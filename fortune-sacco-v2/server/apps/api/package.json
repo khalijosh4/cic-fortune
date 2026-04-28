@@ -1,0 +1,34 @@
+{
+  "name": "api",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "main": "./src/main.ts",
+  "scripts": {
+    "clean": "git clean -xdf dist node_modules"
+  },
+  "imports": {
+    "#/*": "./dist/*"
+  },
+  "dependencies": {
+    "@fastify/autoload": "catalog:fastify",
+    "@fastify/cors": "catalog:fastify",
+    "@fastify/env": "catalog:fastify",
+    "@fastify/helmet": "catalog:fastify",
+    "@fastify/multipart": "catalog:fastify",
+    "@fastify/rate-limit": "catalog:fastify",
+    "@fastify/sensible": "catalog:fastify",
+    "@fastify/swagger": "catalog:fastify",
+    "@fastify/swagger-ui": "catalog:fastify",
+    "@fastify/type-provider-typebox": "catalog:fastify",
+    "@fastify/under-pressure": "catalog:fastify",
+    "@sinclair/typebox": "^0.34.41",
+    "@fastify-forge/db": "workspace:",
+    "@fastify-forge/logger": "workspace:",
+    "better-auth": "catalog:",
+    "close-with-grace": "^2.2.0",
+    "fastify": "catalog:fastify",
+    "fastify-better-auth": "catalog:fastify",
+    "fastify-plugin": "catalog:fastify"
+  }
+}
