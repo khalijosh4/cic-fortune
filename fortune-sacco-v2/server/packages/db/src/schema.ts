@@ -1,166 +1,137 @@
 import { 
-  boolean, pgEnum, pgTable, text, timestamp, uuid, varchar, numeric, pgView
+  pgEnum, pgTable, uuid, varchar, numeric, pgView, timestamp, boolean, text
 } from 'drizzle-orm/pg-core';
-
-import {
-  sql, eq
-} from 'drizzle-orm';
-
+import { sql, eq } from 'drizzle-orm';
 import type { InferSelectModel } from 'drizzle-orm';
+//import type { PgTableWithColumns } from 'drizzle-orm/pg-core'
 
-export type User = InferSelectModel<typeof users>;
-
-
-
-// ----- Fortune SACCO -----
-export const HospitalTypeEnum = pgEnum('HospitalType', ['private', 'county', 'teaching', 'clinic', 'specialist', 'referral']);
+// 1. Enums First
+export const HospitalTypeEnum = pgEnum('HospitalType', ['private', 'county', 'teaching', 'clinic', 'specialist', 'referral', 'public']);
 export const RolesEnum = pgEnum('UserRole', ['admin', 'user']);
 export const PolicyStatusEnum = pgEnum('PolicyStatus', ['active', 'expired', 'pending']);
-export const CoverTypeEnum = pgEnum('CoverType', ['family', 'individual', 'corporate group']);
-//export const MemberStatusEnum = pgEnum('MemberStatus', ['active']);
+export const PolicyCoverTypeEnum = pgEnum('CoverType', ['family', 'individual', 'corporate group']);
+export const ClaimStatusEnum = pgEnum('ClaimStatus', ['approved', 'pending', 'rejected']);
+export const PaymentMethodEnum = pgEnum('PaymentMethod', ['']);
 
-// How to use the counts:
-// Fetching all branches with their real-time member counts
-// const reports = await db.select().from(branchMemberCounts);
-
-export const branchMemberCount = pgView('branch_member_counts').as((db) => {
-  return db
-    .select({
-      branchId: branch.id,
-      // This does the actual counting on the fly
-      totalMembers: sql<number>`count(${member.id})`.mapWith(Number).as('total_members'),
-    })
-    .from(branch)
-    // Left join ensures branches with 0 members still show up
-    .leftJoin(member, eq(branch.id, member.branchId))
-    .groupBy(branch.id);
+// 2. Tables 
+// Note: We use arrow functions in .references() to handle the hoisting/circularity
+export const user: any = pgTable('user', {
+  id: uuid('id').primaryKey().notNull().defaultRandom(),
+  firstName: varchar('first_name', { length: 50 }).notNull(),
+  middleName: varchar('middle_name', { length: 50 }),
+  lastName: varchar('last_name', { length: 50 }).notNull(),
+  phoneNumber: varchar('phone_number', { length: 15 }),
+  password: varchar('password', { length: 255 }).notNull(),
+  branchId: uuid('branch_id').notNull().references(() => branch.id, { onDelete: 'restrict', onUpdate: 'cascade' }),
+  role: RolesEnum('role').notNull().default('user'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()) // Update on every save
 });
 
-export const activeBranchMemberCount = pgView('active_branch_member_count').as((db) => {
-  return db
-    .select({
-      branchId: branch.id,
-      totalActiveMembers: sql<number>`count(${member.id})`.mapWith(Number).as('total_active_members'),
-    })
-    .from(branch)
-    .leftJoin(member, eq(branch.id, member.id))
-    .groupBy(branch.id);
-});
-
-export const branchPolicyCount = pgView('branch_policy_count').as((db) => {
-  return db
-    .select({
-      branchId: branch.id,
-      totalPolicies: sql<number>`count(${member.id})`.mapWith(Number).as('total_policies'),
-    })
-    .from(branch)
-    .leftJoin(member, eq(branch.id, member.id))
-    .groupBy(branch.id);
-});
-
-export const branchActivePolicyCount = pgView('branch_active_policy_count').as((db) => {
-  return db
-    .select({
-      branchId: branch.id,
-      totalActivePolicies: sql<number>`count(${member.id})`.mapWith(Number).as('total_active_policies'),
-    })
-    .from(branch)
-    .leftJoin(member, eq(branch.id, member.id))
-    .groupBy(branch.id);
-});
-
-export const branchClaimCount = pgView('branch_claim_count').as((db) => {
-  return db
-    .select({
-      branchId: branch.id,
-      totalClaims: sql<number>`count (${member.id})`.mapWith(Number).as('total_claims'),
-    })
-    .from(branch)
-    .leftJoin(member, eq(branch.id, member.id))
-    .groupBy(branch.id);
-});
-
-// onDelete: 'restrict' prevents deletion if the entity has references
-// onUpdate: 'cascade' updates the id if the parent id changes
-
-export const member = pgTable('member', {
-	id: uuid('id').primaryKey().notNull().defaultRandom(),
-	firstName: varchar('first_name', { length: 50 }).notNull(), // Added DB name
-	middleName: varchar('middle_name', { length: 50 }),          // Added DB name
-	lastName: varchar('last_name', { length: 50 }).notNull(),   // Added DB name
-	email: varchar('email', { length: 100 }),
-	phoneNumber: varchar('phone_number', { length: 15 }).notNull(),
-	
-	// Foreign Keys with 'restrict' safety
-	branchId: uuid('branch_id')
-		.notNull()
-		.references(() => branch.id, { onDelete: 'restrict', onUpdate: 'cascade' }),
-	
-	policyId: uuid('policy_id')
-		.notNull()
-		.references(() => policy.id, { onDelete: 'restrict', onUpdate: 'cascade' }),
-
-	coverType: CoverTypeEnum('cover_type').notNull().default('individual'),
-	premiumAmount: numeric('premium_amount', { precision: 12, scale: 4 }).notNull(),
-});
- 
-
-export const branch = pgTable('branch', {
+export const branch: any = pgTable('branch', {
   id: uuid('id').primaryKey().notNull().defaultRandom(),
   name: varchar('name', { length: 50 }).notNull(),
   location: varchar('location', { length: 255 }).notNull(),
-  manager: uuid('manager_id').notNull().references(() => users.id, {onDelete: 'restrict', onUpdate: 'cascade'}),
+  manager: uuid('manager_id').notNull().references(() => user.id, { onDelete: 'restrict', onUpdate: 'cascade' }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date())
 });
 
-export const policy = pgTable('policy', {
+/*
+export const policy: any = pgTable('policy', {
   id: uuid('id').primaryKey().notNull().defaultRandom(),
+  name: varchar('name', { length: 255 }).notNull(),
+  coverType: PolicyCoverTypeEnum('cover_type').notNull().default('individual'),
+  status: PolicyStatusEnum('status').notNull().default('pending'),
+  utilised: boolean('utilised').notNull().default(false),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date())
+});
+*/
 
+export const policy: any = pgTable('policy', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: varchar('name', { length: 255 }).notNull(),
+  annualLimit: numeric('annual_limit', { precision: 15, scale: 2 }).notNull(),
+  outpatientLimit: numeric('outpatient_limit', { precision: 15, scale: 2 }),
+  inpatientLimit: numeric('inpatient_limit', { precision: 15, scale: 2 }),
+  maternityLimit: numeric('maternity_limit', { precision: 15, scale: 2 }),
+  status: PolicyStatusEnum('status').default('pending'),
 });
 
-// ----- END -----
+/*
+export const member: any = pgTable('member', {
+  id: uuid('id').primaryKey().notNull().defaultRandom(),
+  firstName: varchar('first_name', { length: 50 }).notNull(),
+  middleName: varchar('middle_name', { length: 50 }),
+  lastName: varchar('last_name', { length: 50 }).notNull(),
+  email: varchar('email', { length: 100 }),
+  phoneNumber: varchar('phone_number', { length: 15 }).notNull(),
+  branchId: uuid('branch_id').notNull().references(() => branch.id, { onDelete: 'restrict', onUpdate: 'cascade' }),
+  policyId: uuid('policy_id').notNull().references(() => policy.id, { onDelete: 'restrict', onUpdate: 'cascade' }),
+  premiumAmount: numeric('premium_amount', { precision: 12, scale: 4 }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date())
+});
+*/
 
-export const users = pgTable('users', {
-  id: uuid().primaryKey().notNull().defaultRandom(),
-  email: varchar({ length: 50 }).notNull().unique(),
-  emailVerified: boolean('email_verified').notNull().default(false),
-  name: varchar('name', { length: 50 }).notNull(),
-  role: RolesEnum('role').notNull().default('user'),
-  image: text('image'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').notNull(),
-  banned: boolean().notNull().default(false),
-  banReason: text('ban_reason'),
-  banExpires: timestamp('ban_expires')
+export const member: any = pgTable('member', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  firstName: varchar('first_name', { length: 50 }).notNull(),
+  lastName: varchar('last_name', { length: 50 }).notNull(),
+  branchId: uuid('branch_id').references(() => branch.id),
+  policyId: uuid('policy_id').references(() => policy.id), // Current active policy
+  coverType: PolicyCoverTypeEnum('cover_type').default('individual'),
+  premiumRate: numeric('premium_rate', { precision: 12, scale: 2 }).notNull(),
+  status: PolicyStatusEnum('status').default('pending'),
 });
 
-export const sessions = pgTable('sessions', {
-  id: uuid().primaryKey().notNull().defaultRandom(),
-  expiresAt: timestamp('expires_at').notNull(),
-  token: text('token').notNull().unique(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').notNull(),
-  ipAddress: text('ip_address'),
-  userAgent: text('user_agent'),
-  userId: uuid('user_id')
-    .notNull()
-    .references(() => users.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
-  impersonatedBy: uuid('impersonated_by')
+export const claim: any = pgTable('claim', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  memberId: uuid('member_id').references(() => member.id),
+  hospitalId: uuid('hospital_id').references(() => hospital.id),
+  policyId: uuid('policy_id').references(() => policy.id),
+  amountClaimed: numeric('amount_claimed', { precision: 15, scale: 2 }).notNull(),
+  amountApproved: numeric('amount_approved', { precision: 15, scale: 2 }),
+  status: ClaimStatusEnum('status').default('pending'),
+  diagnosis: text('diagnosis'),
+  createdAt: timestamp('created_at').defaultNow(),
 });
 
-export const accounts = pgTable('accounts', {
-  id: uuid().primaryKey().notNull().defaultRandom(),
-  accountId: text('account_id').notNull(),
-  providerId: text('provider_id').notNull(),
-  userId: uuid('user_id')
-    .notNull()
-    .references(() => users.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
-  accessToken: text('access_token'),
-  refreshToken: text('refresh_token'),
-  idToken: text('id_token'),
-  accessTokenExpiresAt: timestamp('access_token_expires_at'),
-  refreshTokenExpiresAt: timestamp('refresh_token_expires_at'),
-  scope: text('scope'),
-  password: text('password'),
-  createdAt: timestamp('created_at').notNull(),
-  updatedAt: timestamp('updated_at').notNull()
+export const hospital: any = pgTable('hospital', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: varchar('name', { length: 100 }).notNull(),
+  location: text('location'),
+  type: HospitalTypeEnum('type').default('public'),
+  claimLimit: numeric('claim_limit', { precision: 15, scale: 2 }),
+});
+
+export const premium: any = pgTable('premium', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  memberId: uuid('member_id').references(() => member.id),
+  amountDue: numeric('amount_due', { precision: 12, scale: 2 }).notNull(),
+  amountPaid: numeric('amount_paid', { precision: 12, scale: 2 }).default('0'),
+  dueDate: timestamp('due_date').notNull(),
+  paymentMethod: PaymentMethodEnum('payment_method'),
+});
+
+// 3. Types (Moved here to ensure 'user' table is fully defined)
+export type User = InferSelectModel<typeof user>;
+
+// 4. Views (Moved to bottom to fix TS7022 Circular Initializer errors)
+export const branchStats = pgView('branch_stats').as((db) => {
+  return db
+    .select({
+      branchId: branch.id,
+      branchName: branch.name,
+      totalMembers: sql<number>`count(${member.id})`.mapWith(Number),
+      totalPolicies: sql<number>`count(${member.policyId})`.mapWith(Number),
+      totalActivePolicies: sql<number>`count(${member.policyId}) filter (where ${policy.status} = 'active')`.mapWith(Number),
+      totalClaims: sql<number>`count(${claim.id})`.mapWith(Number),
+    })
+    .from(branch)
+    .leftJoin(member, eq(branch.id, member.branchId))
+    .leftJoin(policy, eq(member.policyId, policy.id))
+    .leftJoin(claim, eq(member.id, claim.memberId))
+    .groupBy(branch.id, branch.name);
 });
