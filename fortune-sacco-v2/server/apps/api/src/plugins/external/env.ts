@@ -13,6 +13,7 @@ declare module 'fastify' {
       HOST: string;
       PORT: number;
       NODE_ENV: (typeof NodeEnv)[keyof typeof NodeEnv];
+      ALLOWED_ORIGINS: string;
     };
   }
 }

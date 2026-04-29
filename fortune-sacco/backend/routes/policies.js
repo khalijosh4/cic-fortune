@@ -1,7 +1,7 @@
 const express = require("express");
 const { body, query, validationResult } = require("express-validator");
 const { v4: uuidv4 } = require("uuid");
-const { getAll, getOne, runQuery } = require("../db/database");
+const { getAll, getOne, runQuery, getDb } = require("../db/database");
 const { authenticate, authorize, branchGuard } = require("../middleware/auth");
 const { auditLog } = require("../utils/audit");
 const { sendSuccess, sendError, genId } = require("../utils/response");
