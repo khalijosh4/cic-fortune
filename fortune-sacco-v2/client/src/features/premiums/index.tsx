@@ -3,7 +3,7 @@ import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { useUsers } from '@/hooks/use-users'
+import { usePremiums } from '@/hooks/use-premiums'
 import { GeneralError } from '@/features/errors/general-error'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -16,16 +16,10 @@ import {
 } from '@/components/ui/table'
 import { useState } from 'react'
 
-export function Users() {
+export function Premiums() {
   const [page, setPage] = useState(1)
   const pageSize = 20
-  const { data, isLoading, error } = useUsers(pageSize, (page - 1) * pageSize)
-
-  const roleColor: Record<string, string> = {
-    admin: 'bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300',
-    user: 'bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300',
-    hospital: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
-  }
+  const { data, isLoading, error } = usePremiums(pageSize, (page - 1) * pageSize)
 
   return (
     <>
@@ -38,14 +32,14 @@ export function Users() {
       <Main className='flex flex-1 flex-col gap-4 sm:gap-6'>
         <div className='flex flex-wrap items-end justify-between gap-2'>
           <div>
-            <h2 className='text-2xl font-bold tracking-tight'>User Management</h2>
+            <h2 className='text-2xl font-bold tracking-tight'>Premiums</h2>
             <p className='text-muted-foreground'>
-              Manage employees and their access roles.
+              Track premium payments and outstanding balances.
             </p>
           </div>
           {data && (
             <p className='text-sm text-muted-foreground'>
-              {data.total.toLocaleString()} total users
+              {data.total.toLocaleString()} total records
             </p>
           )}
         </div>
@@ -54,7 +48,7 @@ export function Users() {
           <div className='flex h-64 w-full items-center justify-center'>
             <div className='flex flex-col items-center gap-2'>
               <div className='h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent' />
-              <p className='text-sm text-muted-foreground'>Loading users...</p>
+              <p className='text-sm text-muted-foreground'>Loading premiums...</p>
             </div>
           </div>
         ) : error ? (
@@ -65,45 +59,54 @@ export function Users() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Branch</TableHead>
+                    <TableHead>Amount Due (KES)</TableHead>
+                    <TableHead>Amount Paid (KES)</TableHead>
+                    <TableHead>Balance (KES)</TableHead>
+                    <TableHead>Due Date</TableHead>
+                    <TableHead>Payment Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {data?.data.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell className='font-medium'>
-                        {user.firstName} {user.lastName}
-                      </TableCell>
-                      <TableCell className='text-muted-foreground'>
-                        {user.email ?? '—'}
-                      </TableCell>
-                      <TableCell>{user.phoneNumber ?? '—'}</TableCell>
-                      <TableCell>
-                        <Badge
-                          variant='outline'
-                          className={`capitalize ${roleColor[user.role] ?? ''}`}
+                  {data?.data.map((premium) => {
+                    const due = Number(premium.amountDue)
+                    const paid = Number(premium.amountPaid ?? 0)
+                    const balance = due - paid
+                    const isPaid = balance <= 0
+
+                    return (
+                      <TableRow key={premium.id}>
+                        <TableCell className='font-medium'>
+                          {due.toLocaleString()}
+                        </TableCell>
+                        <TableCell>{paid.toLocaleString()}</TableCell>
+                        <TableCell
+                          className={balance > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-teal-600 dark:text-teal-400'}
                         >
-                          {user.role}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className='text-muted-foreground text-xs'>
-                        {user.branchId ? user.branchId.slice(0, 8) + '...' : '—'}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                          {balance > 0 ? balance.toLocaleString() : '0'}
+                        </TableCell>
+                        <TableCell className='text-xs text-muted-foreground'>
+                          {new Date(premium.dueDate).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant='outline'
+                            className={isPaid
+                              ? 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300'
+                              : 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300'
+                            }
+                          >
+                            {isPaid ? 'Paid' : 'Outstanding'}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })}
                 </TableBody>
               </Table>
             </div>
 
-            {/* Pagination */}
             <div className='flex items-center justify-between text-sm text-muted-foreground'>
-              <span>
-                Page {page} of {Math.ceil((data?.total ?? 0) / pageSize)}
-              </span>
+              <span>Page {page} of {Math.ceil((data?.total ?? 0) / pageSize)}</span>
               <div className='flex gap-2'>
                 <button
                   className='rounded border px-3 py-1 disabled:opacity-50'

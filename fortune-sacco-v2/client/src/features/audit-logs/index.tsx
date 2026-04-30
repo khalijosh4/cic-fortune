@@ -3,7 +3,7 @@ import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { useUsers } from '@/hooks/use-users'
+import { useAuditLogs } from '@/hooks/use-audit-logs'
 import { GeneralError } from '@/features/errors/general-error'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -16,15 +16,14 @@ import {
 } from '@/components/ui/table'
 import { useState } from 'react'
 
-export function Users() {
+export function AuditLogs() {
   const [page, setPage] = useState(1)
   const pageSize = 20
-  const { data, isLoading, error } = useUsers(pageSize, (page - 1) * pageSize)
+  const { data, isLoading, error } = useAuditLogs(pageSize, (page - 1) * pageSize)
 
-  const roleColor: Record<string, string> = {
-    admin: 'bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300',
-    user: 'bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300',
-    hospital: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
+  const statusColor: Record<string, string> = {
+    Success: 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300',
+    Failure: 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300',
   }
 
   return (
@@ -38,14 +37,14 @@ export function Users() {
       <Main className='flex flex-1 flex-col gap-4 sm:gap-6'>
         <div className='flex flex-wrap items-end justify-between gap-2'>
           <div>
-            <h2 className='text-2xl font-bold tracking-tight'>User Management</h2>
+            <h2 className='text-2xl font-bold tracking-tight'>Audit Logs</h2>
             <p className='text-muted-foreground'>
-              Manage employees and their access roles.
+              Track all system activity and user actions.
             </p>
           </div>
           {data && (
             <p className='text-sm text-muted-foreground'>
-              {data.total.toLocaleString()} total users
+              {data.total.toLocaleString()} total events
             </p>
           )}
         </div>
@@ -54,7 +53,7 @@ export function Users() {
           <div className='flex h-64 w-full items-center justify-center'>
             <div className='flex flex-col items-center gap-2'>
               <div className='h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent' />
-              <p className='text-sm text-muted-foreground'>Loading users...</p>
+              <p className='text-sm text-muted-foreground'>Loading audit logs...</p>
             </div>
           </div>
         ) : error ? (
@@ -65,33 +64,48 @@ export function Users() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Branch</TableHead>
+                    <TableHead>Timestamp</TableHead>
+                    <TableHead>User</TableHead>
+                    <TableHead>Action</TableHead>
+                    <TableHead>Module</TableHead>
+                    <TableHead>IP Address</TableHead>
+                    <TableHead>Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {data?.data.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell className='font-medium'>
-                        {user.firstName} {user.lastName}
+                  {data?.data.map((log) => (
+                    <TableRow key={log.id}>
+                      <TableCell className='text-xs text-muted-foreground whitespace-nowrap'>
+                        {log.timestamp
+                          ? new Date(log.timestamp).toLocaleString()
+                          : '—'}
                       </TableCell>
-                      <TableCell className='text-muted-foreground'>
-                        {user.email ?? '—'}
+                      <TableCell>
+                        <div className='flex flex-col'>
+                          <span className='text-sm font-medium'>{log.userEmail ?? '—'}</span>
+                          <span className='text-xs text-muted-foreground capitalize'>
+                            {log.userRole ?? ''}
+                          </span>
+                        </div>
                       </TableCell>
-                      <TableCell>{user.phoneNumber ?? '—'}</TableCell>
+                      <TableCell className='max-w-xs truncate text-sm'>
+                        {log.action}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant='outline' className='capitalize text-xs'>
+                          {log.module ?? '—'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className='text-xs text-muted-foreground'>
+                        {log.ipAddress ?? '—'}
+                      </TableCell>
                       <TableCell>
                         <Badge
                           variant='outline'
-                          className={`capitalize ${roleColor[user.role] ?? ''}`}
+                          className={statusColor[log.status ?? ''] ?? ''}
                         >
-                          {user.role}
+                          {log.status ?? '—'}
                         </Badge>
-                      </TableCell>
-                      <TableCell className='text-muted-foreground text-xs'>
-                        {user.branchId ? user.branchId.slice(0, 8) + '...' : '—'}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -99,11 +113,8 @@ export function Users() {
               </Table>
             </div>
 
-            {/* Pagination */}
             <div className='flex items-center justify-between text-sm text-muted-foreground'>
-              <span>
-                Page {page} of {Math.ceil((data?.total ?? 0) / pageSize)}
-              </span>
+              <span>Page {page} of {Math.ceil((data?.total ?? 0) / pageSize)}</span>
               <div className='flex gap-2'>
                 <button
                   className='rounded border px-3 py-1 disabled:opacity-50'

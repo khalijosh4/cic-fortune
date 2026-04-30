@@ -13,12 +13,6 @@ import {
   Bell,
   Monitor,
   HelpCircle,
-  Bug,
-  Lock,
-  UserX,
-  FileX,
-  ServerOff,
-  Construction,
   Command,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
@@ -61,9 +55,14 @@ export const sidebarData: SidebarData = {
           icon: ShieldCheck,
         },
         {
+          title: 'Members',
+          url: '/members',
+          icon: Users,
+        },
+        {
           title: 'User Management',
           url: '/users',
-          icon: Users,
+          icon: UserCog,
         },
         {
           title: 'Claims',
