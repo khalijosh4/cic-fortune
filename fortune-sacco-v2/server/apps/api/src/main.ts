@@ -17,6 +17,7 @@ async function startServer() {
       headersTimeout: 15_000,
     },
     loggerInstance: logger,
+    ignoreTrailingSlash: true,
   });
 
   app.register(fp(bootstrap));

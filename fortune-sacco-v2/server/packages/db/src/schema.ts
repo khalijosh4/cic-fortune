@@ -20,13 +20,14 @@ export const user: any = pgTable('user', {
   firstName: varchar('first_name', { length: 50 }).notNull(),
   middleName: varchar('middle_name', { length: 50 }),
   lastName: varchar('last_name', { length: 50 }).notNull(),
+  email: varchar('email', { length: 100 }).unique(),
   phoneNumber: varchar('phone_number', { length: 15 }),
   password: varchar('password', { length: 255 }).notNull(),
   branchId: uuid('branch_id').references((): AnyPgColumn => branch.id, { onDelete: 'restrict', onUpdate: 'cascade' }),
   hospitalId: uuid('hospital_id').references((): AnyPgColumn => hospital.id, { onDelete: 'restrict', onUpdate: 'cascade' }),
   role: RolesEnum('role').notNull().default('user'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()) // Update on every save
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date())
 });
 
 export const branch: any = pgTable('branch', {
@@ -124,6 +125,19 @@ export const premium = pgTable('premium', {
 export type User = InferSelectModel<typeof user>;
 
 // 4. Views (Moved to bottom to fix TS7022 Circular Initializer errors)
+export const auditLog = pgTable('audit_log', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  timestamp: timestamp('timestamp').defaultNow(),
+  userEmail: varchar('user_email', { length: 100 }),
+  userRole: varchar('user_role', { length: 50 }),
+  branchName: varchar('branch_name', { length: 100 }),
+  action: text('action').notNull(),
+  module: varchar('module', { length: 50 }),
+  ipAddress: varchar('ip_address', { length: 45 }),
+  status: varchar('status', { length: 20 }),
+  type: varchar('type', { length: 20 }),
+});
+
 export const branchStats = pgView('branch_stats').as((db) => {
   return db
     .select({

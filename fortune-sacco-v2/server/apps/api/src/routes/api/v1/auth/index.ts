@@ -8,9 +8,9 @@ import { LoginSchema, RegisterSchema } from '#/schemas/auth.schema.js';
 
 const authRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.post('/login', { schema: LoginSchema }, async (request, reply) => {
-    const { phoneNumber, password } = request.body;
+    const { email, password } = request.body;
 
-    const findResult = await db.select().from(user).where(eq(user.phoneNumber, phoneNumber)).limit(1);
+    const findResult = await db.select().from(user).where(eq(user.email, email)).limit(1);
     const foundUser = findResult[0];
 
     if (!foundUser) {
