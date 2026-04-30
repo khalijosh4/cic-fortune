@@ -22,17 +22,17 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { DataTablePagination, DataTableToolbar } from '@/components/data-table'
-import { User } from '@/hooks/use-users'
-import { usersColumns as columns } from './users-columns'
+import { AuditLog } from '@/hooks/use-audit-logs'
+import { auditLogsColumns as columns } from './audit-logs-columns'
 import { DataTableBulkActions } from './data-table-bulk-actions'
 
 type DataTableProps = {
-  data: User[]
+  data: AuditLog[]
   search: Record<string, unknown>
   navigate: NavigateFn
 }
 
-export function UsersTable({ data, search, navigate }: DataTableProps) {
+export function AuditLogsTable({ data, search, navigate }: DataTableProps) {
   const [rowSelection, setRowSelection] = useState({})
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [sorting, setSorting] = useState<SortingState>([])
@@ -49,8 +49,9 @@ export function UsersTable({ data, search, navigate }: DataTableProps) {
     pagination: { defaultPage: 1, defaultPageSize: 20 },
     globalFilter: { enabled: false },
     columnFilters: [
-      { columnId: 'email', searchKey: 'email', type: 'string' },
-      { columnId: 'role', searchKey: 'role', type: 'array' },
+      { columnId: 'action', searchKey: 'action', type: 'string' },
+      { columnId: 'status', searchKey: 'status', type: 'array' },
+      { columnId: 'module', searchKey: 'module', type: 'array' },
     ],
   })
 
@@ -92,16 +93,26 @@ export function UsersTable({ data, search, navigate }: DataTableProps) {
     >
       <DataTableToolbar
         table={table}
-        searchPlaceholder='Filter by email...'
-        searchKey='email'
+        searchPlaceholder='Filter by action...'
+        searchKey='action'
         filters={[
           {
-            columnId: 'role',
-            title: 'Role',
+            columnId: 'status',
+            title: 'Status',
             options: [
-              { label: 'Admin', value: 'admin' },
-              { label: 'User', value: 'user' },
-              { label: 'Hospital', value: 'hospital' },
+              { label: 'Success', value: 'Success' },
+              { label: 'Failure', value: 'Failure' },
+            ],
+          },
+          {
+            columnId: 'module',
+            title: 'Module',
+            options: [
+              { label: 'Auth', value: 'auth' },
+              { label: 'Members', value: 'members' },
+              { label: 'Claims', value: 'claims' },
+              { label: 'Policies', value: 'policies' },
+              { label: 'Users', value: 'users' },
             ],
           },
         ]}

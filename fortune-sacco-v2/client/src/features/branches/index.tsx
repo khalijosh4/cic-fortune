@@ -1,3 +1,4 @@
+import { getRouteApi } from '@tanstack/react-router'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
@@ -7,8 +8,16 @@ import { useBranches } from '@/hooks/use-branches'
 import { GeneralError } from '@/features/errors/general-error'
 import { BranchesTable } from './components/branches-table'
 
+const route = getRouteApi('/_authenticated/branches/')
+
 export function Branches() {
-  const { data, isLoading, error } = useBranches(100, 0) // Fetch all for now
+  const search = route.useSearch()
+  const navigate = route.useNavigate()
+
+  const page = search.page || 1
+  const pageSize = search.pageSize || 20
+
+  const { data, isLoading, error } = useBranches(pageSize, (page - 1) * pageSize)
 
   return (
     <>
@@ -37,7 +46,7 @@ export function Branches() {
         ) : error ? (
           <GeneralError />
         ) : (
-          <BranchesTable data={data?.data || []} />
+          <BranchesTable data={data?.data || []} search={search} navigate={navigate} />
         )}
       </Main>
     </>

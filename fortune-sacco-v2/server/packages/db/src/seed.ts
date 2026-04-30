@@ -1,11 +1,9 @@
 import { db, schema } from './index.js';
 import bcrypt from 'bcryptjs';
-import { v5 as uuidv5 } from 'uuid';
+//import { v5 as uuidv5 } from 'uuid';
 import { eq } from 'drizzle-orm';
 import { faker } from '@faker-js/faker';
 
-const NAMESPACE = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
-const toUuid = (str: string) => uuidv5(str, NAMESPACE);
 
 // Constants for counts
 const BRANCH_COUNT = 15;
@@ -51,13 +49,14 @@ async function seed() {
     let hospitalIds: string[] = [];
     for (let i = 0; i < HOSPITAL_COUNT; i++) {
       const hId = faker.string.uuid();
-      const [res] = await db.insert(schema.hospital).values({
+      const insertRes: any = await db.insert(schema.hospital).values({
         id: hId,
         name: faker.company.name() + ' Hospital',
         location: faker.location.city(),
         type: faker.helpers.arrayElement(['private', 'county', 'teaching', 'clinic', 'specialist', 'referral', 'public']),
         claimLimit: faker.number.int({ min: 100000, max: 2000000 }).toString(),
       } as any).onConflictDoNothing().returning();
+      const res = insertRes?.[0];
       if (res) hospitalIds.push(res.id);
     }
     if (hospitalIds.length === 0) {
@@ -71,12 +70,13 @@ async function seed() {
     for (let i = 0; i < BRANCH_COUNT; i++) {
       const bId = faker.string.uuid();
       // Temporarily use admin as manager, we'll update later
-      const [res] = await db.insert(schema.branch).values({
+      const insertRes: any = await db.insert(schema.branch).values({
         id: bId,
         name: (faker.location.city() + ' Branch').slice(0, 50),
         location: faker.location.streetAddress().slice(0, 255),
         manager: adminId, 
       } as any).onConflictDoNothing().returning();
+      const res = insertRes?.[0];
       if (res) branchIds.push(res.id);
     }
     if (branchIds.length === 0) {
@@ -91,7 +91,7 @@ async function seed() {
       const uId = faker.string.uuid();
       const firstName = faker.person.firstName();
       const lastName = faker.person.lastName();
-      const [res] = await db.insert(schema.user).values({
+      const insertRes: any = await db.insert(schema.user).values({
         id: uId,
         firstName: firstName.slice(0, 50),
         lastName: lastName.slice(0, 50),
@@ -101,6 +101,7 @@ async function seed() {
         role: faker.helpers.arrayElement(['admin', 'user']),
         branchId: faker.helpers.arrayElement(branchIds),
       } as any).onConflictDoNothing().returning();
+      const res = insertRes?.[0];
       if (res) userIds.push(res.id);
     }
     if (userIds.length <= 1) { // only adminId
@@ -121,7 +122,7 @@ async function seed() {
     for (let i = 0; i < POLICY_COUNT; i++) {
       const pId = faker.string.uuid();
       const annualLimit = faker.number.int({ min: 100000, max: 1000000 });
-      const [res] = await db.insert(schema.policy).values({
+      const insertRes: any = await db.insert(schema.policy).values({
         id: pId,
         name: faker.commerce.productName() + ' Cover',
         annualLimit: annualLimit.toString(),
@@ -130,6 +131,7 @@ async function seed() {
         maternityLimit: (annualLimit * 0.1).toString(),
         status: faker.helpers.arrayElement(['active', 'expired', 'pending']),
       } as any).onConflictDoNothing().returning();
+      const res = insertRes?.[0];
       if (res) policyIds.push(res.id);
     }
     if (policyIds.length === 0) {
@@ -142,7 +144,7 @@ async function seed() {
     let memberIds: string[] = [];
     for (let i = 0; i < MEMBER_COUNT; i++) {
       const mId = faker.string.uuid();
-      const [res] = await db.insert(schema.member).values({
+      const insertRes: any = await db.insert(schema.member).values({
         id: mId,
         firstName: faker.person.firstName(),
         lastName: faker.person.lastName(),
@@ -153,6 +155,7 @@ async function seed() {
         status: faker.helpers.arrayElement(['active', 'expired', 'pending']),
         usedAnnualLimit: '0',
       } as any).onConflictDoNothing().returning();
+      const res = insertRes?.[0];
       if (res) memberIds.push(res.id);
     }
     if (memberIds.length === 0) {
@@ -202,7 +205,6 @@ async function seed() {
     // 9. Seed Audit Logs
     console.log('Seeding audit logs...');
     for (let i = 0; i < AUDIT_LOG_COUNT; i++) {
-      const user = faker.helpers.arrayElement(userIds);
       // We don't have a direct link in schema, but we can use faker to fill text fields
       await db.insert(schema.auditLog).values({
         id: faker.string.uuid(),

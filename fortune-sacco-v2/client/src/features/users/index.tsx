@@ -1,3 +1,4 @@
+import { getRouteApi } from '@tanstack/react-router'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
@@ -5,27 +6,18 @@ import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { useUsers } from '@/hooks/use-users'
 import { GeneralError } from '@/features/errors/general-error'
-import { Badge } from '@/components/ui/badge'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import { useState } from 'react'
+import { UsersTable } from './components/users-table'
+
+const route = getRouteApi('/_authenticated/users/')
 
 export function Users() {
-  const [page, setPage] = useState(1)
-  const pageSize = 20
-  const { data, isLoading, error } = useUsers(pageSize, (page - 1) * pageSize)
+  const search = route.useSearch()
+  const navigate = route.useNavigate()
 
-  const roleColor: Record<string, string> = {
-    admin: 'bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300',
-    user: 'bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300',
-    hospital: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
-  }
+  const page = search.page || 1
+  const pageSize = search.pageSize || 20
+
+  const { data, isLoading, error } = useUsers(pageSize, (page - 1) * pageSize)
 
   return (
     <>
@@ -60,68 +52,7 @@ export function Users() {
         ) : error ? (
           <GeneralError />
         ) : (
-          <>
-            <div className='overflow-hidden rounded-md border'>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Branch</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {data?.data.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell className='font-medium'>
-                        {user.firstName} {user.lastName}
-                      </TableCell>
-                      <TableCell className='text-muted-foreground'>
-                        {user.email ?? '—'}
-                      </TableCell>
-                      <TableCell>{user.phoneNumber ?? '—'}</TableCell>
-                      <TableCell>
-                        <Badge
-                          variant='outline'
-                          className={`capitalize ${roleColor[user.role] ?? ''}`}
-                        >
-                          {user.role}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className='text-muted-foreground text-xs'>
-                        {user.branchId ? user.branchId.slice(0, 8) + '...' : '—'}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-
-            {/* Pagination */}
-            <div className='flex items-center justify-between text-sm text-muted-foreground'>
-              <span>
-                Page {page} of {Math.ceil((data?.total ?? 0) / pageSize)}
-              </span>
-              <div className='flex gap-2'>
-                <button
-                  className='rounded border px-3 py-1 disabled:opacity-50'
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                >
-                  Previous
-                </button>
-                <button
-                  className='rounded border px-3 py-1 disabled:opacity-50'
-                  onClick={() => setPage((p) => p + 1)}
-                  disabled={page >= Math.ceil((data?.total ?? 0) / pageSize)}
-                >
-                  Next
-                </button>
-              </div>
-            </div>
-          </>
+          <UsersTable data={data?.data || []} search={search} navigate={navigate} />
         )}
       </Main>
     </>

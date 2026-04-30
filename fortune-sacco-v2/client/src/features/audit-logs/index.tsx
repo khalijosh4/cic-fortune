@@ -1,3 +1,4 @@
+import { getRouteApi } from '@tanstack/react-router'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
@@ -5,26 +6,18 @@ import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { useAuditLogs } from '@/hooks/use-audit-logs'
 import { GeneralError } from '@/features/errors/general-error'
-import { Badge } from '@/components/ui/badge'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import { useState } from 'react'
+import { AuditLogsTable } from './components/audit-logs-table'
+
+const route = getRouteApi('/_authenticated/audit-logs/')
 
 export function AuditLogs() {
-  const [page, setPage] = useState(1)
-  const pageSize = 20
-  const { data, isLoading, error } = useAuditLogs(pageSize, (page - 1) * pageSize)
+  const search = route.useSearch()
+  const navigate = route.useNavigate()
 
-  const statusColor: Record<string, string> = {
-    Success: 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300',
-    Failure: 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300',
-  }
+  const page = search.page || 1
+  const pageSize = search.pageSize || 20
+  
+  const { data, isLoading, error } = useAuditLogs(pageSize, (page - 1) * pageSize)
 
   return (
     <>
@@ -59,80 +52,7 @@ export function AuditLogs() {
         ) : error ? (
           <GeneralError />
         ) : (
-          <>
-            <div className='overflow-hidden rounded-md border'>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Timestamp</TableHead>
-                    <TableHead>User</TableHead>
-                    <TableHead>Action</TableHead>
-                    <TableHead>Module</TableHead>
-                    <TableHead>IP Address</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {data?.data.map((log) => (
-                    <TableRow key={log.id}>
-                      <TableCell className='text-xs text-muted-foreground whitespace-nowrap'>
-                        {log.timestamp
-                          ? new Date(log.timestamp).toLocaleString()
-                          : '—'}
-                      </TableCell>
-                      <TableCell>
-                        <div className='flex flex-col'>
-                          <span className='text-sm font-medium'>{log.userEmail ?? '—'}</span>
-                          <span className='text-xs text-muted-foreground capitalize'>
-                            {log.userRole ?? ''}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className='max-w-xs truncate text-sm'>
-                        {log.action}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant='outline' className='capitalize text-xs'>
-                          {log.module ?? '—'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className='text-xs text-muted-foreground'>
-                        {log.ipAddress ?? '—'}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant='outline'
-                          className={statusColor[log.status ?? ''] ?? ''}
-                        >
-                          {log.status ?? '—'}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-
-            <div className='flex items-center justify-between text-sm text-muted-foreground'>
-              <span>Page {page} of {Math.ceil((data?.total ?? 0) / pageSize)}</span>
-              <div className='flex gap-2'>
-                <button
-                  className='rounded border px-3 py-1 disabled:opacity-50'
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                >
-                  Previous
-                </button>
-                <button
-                  className='rounded border px-3 py-1 disabled:opacity-50'
-                  onClick={() => setPage((p) => p + 1)}
-                  disabled={page >= Math.ceil((data?.total ?? 0) / pageSize)}
-                >
-                  Next
-                </button>
-              </div>
-            </div>
-          </>
+          <AuditLogsTable data={data?.data || []} search={search} navigate={navigate} />
         )}
       </Main>
     </>

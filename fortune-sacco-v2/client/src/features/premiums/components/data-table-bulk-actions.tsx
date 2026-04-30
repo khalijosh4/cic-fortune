@@ -10,7 +10,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { DataTableBulkActions as BulkActionsToolbar } from '@/components/data-table'
-import { User } from '@/hooks/use-users'
+import { Premium } from '@/hooks/use-premiums'
 
 type DataTableBulkActionsProps<TData> = {
   table: Table<TData>
@@ -22,12 +22,12 @@ export function DataTableBulkActions<TData>({
   const selectedRows = table.getFilteredSelectedRowModel().rows
 
   const handleBulkExport = () => {
-    const selectedUsers = selectedRows.map((row) => row.original as User)
+    const selectedPremiums = selectedRows.map((row) => row.original as Premium)
     toast.promise(sleep(1000), {
-      loading: 'Exporting users...',
+      loading: 'Exporting premiums...',
       success: () => {
         table.resetRowSelection()
-        return `Exported ${selectedUsers.length} user${selectedUsers.length > 1 ? 's' : ''} to CSV.`
+        return `Exported ${selectedPremiums.length} premium record${selectedPremiums.length > 1 ? 's' : ''} to CSV.`
       },
       error: 'Error exporting',
     })
@@ -35,12 +35,12 @@ export function DataTableBulkActions<TData>({
   }
 
   const handleDelete = () => {
-    const selectedUsers = selectedRows.map((row) => row.original as User)
+    const selectedPremiums = selectedRows.map((row) => row.original as Premium)
     toast.promise(sleep(1000), {
-      loading: 'Deleting users...',
+      loading: 'Deleting premiums...',
       success: () => {
         table.resetRowSelection()
-        return `Deleted ${selectedUsers.length} user${selectedUsers.length > 1 ? 's' : ''}.`
+        return `Deleted ${selectedPremiums.length} premium record${selectedPremiums.length > 1 ? 's' : ''}.`
       },
       error: 'Error deleting',
     })
@@ -48,7 +48,7 @@ export function DataTableBulkActions<TData>({
   }
 
   return (
-    <BulkActionsToolbar table={table} entityName='user'>
+    <BulkActionsToolbar table={table} entityName='premium'>
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
@@ -56,15 +56,15 @@ export function DataTableBulkActions<TData>({
             size='icon'
             onClick={() => handleBulkExport()}
             className='size-8'
-            aria-label='Export users'
-            title='Export users'
+            aria-label='Export premiums'
+            title='Export premiums'
           >
             <Download />
-            <span className='sr-only'>Export users</span>
+            <span className='sr-only'>Export premiums</span>
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>Export users</p>
+          <p>Export premiums</p>
         </TooltipContent>
       </Tooltip>
 
@@ -75,15 +75,15 @@ export function DataTableBulkActions<TData>({
             size='icon'
             onClick={handleDelete}
             className='size-8'
-            aria-label='Delete selected users'
-            title='Delete selected users'
+            aria-label='Delete selected premiums'
+            title='Delete selected premiums'
           >
             <Trash2 />
-            <span className='sr-only'>Delete selected users</span>
+            <span className='sr-only'>Delete selected premiums</span>
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>Delete selected users</p>
+          <p>Delete selected premiums</p>
         </TooltipContent>
       </Tooltip>
     </BulkActionsToolbar>

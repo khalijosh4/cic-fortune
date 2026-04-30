@@ -1,3 +1,4 @@
+import { getRouteApi } from '@tanstack/react-router'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
@@ -5,20 +6,17 @@ import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { usePremiums } from '@/hooks/use-premiums'
 import { GeneralError } from '@/features/errors/general-error'
-import { Badge } from '@/components/ui/badge'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import { useState } from 'react'
+import { PremiumsTable } from './components/premiums-table'
+
+const route = getRouteApi('/_authenticated/premiums/')
 
 export function Premiums() {
-  const [page, setPage] = useState(1)
-  const pageSize = 20
+  const search = route.useSearch()
+  const navigate = route.useNavigate()
+
+  const page = search.page || 1
+  const pageSize = search.pageSize || 20
+  
   const { data, isLoading, error } = usePremiums(pageSize, (page - 1) * pageSize)
 
   return (
@@ -54,77 +52,7 @@ export function Premiums() {
         ) : error ? (
           <GeneralError />
         ) : (
-          <>
-            <div className='overflow-hidden rounded-md border'>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Amount Due (KES)</TableHead>
-                    <TableHead>Amount Paid (KES)</TableHead>
-                    <TableHead>Balance (KES)</TableHead>
-                    <TableHead>Due Date</TableHead>
-                    <TableHead>Payment Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {data?.data.map((premium) => {
-                    const due = Number(premium.amountDue)
-                    const paid = Number(premium.amountPaid ?? 0)
-                    const balance = due - paid
-                    const isPaid = balance <= 0
-
-                    return (
-                      <TableRow key={premium.id}>
-                        <TableCell className='font-medium'>
-                          {due.toLocaleString()}
-                        </TableCell>
-                        <TableCell>{paid.toLocaleString()}</TableCell>
-                        <TableCell
-                          className={balance > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-teal-600 dark:text-teal-400'}
-                        >
-                          {balance > 0 ? balance.toLocaleString() : '0'}
-                        </TableCell>
-                        <TableCell className='text-xs text-muted-foreground'>
-                          {new Date(premium.dueDate).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant='outline'
-                            className={isPaid
-                              ? 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300'
-                              : 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300'
-                            }
-                          >
-                            {isPaid ? 'Paid' : 'Outstanding'}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-
-            <div className='flex items-center justify-between text-sm text-muted-foreground'>
-              <span>Page {page} of {Math.ceil((data?.total ?? 0) / pageSize)}</span>
-              <div className='flex gap-2'>
-                <button
-                  className='rounded border px-3 py-1 disabled:opacity-50'
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                >
-                  Previous
-                </button>
-                <button
-                  className='rounded border px-3 py-1 disabled:opacity-50'
-                  onClick={() => setPage((p) => p + 1)}
-                  disabled={page >= Math.ceil((data?.total ?? 0) / pageSize)}
-                >
-                  Next
-                </button>
-              </div>
-            </div>
-          </>
+          <PremiumsTable data={data?.data || []} search={search} navigate={navigate} />
         )}
       </Main>
     </>

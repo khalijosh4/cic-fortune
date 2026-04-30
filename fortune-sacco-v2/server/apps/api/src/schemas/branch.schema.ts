@@ -46,17 +46,14 @@ export const ListBranchSchema = {
   }),
   response: {
     200: Type.Object({
-      data: Type.Array(Type.Intersect([
-        BranchSchema,
-        Type.Object({
-          stats: Type.Optional(Type.Object({
-            totalMembers: Type.Number(),
-            totalPolicies: Type.Number(),
-            totalActivePolicies: Type.Number(),
-            totalClaims: Type.Number(),
-          }))
-        })
-      ])),
+      data: Type.Array(Type.Object({
+        branchId: Type.String(),
+        branchName: Type.String(),
+        totalMembers: Type.Number(),
+        totalPolicies: Type.Number(),
+        totalActivePolicies: Type.Number(),
+        totalClaims: Type.Number(),
+      })),
       total: Type.Number(),
     }),
   },

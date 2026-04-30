@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   type SortingState,
   type VisibilityState,
@@ -12,6 +12,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import { cn } from '@/lib/utils'
+import { type NavigateFn, useTableUrlState } from '@/hooks/use-table-url-state'
 import {
   Table,
   TableBody,
@@ -23,25 +24,49 @@ import {
 import { DataTablePagination, DataTableToolbar } from '@/components/data-table'
 import { Branch } from '@/hooks/use-branches'
 import { branchesColumns as columns } from './branches-columns'
+import { DataTableBulkActions } from './data-table-bulk-actions'
 
 type DataTableProps = {
   data: Branch[]
+  search: Record<string, unknown>
+  navigate: NavigateFn
 }
 
-export function BranchesTable({ data }: DataTableProps) {
+export function BranchesTable({ data, search, navigate }: DataTableProps) {
   const [rowSelection, setRowSelection] = useState({})
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [sorting, setSorting] = useState<SortingState>([])
 
+  const {
+    columnFilters,
+    onColumnFiltersChange,
+    pagination,
+    onPaginationChange,
+    ensurePageInRange,
+  } = useTableUrlState({
+    search,
+    navigate,
+    pagination: { defaultPage: 1, defaultPageSize: 20 },
+    globalFilter: { enabled: false },
+    columnFilters: [
+      { columnId: 'branchName', searchKey: 'branchName', type: 'string' },
+    ],
+  })
+
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data,
     columns,
     state: {
       sorting,
+      pagination,
       rowSelection,
+      columnFilters,
       columnVisibility,
     },
     enableRowSelection: true,
+    onPaginationChange,
+    onColumnFiltersChange,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnVisibilityChange: setColumnVisibility,
@@ -53,12 +78,22 @@ export function BranchesTable({ data }: DataTableProps) {
     getFacetedUniqueValues: getFacetedUniqueValues(),
   })
 
+  useEffect(() => {
+    ensurePageInRange(table.getPageCount())
+  }, [table, ensurePageInRange])
+
   return (
-    <div className='flex flex-1 flex-col gap-4'>
+    <div
+      className={cn(
+        'max-sm:has-[div[role="toolbar"]]:mb-16', // Add margin bottom to the table on mobile when the toolbar is visible
+        'flex flex-1 flex-col gap-4'
+      )}
+    >
       <DataTableToolbar
         table={table}
-        searchPlaceholder='Filter branches...'
+        searchPlaceholder='Filter by branch name...'
         searchKey='branchName'
+        filters={[]}
       />
       <div className='overflow-hidden rounded-md border'>
         <Table>
@@ -71,7 +106,9 @@ export function BranchesTable({ data }: DataTableProps) {
                       key={header.id}
                       colSpan={header.colSpan}
                       className={cn(
-                        'bg-background group-hover/row:bg-muted group-data-[state=selected]/row:bg-muted'
+                        'bg-background group-hover/row:bg-muted group-data-[state=selected]/row:bg-muted',
+                        header.column.columnDef.meta?.className,
+                        header.column.columnDef.meta?.thClassName
                       )}
                     >
                       {header.isPlaceholder
@@ -98,7 +135,9 @@ export function BranchesTable({ data }: DataTableProps) {
                     <TableCell
                       key={cell.id}
                       className={cn(
-                        'bg-background group-hover/row:bg-muted group-data-[state=selected]/row:bg-muted'
+                        'bg-background group-hover/row:bg-muted group-data-[state=selected]/row:bg-muted',
+                        cell.column.columnDef.meta?.className,
+                        cell.column.columnDef.meta?.tdClassName
                       )}
                     >
                       {flexRender(
@@ -123,6 +162,7 @@ export function BranchesTable({ data }: DataTableProps) {
         </Table>
       </div>
       <DataTablePagination table={table} className='mt-auto' />
+      <DataTableBulkActions table={table} />
     </div>
   )
 }

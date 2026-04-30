@@ -22,17 +22,17 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { DataTablePagination, DataTableToolbar } from '@/components/data-table'
-import { User } from '@/hooks/use-users'
-import { usersColumns as columns } from './users-columns'
+import { Premium } from '@/hooks/use-premiums'
+import { premiumsColumns as columns } from './premiums-columns'
 import { DataTableBulkActions } from './data-table-bulk-actions'
 
 type DataTableProps = {
-  data: User[]
+  data: Premium[]
   search: Record<string, unknown>
   navigate: NavigateFn
 }
 
-export function UsersTable({ data, search, navigate }: DataTableProps) {
+export function PremiumsTable({ data, search, navigate }: DataTableProps) {
   const [rowSelection, setRowSelection] = useState({})
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [sorting, setSorting] = useState<SortingState>([])
@@ -49,8 +49,7 @@ export function UsersTable({ data, search, navigate }: DataTableProps) {
     pagination: { defaultPage: 1, defaultPageSize: 20 },
     globalFilter: { enabled: false },
     columnFilters: [
-      { columnId: 'email', searchKey: 'email', type: 'string' },
-      { columnId: 'role', searchKey: 'role', type: 'array' },
+      { columnId: 'id', searchKey: 'paymentId', type: 'string' },
     ],
   })
 
@@ -92,19 +91,9 @@ export function UsersTable({ data, search, navigate }: DataTableProps) {
     >
       <DataTableToolbar
         table={table}
-        searchPlaceholder='Filter by email...'
-        searchKey='email'
-        filters={[
-          {
-            columnId: 'role',
-            title: 'Role',
-            options: [
-              { label: 'Admin', value: 'admin' },
-              { label: 'User', value: 'user' },
-              { label: 'Hospital', value: 'hospital' },
-            ],
-          },
-        ]}
+        searchPlaceholder='Filter by payment ID...'
+        searchKey='id'
+        filters={[]}
       />
       <div className='overflow-hidden rounded-md border'>
         <Table>
