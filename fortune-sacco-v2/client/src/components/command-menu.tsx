@@ -1,19 +1,8 @@
-import * as React from "react"
-import { useNavigate } from "react-router-dom"
-import {
-  Settings,
-  LayoutDashboard,
-  Package,
-  Users,
-  Mail,
-  FileText,
-  Briefcase,
-  BookOpen,
-  ShieldCheck,
-  Moon,
-  Sun,
-} from "lucide-react"
-
+import React from 'react'
+import { useNavigate } from '@tanstack/react-router'
+import { ArrowRight, ChevronRight, Laptop, Moon, Sun } from 'lucide-react'
+import { useSearch } from '@/context/search-provider'
+import { useTheme } from '@/context/theme-provider'
 import {
   CommandDialog,
   CommandEmpty,
@@ -22,87 +11,80 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-  CommandShortcut,
-} from "@/components/ui/command"
-import { useTheme } from "@/components/theme-provider"
+} from '@/components/ui/command'
+import { sidebarData } from './layout/data/sidebar-data'
+import { ScrollArea } from './ui/scroll-area'
 
 export function CommandMenu() {
-  const [open, setOpen] = React.useState(false)
   const navigate = useNavigate()
-  const { theme, setTheme } = useTheme()
+  const { setTheme } = useTheme()
+  const { open, setOpen } = useSearch()
 
-  React.useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault()
-        setOpen((open) => !open)
-      }
-    }
-
-    document.addEventListener("keydown", down)
-    return () => document.removeEventListener("keydown", down)
-  }, [])
-
-  const runCommand = React.useCallback((command: () => void) => {
-    setOpen(false)
-    command()
-  }, [])
+  const runCommand = React.useCallback(
+    (command: () => unknown) => {
+      setOpen(false)
+      command()
+    },
+    [setOpen]
+  )
 
   return (
-    <CommandDialog open={open} onOpenChange={setOpen}>
-      <CommandInput placeholder="Type a command or search..." />
+    <CommandDialog modal open={open} onOpenChange={setOpen}>
+      <CommandInput placeholder='Type a command or search...' />
       <CommandList>
-        <CommandEmpty>No results found.</CommandEmpty>
-        <CommandGroup heading="Suggestions">
-          <CommandItem onSelect={() => runCommand(() => navigate("/"))}>
-            <LayoutDashboard className="mr-2 h-4 w-4" />
-            <span>Dashboard</span>
-          </CommandItem>
-          <CommandItem onSelect={() => runCommand(() => navigate("/products"))}>
-            <Package className="mr-2 h-4 w-4" />
-            <span>Products</span>
-          </CommandItem>
-          <CommandItem onSelect={() => runCommand(() => navigate("/users"))}>
-            <Users className="mr-2 h-4 w-4" />
-            <span>Users</span>
-          </CommandItem>
-        </CommandGroup>
-        <CommandSeparator />
-        <CommandGroup heading="Quick Actions">
-          <CommandItem onSelect={() => runCommand(() => setTheme(theme === "light" ? "dark" : "light"))}>
-            {theme === "light" ? <Moon className="mr-2 h-4 w-4" /> : <Sun className="mr-2 h-4 w-4" />}
-            <span>Toggle Theme</span>
-            <CommandShortcut>⌘T</CommandShortcut>
-          </CommandItem>
-          <CommandItem onSelect={() => runCommand(() => navigate("/settings"))}>
-            <Settings className="mr-2 h-4 w-4" />
-            <span>Settings</span>
-            <CommandShortcut>⌘S</CommandShortcut>
-          </CommandItem>
-        </CommandGroup>
-        <CommandSeparator />
-        <CommandGroup heading="Navigation">
-          <CommandItem onSelect={() => runCommand(() => navigate("/inbox"))}>
-            <Mail className="mr-2 h-4 w-4" />
-            <span>Inbox</span>
-          </CommandItem>
-          <CommandItem onSelect={() => runCommand(() => navigate("/blog"))}>
-            <FileText className="mr-2 h-4 w-4" />
-            <span>Blog</span>
-          </CommandItem>
-          <CommandItem onSelect={() => runCommand(() => navigate("/jobs"))}>
-            <Briefcase className="mr-2 h-4 w-4" />
-            <span>Jobs</span>
-          </CommandItem>
-          <CommandItem onSelect={() => runCommand(() => navigate("/knowledge-base"))}>
-            <BookOpen className="mr-2 h-4 w-4" />
-            <span>Knowledge Base</span>
-          </CommandItem>
-          <CommandItem onSelect={() => runCommand(() => navigate("/legal"))}>
-            <ShieldCheck className="mr-2 h-4 w-4" />
-            <span>Legal</span>
-          </CommandItem>
-        </CommandGroup>
+        <ScrollArea type='hover' className='h-72 pe-1'>
+          <CommandEmpty>No results found.</CommandEmpty>
+          {sidebarData.navGroups.map((group) => (
+            <CommandGroup key={group.title} heading={group.title}>
+              {group.items.map((navItem, i) => {
+                if (navItem.url)
+                  return (
+                    <CommandItem
+                      key={`${navItem.url}-${i}`}
+                      value={navItem.title}
+                      onSelect={() => {
+                        runCommand(() => navigate({ to: navItem.url }))
+                      }}
+                    >
+                      <div className='flex size-4 items-center justify-center'>
+                        <ArrowRight className='size-2 text-muted-foreground/80' />
+                      </div>
+                      {navItem.title}
+                    </CommandItem>
+                  )
+
+                return navItem.items?.map((subItem, i) => (
+                  <CommandItem
+                    key={`${navItem.title}-${subItem.url}-${i}`}
+                    value={`${navItem.title}-${subItem.url}`}
+                    onSelect={() => {
+                      runCommand(() => navigate({ to: subItem.url }))
+                    }}
+                  >
+                    <div className='flex size-4 items-center justify-center'>
+                      <ArrowRight className='size-2 text-muted-foreground/80' />
+                    </div>
+                    {navItem.title} <ChevronRight /> {subItem.title}
+                  </CommandItem>
+                ))
+              })}
+            </CommandGroup>
+          ))}
+          <CommandSeparator />
+          <CommandGroup heading='Theme'>
+            <CommandItem onSelect={() => runCommand(() => setTheme('light'))}>
+              <Sun /> <span>Light</span>
+            </CommandItem>
+            <CommandItem onSelect={() => runCommand(() => setTheme('dark'))}>
+              <Moon className='scale-90' />
+              <span>Dark</span>
+            </CommandItem>
+            <CommandItem onSelect={() => runCommand(() => setTheme('system'))}>
+              <Laptop />
+              <span>System</span>
+            </CommandItem>
+          </CommandGroup>
+        </ScrollArea>
       </CommandList>
     </CommandDialog>
   )

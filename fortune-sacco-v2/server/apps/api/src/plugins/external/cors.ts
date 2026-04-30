@@ -2,12 +2,12 @@ import FastifyCors, { type FastifyCorsOptions } from '@fastify/cors';
 
 export const autoConfig: FastifyCorsOptions = {
   origin: (origin, cb) => {
-    const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',');
-    if (allowedOrigins?.includes(origin)) {
+    const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [];
+    if (!origin || allowedOrigins.includes(origin)) {
       cb(null, true);
-    } else {
-      cb(new Error('Not allowed by CORS'), false);
+      return;
     }
+    cb(new Error('Not allowed by CORS'), false);
   }
 };
 

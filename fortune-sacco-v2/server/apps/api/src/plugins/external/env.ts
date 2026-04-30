@@ -14,6 +14,7 @@ declare module 'fastify' {
       PORT: number;
       NODE_ENV: (typeof NodeEnv)[keyof typeof NodeEnv];
       ALLOWED_ORIGINS: string;
+      JWT_SECRET: string;
     };
   }
 }
@@ -41,7 +42,9 @@ const schema = Type.Object({
   LOG_LEVEL: Type.Enum(LogLevel),
   HOST: Type.String({ default: 'localhost' }),
   PORT: Type.Number({ default: 3000 }),
-  NODE_ENV: Type.Enum(NodeEnv, { default: NodeEnv.development })
+  NODE_ENV: Type.Enum(NodeEnv, { default: NodeEnv.development }),
+  JWT_SECRET: Type.String(),
+  ALLOWED_ORIGINS: Type.String({ default: 'http://localhost:5173' })
 });
 
 export const autoConfig: FastifyEnvOptions = {

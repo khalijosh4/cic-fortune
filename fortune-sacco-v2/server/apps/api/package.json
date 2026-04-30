@@ -11,10 +11,13 @@
     "#/*": "./dist/*"
   },
   "dependencies": {
+    "@fastify-forge/db": "workspace:",
+    "@fastify-forge/logger": "workspace:",
     "@fastify/autoload": "catalog:fastify",
     "@fastify/cors": "catalog:fastify",
     "@fastify/env": "catalog:fastify",
     "@fastify/helmet": "catalog:fastify",
+    "@fastify/jwt": "^10.0.0",
     "@fastify/multipart": "catalog:fastify",
     "@fastify/rate-limit": "catalog:fastify",
     "@fastify/sensible": "catalog:fastify",
@@ -23,12 +26,13 @@
     "@fastify/type-provider-typebox": "catalog:fastify",
     "@fastify/under-pressure": "catalog:fastify",
     "@sinclair/typebox": "^0.34.41",
-    "@fastify-forge/db": "workspace:",
-    "@fastify-forge/logger": "workspace:",
-    "better-auth": "catalog:",
+    "bcryptjs": "^3.0.3",
     "close-with-grace": "^2.2.0",
+    "drizzle-orm": "catalog:",
     "fastify": "catalog:fastify",
-    "fastify-better-auth": "catalog:fastify",
     "fastify-plugin": "catalog:fastify"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^3.0.0"
   }
 }

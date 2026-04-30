@@ -1,5 +1,5 @@
 import { 
-  pgEnum, pgTable, uuid, varchar, numeric, pgView, timestamp, boolean, text
+  pgEnum, pgTable, uuid, varchar, numeric, pgView, timestamp, text, type AnyPgColumn
 } from 'drizzle-orm/pg-core';
 import { sql, eq } from 'drizzle-orm';
 import type { InferSelectModel } from 'drizzle-orm';
@@ -7,7 +7,7 @@ import type { InferSelectModel } from 'drizzle-orm';
 
 // 1. Enums First
 export const HospitalTypeEnum = pgEnum('HospitalType', ['private', 'county', 'teaching', 'clinic', 'specialist', 'referral', 'public']);
-export const RolesEnum = pgEnum('UserRole', ['admin', 'user']);
+export const RolesEnum = pgEnum('UserRole', ['admin', 'user', 'hospital']);
 export const PolicyStatusEnum = pgEnum('PolicyStatus', ['active', 'expired', 'pending']);
 export const PolicyCoverTypeEnum = pgEnum('CoverType', ['family', 'individual', 'corporate group']);
 export const ClaimStatusEnum = pgEnum('ClaimStatus', ['approved', 'pending', 'rejected']);
@@ -22,7 +22,8 @@ export const user: any = pgTable('user', {
   lastName: varchar('last_name', { length: 50 }).notNull(),
   phoneNumber: varchar('phone_number', { length: 15 }),
   password: varchar('password', { length: 255 }).notNull(),
-  branchId: uuid('branch_id').notNull().references(() => branch.id, { onDelete: 'restrict', onUpdate: 'cascade' }),
+  branchId: uuid('branch_id').references((): AnyPgColumn => branch.id, { onDelete: 'restrict', onUpdate: 'cascade' }),
+  hospitalId: uuid('hospital_id').references((): AnyPgColumn => hospital.id, { onDelete: 'restrict', onUpdate: 'cascade' }),
   role: RolesEnum('role').notNull().default('user'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()) // Update on every save
@@ -32,7 +33,7 @@ export const branch: any = pgTable('branch', {
   id: uuid('id').primaryKey().notNull().defaultRandom(),
   name: varchar('name', { length: 50 }).notNull(),
   location: varchar('location', { length: 255 }).notNull(),
-  manager: uuid('manager_id').notNull().references(() => user.id, { onDelete: 'restrict', onUpdate: 'cascade' }),
+  manager: uuid('manager_id').notNull().references((): AnyPgColumn => user.id, { onDelete: 'restrict', onUpdate: 'cascade' }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date())
 });
@@ -49,7 +50,7 @@ export const policy: any = pgTable('policy', {
 });
 */
 
-export const policy: any = pgTable('policy', {
+export const policy = pgTable('policy', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: varchar('name', { length: 255 }).notNull(),
   annualLimit: numeric('annual_limit', { precision: 15, scale: 2 }).notNull(),
@@ -75,7 +76,7 @@ export const member: any = pgTable('member', {
 });
 */
 
-export const member: any = pgTable('member', {
+export const member = pgTable('member', {
   id: uuid('id').primaryKey().defaultRandom(),
   firstName: varchar('first_name', { length: 50 }).notNull(),
   lastName: varchar('last_name', { length: 50 }).notNull(),
@@ -84,9 +85,13 @@ export const member: any = pgTable('member', {
   coverType: PolicyCoverTypeEnum('cover_type').default('individual'),
   premiumRate: numeric('premium_rate', { precision: 12, scale: 2 }).notNull(),
   status: PolicyStatusEnum('status').default('pending'),
+  usedAnnualLimit: numeric('used_annual_limit', { precision: 15, scale: 2 }).default('0'),
+  usedOutpatientLimit: numeric('used_outpatient_limit', { precision: 15, scale: 2 }).default('0'),
+  usedInpatientLimit: numeric('used_inpatient_limit', { precision: 15, scale: 2 }).default('0'),
+  usedMaternityLimit: numeric('used_maternity_limit', { precision: 15, scale: 2 }).default('0'),
 });
 
-export const claim: any = pgTable('claim', {
+export const claim = pgTable('claim', {
   id: uuid('id').primaryKey().defaultRandom(),
   memberId: uuid('member_id').references(() => member.id),
   hospitalId: uuid('hospital_id').references(() => hospital.id),
@@ -98,7 +103,7 @@ export const claim: any = pgTable('claim', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
-export const hospital: any = pgTable('hospital', {
+export const hospital = pgTable('hospital', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: varchar('name', { length: 100 }).notNull(),
   location: text('location'),
@@ -106,7 +111,7 @@ export const hospital: any = pgTable('hospital', {
   claimLimit: numeric('claim_limit', { precision: 15, scale: 2 }),
 });
 
-export const premium: any = pgTable('premium', {
+export const premium = pgTable('premium', {
   id: uuid('id').primaryKey().defaultRandom(),
   memberId: uuid('member_id').references(() => member.id),
   amountDue: numeric('amount_due', { precision: 12, scale: 2 }).notNull(),
@@ -124,10 +129,10 @@ export const branchStats = pgView('branch_stats').as((db) => {
     .select({
       branchId: branch.id,
       branchName: branch.name,
-      totalMembers: sql<number>`count(${member.id})`.mapWith(Number),
-      totalPolicies: sql<number>`count(${member.policyId})`.mapWith(Number),
-      totalActivePolicies: sql<number>`count(${member.policyId}) filter (where ${policy.status} = 'active')`.mapWith(Number),
-      totalClaims: sql<number>`count(${claim.id})`.mapWith(Number),
+      totalMembers: sql<number>`count(${member.id})`.mapWith(Number).as('total_members'),
+      totalPolicies: sql<number>`count(${member.policyId})`.mapWith(Number).as('total_policies'),
+      totalActivePolicies: sql<number>`count(${member.policyId}) filter (where ${policy.status} = 'active')`.mapWith(Number).as('total_active_policies'),
+      totalClaims: sql<number>`count(${claim.id})`.mapWith(Number).as('total_claims'),
     })
     .from(branch)
     .leftJoin(member, eq(branch.id, member.branchId))

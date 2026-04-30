@@ -2,6 +2,8 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import pg from 'pg';
 
 import * as schema from './schema.js';
+export * from './schema.js';
+export { schema };
 
 export const pool = new pg.Pool({
   host: process.env.POSTGRES_HOST,
