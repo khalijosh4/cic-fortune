@@ -61,7 +61,7 @@ export function Dashboard() {
           <GeneralError />
         ) : (
           <Tabs
-            orientation='vertical'
+            orientation='horizontal'
             defaultValue='overview'
             className='space-y-4'
           >
@@ -69,10 +69,10 @@ export function Dashboard() {
               <TabsList>
                 <TabsTrigger value='overview'>Overview</TabsTrigger>
                 <TabsTrigger value='analytics'>Analytics</TabsTrigger>
-                <TabsTrigger value='reports' disabled>
+                <TabsTrigger value='reports'>
                   Reports
                 </TabsTrigger>
-                <TabsTrigger value='notifications' disabled>
+                <TabsTrigger value='notifications'>
                   Notifications
                 </TabsTrigger>
               </TabsList>
