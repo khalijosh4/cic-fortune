@@ -15,6 +15,7 @@ export interface Member {
   usedOutpatientLimit?: string | null
   usedInpatientLimit?: string | null
   usedMaternityLimit?: string | null
+  branchName?: string | null
 }
 
 interface MembersResponse {
@@ -22,7 +23,18 @@ interface MembersResponse {
   total: number
 }
 
-export function useMembers(limit = 10, offset = 0, filters?: { branchId?: string; policyId?: string }) {
+export function useMembers(
+  limit = 10, 
+  offset = 0, 
+  filters?: { 
+    branchId?: string; 
+    policyId?: string;
+    coverType?: string;
+    minPremiumRate?: number;
+    maxPremiumRate?: number;
+    status?: string;
+  }
+) {
   return useQuery<MembersResponse>({
     queryKey: ['members', limit, offset, filters],
     queryFn: async () => {
@@ -30,6 +42,27 @@ export function useMembers(limit = 10, offset = 0, filters?: { branchId?: string
         params: { limit, offset, ...filters },
       })
       return response.data
+    },
+  })
+}
+
+export function useBulkUpdateMembers() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ ids, status }: { ids: string[]; status: string }) => {
+      const response = await api.put('/members/bulk-status', { ids, status })
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['members'] })
+      toast.success('Members updated', {
+        description: 'Selected members have been successfully updated.',
+      })
+    },
+    onError: (error: any) => {
+      toast.error('Update failed', {
+        description: error.response?.data?.message || 'An error occurred during bulk update.',
+      })
     },
   })
 }

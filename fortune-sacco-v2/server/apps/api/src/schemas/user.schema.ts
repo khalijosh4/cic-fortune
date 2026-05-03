@@ -12,6 +12,7 @@ export const UserSchema = Type.Object({
   hospitalId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   createdAt: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   updatedAt: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  branchName: Type.Optional(Type.Union([Type.String(), Type.Null()])),
 });
 
 export const CreateUserSchema = {

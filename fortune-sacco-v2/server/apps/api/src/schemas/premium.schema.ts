@@ -36,6 +36,13 @@ export const ListPremiumSchema = {
     limit: Type.Optional(Type.Number()),
     offset: Type.Optional(Type.Number()),
     memberId: Type.Optional(Type.String()),
+    status: Type.Optional(Type.String()),
+    minAmountDue: Type.Optional(Type.Number()),
+    maxAmountDue: Type.Optional(Type.Number()),
+    minAmountPaid: Type.Optional(Type.Number()),
+    maxAmountPaid: Type.Optional(Type.Number()),
+    startDate: Type.Optional(Type.String()),
+    endDate: Type.Optional(Type.String()),
   }),
   response: {
     200: Type.Object({

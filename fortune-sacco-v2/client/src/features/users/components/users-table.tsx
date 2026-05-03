@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/table'
 import { DataTablePagination, DataTableToolbar } from '@/components/data-table'
 import { User } from '@/hooks/use-users'
+import { useBranches } from '@/hooks/use-branches'
 import { usersColumns as columns } from './users-columns'
 import { DataTableBulkActions } from './data-table-bulk-actions'
 
@@ -52,6 +53,7 @@ export function UsersTable({ data, total, search, navigate }: DataTableProps) {
     columnFilters: [
       { columnId: 'email', searchKey: 'email', type: 'string' },
       { columnId: 'role', searchKey: 'role', type: 'array' },
+      { columnId: 'branchName', searchKey: 'branchId', type: 'array' },
     ],
   })
 
@@ -68,6 +70,7 @@ export function UsersTable({ data, total, search, navigate }: DataTableProps) {
     },
     enableRowSelection: true,
     manualPagination: true,
+    manualFiltering: true,
     rowCount: total,
     pageCount: Math.ceil(total / pagination.pageSize),
     onPaginationChange,
@@ -86,6 +89,12 @@ export function UsersTable({ data, total, search, navigate }: DataTableProps) {
   useEffect(() => {
     ensurePageInRange(table.getPageCount())
   }, [table, ensurePageInRange])
+
+  const { data: branchesData } = useBranches(100, 0)
+  const branchOptions = branchesData?.data.map(b => ({
+    label: b.branchName,
+    value: b.branchId
+  })) || []
 
   return (
     <div
@@ -107,6 +116,11 @@ export function UsersTable({ data, total, search, navigate }: DataTableProps) {
               { label: 'User', value: 'user' },
               { label: 'Hospital', value: 'hospital' },
             ],
+          },
+          {
+            columnId: 'branchName',
+            title: 'Branch',
+            options: branchOptions,
           },
         ]}
       />

@@ -51,6 +51,8 @@ export function HospitalsTable({ data, total, search, navigate }: DataTableProps
     globalFilter: { enabled: false },
     columnFilters: [
       { columnId: 'name', searchKey: 'name', type: 'string' },
+      { columnId: 'location', searchKey: 'location', type: 'string' },
+      { columnId: 'claimLimit', searchKey: 'claimLimitRange', type: 'array' },
       { columnId: 'type', searchKey: 'type', type: 'array' },
     ],
   })
@@ -68,6 +70,7 @@ export function HospitalsTable({ data, total, search, navigate }: DataTableProps
     },
     enableRowSelection: true,
     manualPagination: true,
+    manualFiltering: true,
     rowCount: total,
     pageCount: Math.ceil(total / pagination.pageSize),
     onPaginationChange,
@@ -96,7 +99,7 @@ export function HospitalsTable({ data, total, search, navigate }: DataTableProps
     >
       <DataTableToolbar
         table={table}
-        searchPlaceholder='Filter hospitals by name...'
+        searchPlaceholder='Filter hospitals...'
         searchKey='name'
         filters={[
           {
@@ -112,6 +115,12 @@ export function HospitalsTable({ data, total, search, navigate }: DataTableProps
               { label: 'Referral', value: 'referral' },
             ],
           },
+        ]}
+        rangeFilters={[
+          {
+            columnId: 'claimLimit',
+            title: 'Claim Limit',
+          }
         ]}
       />
       <div className='overflow-hidden rounded-md border'>

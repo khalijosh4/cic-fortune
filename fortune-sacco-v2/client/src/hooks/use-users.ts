@@ -14,6 +14,7 @@ export interface User {
   hospitalId?: string | null
   createdAt?: string | null
   updatedAt?: string | null
+  branchName?: string | null
 }
 
 interface UsersResponse {

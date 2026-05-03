@@ -1,5 +1,5 @@
 import { db, schema } from '@fastify-forge/db';
-import { eq, sql } from 'drizzle-orm';
+import { eq, sql, and } from 'drizzle-orm';
 import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 const { branch, branchStats } = schema;
 
@@ -12,14 +12,41 @@ import {
 
 const branchRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/', { schema: ListBranchSchema }, async (request, reply) => {
-    const { limit = 10, offset = 0 } = request.query;
+    const { 
+      limit = 10, offset = 0, location, 
+      minPolicies, maxPolicies, minActivePolicies, maxActivePolicies 
+    } = request.query;
 
-    const data = await db.select()
+    const filters = [];
+    if (location) filters.push(sql`${branch.location} ILIKE ${`%${location}%`}`);
+    if (minPolicies) filters.push(sql`${branchStats.totalPolicies} >= ${minPolicies}`);
+    if (maxPolicies) filters.push(sql`${branchStats.totalPolicies} <= ${maxPolicies}`);
+    if (minActivePolicies) filters.push(sql`${branchStats.totalActivePolicies} >= ${minActivePolicies}`);
+    if (maxActivePolicies) filters.push(sql`${branchStats.totalActivePolicies} <= ${maxActivePolicies}`);
+
+    const whereClause = filters.length > 0 ? and(...filters) : undefined;
+
+    const data = await db.select({
+      branchId: branchStats.branchId,
+      branchName: branchStats.branchName,
+      totalMembers: branchStats.totalMembers,
+      totalPolicies: branchStats.totalPolicies,
+      totalActivePolicies: branchStats.totalActivePolicies,
+      totalClaims: branchStats.totalClaims,
+      location: branch.location,
+      managerName: sql<string>`${schema.user.firstName} || ' ' || ${schema.user.lastName}`.as('manager_name'),
+    })
+    .from(branchStats)
+    .innerJoin(branch, eq(branchStats.branchId, branch.id))
+    .innerJoin(schema.user, eq(branch.manager, schema.user.id))
+    .where(whereClause)
+    .limit(limit)
+    .offset(offset);
+
+    const countResult = await db.select({ count: sql<number>`count(*)` })
       .from(branchStats)
-      .limit(limit)
-      .offset(offset);
-
-    const countResult = await db.select({ count: sql<number>`count(*)` }).from(branch);
+      .innerJoin(branch, eq(branchStats.branchId, branch.id))
+      .where(whereClause);
     const count = countResult[0]?.count ?? 0;
 
     return reply.send({ data: data as any, total: Number(count) });

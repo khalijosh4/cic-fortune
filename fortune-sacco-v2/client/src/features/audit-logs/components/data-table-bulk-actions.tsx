@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/tooltip'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { DataTableBulkActions as BulkActionsToolbar } from '@/components/data-table'
+import { downloadCsv } from '@/lib/export'
 import { AuditLog } from '@/hooks/use-audit-logs'
 
 type DataTableBulkActionsProps<TData> = {
@@ -26,15 +27,9 @@ export function DataTableBulkActions<TData>({
 
   const handleBulkExport = () => {
     const selectedLogs = selectedRows.map((row) => row.original as AuditLog)
-    toast.promise(sleep(1000), {
-      loading: 'Exporting audit logs...',
-      success: () => {
-        table.resetRowSelection()
-        return `Exported ${selectedLogs.length} audit log${selectedLogs.length > 1 ? 's' : ''} to CSV.`
-      },
-      error: 'Error exporting',
-    })
+    downloadCsv(selectedLogs, 'audit-logs-export')
     table.resetRowSelection()
+    toast.success(`Exported ${selectedLogs.length} audit log${selectedLogs.length > 1 ? 's' : ''} to CSV.`)
   }
 
   const handleDelete = () => {

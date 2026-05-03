@@ -19,7 +19,21 @@ interface ClaimsResponse {
   total: number
 }
 
-export function useClaims(limit = 10, offset = 0, filters?: { status?: string; memberId?: string }) {
+export function useClaims(
+  limit = 10, 
+  offset = 0, 
+  filters?: { 
+    status?: string; 
+    memberId?: string;
+    hospitalId?: string;
+    minAmountClaimed?: number;
+    maxAmountClaimed?: number;
+    minAmountApproved?: number;
+    maxAmountApproved?: number;
+    startDate?: string;
+    endDate?: string;
+  }
+) {
   return useQuery<ClaimsResponse>({
     queryKey: ['claims', limit, offset, filters],
     queryFn: async () => {
@@ -27,6 +41,27 @@ export function useClaims(limit = 10, offset = 0, filters?: { status?: string; m
         params: { limit, offset, ...filters },
       })
       return response.data
+    },
+  })
+}
+
+export function useBulkUpdateClaims() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ ids, status }: { ids: string[]; status: string }) => {
+      const response = await api.put('/claims/bulk-status', { ids, status })
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['claims'] })
+      toast.success('Claims updated', {
+        description: 'Selected claims have been successfully updated.',
+      })
+    },
+    onError: (error: any) => {
+      toast.error('Update failed', {
+        description: error.response?.data?.message || 'An error occurred during bulk update.',
+      })
     },
   })
 }

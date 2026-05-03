@@ -87,15 +87,15 @@ export const usersColumns: ColumnDef<User>[] = [
     },
   },
   {
-    accessorKey: 'branchId',
+    accessorKey: 'branchName',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Branch' />
     ),
     cell: ({ row }) => {
-      const branchId = row.getValue('branchId') as string;
+      const branchName = row.getValue('branchName') as string;
       return (
-        <div className='text-muted-foreground text-xs'>
-          {branchId ? branchId.slice(0, 8) + '...' : '—'}
+        <div className='max-w-[150px] truncate text-muted-foreground'>
+          {branchName || '—'}
         </div>
       )
     },

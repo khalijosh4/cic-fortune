@@ -37,6 +37,9 @@ export const ListHospitalSchema = {
   querystring: Type.Object({
     limit: Type.Optional(Type.Number()),
     offset: Type.Optional(Type.Number()),
+    location: Type.Optional(Type.String()),
+    minClaimLimit: Type.Optional(Type.Number()),
+    maxClaimLimit: Type.Optional(Type.Number()),
   }),
   response: {
     200: Type.Object({

@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/table'
 import { DataTablePagination, DataTableToolbar } from '@/components/data-table'
 import { Member } from '@/hooks/use-members'
+import { useBranches } from '@/hooks/use-branches'
 import { membersColumns as columns } from './members-columns'
 import { DataTableBulkActions } from './data-table-bulk-actions'
 
@@ -52,6 +53,9 @@ export function MembersTable({ data, total, search, navigate }: DataTableProps) 
     columnFilters: [
       { columnId: 'name', searchKey: 'name', type: 'string' },
       { columnId: 'status', searchKey: 'status', type: 'array' },
+      { columnId: 'coverType', searchKey: 'coverType', type: 'array' },
+      { columnId: 'branchId', searchKey: 'branchId', type: 'array' },
+      { columnId: 'premiumRate', searchKey: 'premiumRange', type: 'array' },
     ],
   })
 
@@ -68,6 +72,7 @@ export function MembersTable({ data, total, search, navigate }: DataTableProps) 
     },
     enableRowSelection: true,
     manualPagination: true,
+    manualFiltering: true,
     rowCount: total,
     pageCount: Math.ceil(total / pagination.pageSize),
     onPaginationChange,
@@ -86,6 +91,12 @@ export function MembersTable({ data, total, search, navigate }: DataTableProps) 
   useEffect(() => {
     ensurePageInRange(table.getPageCount())
   }, [table, ensurePageInRange])
+
+  const { data: branchesData } = useBranches(100, 0)
+  const branchOptions = branchesData?.data.map(b => ({
+    label: b.branchName,
+    value: b.branchId
+  })) || []
 
   return (
     <div
@@ -108,6 +119,26 @@ export function MembersTable({ data, total, search, navigate }: DataTableProps) 
               { label: 'Pending', value: 'pending' },
             ],
           },
+          {
+            columnId: 'coverType',
+            title: 'Cover Type',
+            options: [
+              { label: 'Individual', value: 'individual' },
+              { label: 'Family', value: 'family' },
+              { label: 'Corporate Group', value: 'corporate group' },
+            ],
+          },
+          {
+            columnId: 'branchId',
+            title: 'Branch',
+            options: branchOptions,
+          },
+        ]}
+        rangeFilters={[
+          {
+            columnId: 'premiumRate',
+            title: 'Premium Rate',
+          }
         ]}
       />
       <div className='overflow-hidden rounded-md border'>

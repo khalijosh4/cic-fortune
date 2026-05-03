@@ -1,5 +1,5 @@
 import { db, schema } from '@fastify-forge/db';
-import { eq, sql, and, desc } from 'drizzle-orm';
+import { eq, sql, and, desc, gte, lte } from 'drizzle-orm';
 import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 
 const { auditLog } = schema;
@@ -11,11 +11,15 @@ import {
 
 const auditLogRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/', { schema: ListAuditLogSchema }, async (request, reply) => {
-    const { limit = 10, offset = 0, module, type } = request.query;
+    const { limit = 10, offset = 0, module, type, status, userRole, startDate, endDate } = request.query;
 
     const filters = [];
     if (module) filters.push(eq(auditLog.module, module));
     if (type) filters.push(eq(auditLog.type, type));
+    if (status) filters.push(eq(auditLog.status, status));
+    if (userRole) filters.push(eq(auditLog.userRole, userRole));
+    if (startDate) filters.push(gte(auditLog.timestamp, new Date(startDate)));
+    if (endDate) filters.push(lte(auditLog.timestamp, new Date(endDate)));
 
     const whereClause = filters.length > 0 ? and(...filters) : undefined;
 

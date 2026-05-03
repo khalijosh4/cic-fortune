@@ -9,6 +9,8 @@ export interface Branch {
   totalPolicies: number
   totalActivePolicies: number
   totalClaims: number
+  location: string
+  managerName: string
 }
 
 interface BranchesResponse {
@@ -16,12 +18,22 @@ interface BranchesResponse {
   total: number
 }
 
-export function useBranches(limit = 10, offset = 0) {
+export function useBranches(
+  limit = 10, 
+  offset = 0, 
+  filters?: { 
+    location?: string;
+    minPolicies?: number;
+    maxPolicies?: number;
+    minActivePolicies?: number;
+    maxActivePolicies?: number;
+  }
+) {
   return useQuery<BranchesResponse>({
-    queryKey: ['branches', limit, offset],
+    queryKey: ['branches', limit, offset, filters],
     queryFn: async () => {
       const response = await api.get('/branches', {
-        params: { limit, offset },
+        params: { limit, offset, ...filters },
       })
       return response.data
     },

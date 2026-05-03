@@ -1,6 +1,7 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
+import { cn } from '@/lib/utils'
 import { DataTableColumnHeader } from '@/components/data-table'
 import { Premium } from '@/hooks/use-premiums'
 import { DataTableRowActions } from './data-table-row-actions'
@@ -46,34 +47,37 @@ export const premiumsColumns: ColumnDef<Premium>[] = [
   {
     accessorKey: 'amountDue',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Amount Due (KES)' />
+      <DataTableColumnHeader column={column} title='Amount Due (KES)' className='justify-center' />
     ),
     cell: ({ row }) => {
       const amount = row.getValue('amountDue') as string | number;
-      return <div className='font-medium'>{amount ? Number(amount).toLocaleString() : '0'}</div>
+      return <div className='font-medium text-center'>{amount ? Number(amount).toLocaleString() : '0'}</div>
     },
   },
   {
     accessorKey: 'amountPaid',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Amount Paid (KES)' />
+      <DataTableColumnHeader column={column} title='Amount Paid (KES)' className='justify-center' />
     ),
     cell: ({ row }) => {
       const amount = row.getValue('amountPaid') as string | number;
-      return <div>{amount ? Number(amount).toLocaleString() : '0'}</div>
+      return <div className='text-center'>{amount ? Number(amount).toLocaleString() : '0'}</div>
     },
   },
   {
     id: 'balance',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Balance (KES)' />
+      <DataTableColumnHeader column={column} title='Balance (KES)' className='justify-center' />
     ),
     cell: ({ row }) => {
       const due = Number(row.getValue('amountDue') ?? 0);
       const paid = Number(row.getValue('amountPaid') ?? 0);
       const balance = due - paid;
       return (
-        <div className={balance > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-teal-600 dark:text-teal-400'}>
+        <div className={cn(
+          'text-center',
+          balance > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-teal-600 dark:text-teal-400'
+        )}>
           {balance > 0 ? balance.toLocaleString() : '0'}
         </div>
       )

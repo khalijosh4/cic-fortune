@@ -49,6 +49,12 @@ export const ListClaimSchema = {
     memberId: Type.Optional(Type.String()),
     hospitalId: Type.Optional(Type.String()),
     status: Type.Optional(Type.String()),
+    minAmountClaimed: Type.Optional(Type.Number()),
+    maxAmountClaimed: Type.Optional(Type.Number()),
+    minAmountApproved: Type.Optional(Type.Number()),
+    maxAmountApproved: Type.Optional(Type.Number()),
+    startDate: Type.Optional(Type.String()),
+    endDate: Type.Optional(Type.String()),
   }),
   response: {
     200: Type.Object({

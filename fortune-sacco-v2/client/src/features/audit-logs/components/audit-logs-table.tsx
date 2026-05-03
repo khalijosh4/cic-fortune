@@ -53,6 +53,8 @@ export function AuditLogsTable({ data, total, search, navigate }: DataTableProps
       { columnId: 'action', searchKey: 'action', type: 'string' },
       { columnId: 'status', searchKey: 'status', type: 'array' },
       { columnId: 'module', searchKey: 'module', type: 'array' },
+      { columnId: 'userRole', searchKey: 'userRole', type: 'array' },
+      { columnId: 'timestamp', searchKey: 'timestampRange', type: 'array' },
     ],
   })
 
@@ -69,6 +71,7 @@ export function AuditLogsTable({ data, total, search, navigate }: DataTableProps
     },
     enableRowSelection: true,
     manualPagination: true,
+    manualFiltering: true,
     rowCount: total,
     pageCount: Math.ceil(total / pagination.pageSize),
     onPaginationChange,
@@ -117,6 +120,15 @@ export function AuditLogsTable({ data, total, search, navigate }: DataTableProps
               { label: 'Claims', value: 'claims' },
               { label: 'Policies', value: 'policies' },
               { label: 'Users', value: 'users' },
+            ],
+          },
+          {
+            columnId: 'userRole',
+            title: 'Role',
+            options: [
+              { label: 'Admin', value: 'admin' },
+              { label: 'User', value: 'user' },
+              { label: 'Hospital', value: 'hospital' },
             ],
           },
         ]}

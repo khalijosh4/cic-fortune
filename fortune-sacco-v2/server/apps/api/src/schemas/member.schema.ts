@@ -13,6 +13,7 @@ export const MemberSchema = Type.Object({
   usedOutpatientLimit: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   usedInpatientLimit: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   usedMaternityLimit: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  branchName: Type.Optional(Type.Union([Type.String(), Type.Null()])),
 });
 
 export const CreateMemberSchema = {
@@ -52,6 +53,10 @@ export const ListMemberSchema = {
     offset: Type.Optional(Type.Number()),
     branchId: Type.Optional(Type.String()),
     policyId: Type.Optional(Type.String()),
+    coverType: Type.Optional(Type.String()),
+    minPremiumRate: Type.Optional(Type.Number()),
+    maxPremiumRate: Type.Optional(Type.Number()),
+    status: Type.Optional(Type.String()),
   }),
   response: {
     200: Type.Object({

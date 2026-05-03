@@ -1,6 +1,7 @@
 import { db, schema } from '@fastify-forge/db';
-import { eq, sql, and } from 'drizzle-orm';
+import { eq, sql, and, gte, lte } from 'drizzle-orm';
 import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
+import { Type } from '@sinclair/typebox';
 const { claim } = schema;
 
 import { 
@@ -14,12 +15,22 @@ import { ClaimsService } from '#/services/claims.service.js';
 
 const claimRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/', { schema: ListClaimSchema }, async (request, reply) => {
-    const { limit = 10, offset = 0, memberId, hospitalId, status } = request.query;
+    const { 
+      limit = 10, offset = 0, memberId, hospitalId, status,
+      minAmountClaimed, maxAmountClaimed, minAmountApproved, maxAmountApproved,
+      startDate, endDate
+    } = request.query;
 
     const filters = [];
     if (memberId) filters.push(eq(claim.memberId, memberId));
     if (hospitalId) filters.push(eq(claim.hospitalId, hospitalId));
     if (status) filters.push(eq(claim.status, status as any));
+    if (minAmountClaimed) filters.push(sql`${claim.amountClaimed} >= ${minAmountClaimed}`);
+    if (maxAmountClaimed) filters.push(sql`${claim.amountClaimed} <= ${maxAmountClaimed}`);
+    if (minAmountApproved) filters.push(sql`${claim.amountApproved} >= ${minAmountApproved}`);
+    if (maxAmountApproved) filters.push(sql`${claim.amountApproved} <= ${maxAmountApproved}`);
+    if (startDate) filters.push(gte(claim.createdAt, new Date(startDate)));
+    if (endDate) filters.push(lte(claim.createdAt, new Date(endDate)));
 
     // Role based filtering
     if (request.user.role === 'hospital') {
@@ -33,6 +44,27 @@ const claimRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     const count = countResult[0]?.count ?? 0;
 
     return reply.send({ data: data as any, total: Number(count) });
+  });
+
+  fastify.put('/bulk-status', {
+    schema: {
+      body: Type.Object({
+        ids: Type.Array(Type.String()),
+        status: Type.String(),
+      }),
+    }
+  }, async (request, reply) => {
+    if (request.user.role !== 'admin') {
+      return reply.forbidden('Only admins can update bulk status');
+    }
+
+    const { ids, status: newStatus } = request.body;
+    
+    await db.update(claim)
+      .set({ status: newStatus } as any)
+      .where(sql`${claim.id} IN ${ids}`);
+    
+    return reply.send({ message: 'Bulk status update successful' });
   });
 
   fastify.post('/', { schema: CreateClaimSchema }, async (request, reply) => {

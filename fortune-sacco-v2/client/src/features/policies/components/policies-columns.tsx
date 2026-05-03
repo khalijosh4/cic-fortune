@@ -48,41 +48,41 @@ export const policiesColumns: ColumnDef<Policy>[] = [
   {
     accessorKey: 'annualLimit',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Annual Limit (KES)' />
+      <DataTableColumnHeader column={column} title='Annual Limit (KES)' className='justify-center' />
     ),
     cell: ({ row }) => {
       const amount = row.getValue('annualLimit') as string | number;
-      return <div>{amount ? Number(amount).toLocaleString() : '0'}</div>
+      return <div className='text-center'>{amount ? Number(amount).toLocaleString() : '0'}</div>
     },
   },
   {
     accessorKey: 'outpatientLimit',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Outpatient (KES)' />
+      <DataTableColumnHeader column={column} title='Outpatient (KES)' className='justify-center' />
     ),
     cell: ({ row }) => {
       const amount = row.getValue('outpatientLimit') as string | number;
-      return <div>{amount ? Number(amount).toLocaleString() : '—'}</div>
+      return <div className='text-center'>{amount ? Number(amount).toLocaleString() : '—'}</div>
     },
   },
   {
     accessorKey: 'inpatientLimit',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Inpatient (KES)' />
+      <DataTableColumnHeader column={column} title='Inpatient (KES)' className='justify-center' />
     ),
     cell: ({ row }) => {
       const amount = row.getValue('inpatientLimit') as string | number;
-      return <div>{amount ? Number(amount).toLocaleString() : '—'}</div>
+      return <div className='text-center'>{amount ? Number(amount).toLocaleString() : '—'}</div>
     },
   },
   {
     accessorKey: 'maternityLimit',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Maternity (KES)' />
+      <DataTableColumnHeader column={column} title='Maternity (KES)' className='justify-center' />
     ),
     cell: ({ row }) => {
       const amount = row.getValue('maternityLimit') as string | number;
-      return <div>{amount ? Number(amount).toLocaleString() : '—'}</div>
+      return <div className='text-center'>{amount ? Number(amount).toLocaleString() : '—'}</div>
     },
   },
   {

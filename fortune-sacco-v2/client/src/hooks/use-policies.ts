@@ -17,7 +17,21 @@ interface PoliciesResponse {
   total: number
 }
 
-export function usePolicies(limit = 10, offset = 0, filters?: { status?: string }) {
+export function usePolicies(
+  limit = 10, 
+  offset = 0, 
+  filters?: { 
+    status?: string;
+    minAnnualLimit?: number;
+    maxAnnualLimit?: number;
+    minOutpatientLimit?: number;
+    maxOutpatientLimit?: number;
+    minInpatientLimit?: number;
+    maxInpatientLimit?: number;
+    minMaternityLimit?: number;
+    maxMaternityLimit?: number;
+  }
+) {
   return useQuery<PoliciesResponse>({
     queryKey: ['policies', limit, offset, filters],
     queryFn: async () => {

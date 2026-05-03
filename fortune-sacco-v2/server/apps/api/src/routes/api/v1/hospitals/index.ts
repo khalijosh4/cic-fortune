@@ -1,5 +1,5 @@
 import { db, schema } from '@fastify-forge/db';
-import { eq, sql } from 'drizzle-orm';
+import { eq, sql, and } from 'drizzle-orm';
 import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 const { hospital } = schema;
 
@@ -11,10 +11,17 @@ import {
 
 const hospitalRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/', { schema: ListHospitalSchema }, async (request, reply) => {
-    const { limit = 10, offset = 0 } = request.query;
+    const { limit = 10, offset = 0, location, minClaimLimit, maxClaimLimit } = request.query;
 
-    const data = await db.select().from(hospital).limit(limit).offset(offset);
-    const countResult = await db.select({ count: sql<number>`count(*)` }).from(hospital);
+    const filters = [];
+    if (location) filters.push(sql`${hospital.location} ILIKE ${`%${location}%`}`);
+    if (minClaimLimit) filters.push(sql`${hospital.claimLimit} >= ${minClaimLimit}`);
+    if (maxClaimLimit) filters.push(sql`${hospital.claimLimit} <= ${maxClaimLimit}`);
+
+    const whereClause = filters.length > 0 ? and(...filters) : undefined;
+
+    const data = await db.select().from(hospital).where(whereClause).limit(limit).offset(offset);
+    const countResult = await db.select({ count: sql<number>`count(*)` }).from(hospital).where(whereClause);
     const count = countResult[0]?.count ?? 0;
 
     return reply.send({ data: data as any, total: Number(count) });

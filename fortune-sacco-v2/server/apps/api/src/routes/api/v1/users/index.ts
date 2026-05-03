@@ -33,9 +33,17 @@ const userRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
       hospitalId: user.hospitalId,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
-    }).from(user).where(whereClause).limit(limit).offset(offset);
+      branchName: schema.branch.name,
+    })
+    .from(user)
+    .leftJoin(schema.branch, eq(user.branchId, schema.branch.id))
+    .where(whereClause)
+    .limit(limit)
+    .offset(offset);
     
-    const countResult = await db.select({ count: sql<number>`count(*)` }).from(user).where(whereClause);
+    const countResult = await db.select({ count: sql<number>`count(*)` })
+      .from(user)
+      .where(whereClause);
     const count = countResult[0]?.count ?? 0;
 
     return reply.send({ data: data as any, total: Number(count) });

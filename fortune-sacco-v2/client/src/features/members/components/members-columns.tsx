@@ -49,6 +49,15 @@ export const membersColumns: ColumnDef<Member>[] = [
     enableHiding: false,
   },
   {
+    accessorKey: 'branchName',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Branch' />
+    ),
+    cell: ({ row }) => (
+      <div className='max-w-[150px] truncate'>{row.getValue('branchName') || '—'}</div>
+    ),
+  },
+  {
     accessorKey: 'coverType',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Cover Type' />
@@ -60,11 +69,11 @@ export const membersColumns: ColumnDef<Member>[] = [
   {
     accessorKey: 'premiumRate',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Premium Rate (KES)' />
+      <DataTableColumnHeader column={column} title='Premium Rate (KES)' className='justify-center' />
     ),
     cell: ({ row }) => {
       const rate = row.getValue('premiumRate') as string | number;
-      return <div>{rate ? Number(rate).toLocaleString() : '0'}</div>
+      return <div className='text-center'>{rate ? Number(rate).toLocaleString() : '0'}</div>
     },
   },
   {
@@ -87,11 +96,11 @@ export const membersColumns: ColumnDef<Member>[] = [
   {
     accessorKey: 'usedAnnualLimit',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Used Limit (KES)' />
+      <DataTableColumnHeader column={column} title='Used Limit (KES)' className='justify-center' />
     ),
     cell: ({ row }) => {
       const limit = row.getValue('usedAnnualLimit') as string | number;
-      return <div>{limit ? Number(limit).toLocaleString() : '0'}</div>
+      return <div className='text-center'>{limit ? Number(limit).toLocaleString() : '0'}</div>
     },
   },
   {

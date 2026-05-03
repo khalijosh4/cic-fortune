@@ -51,6 +51,10 @@ export function PremiumsTable({ data, total, search, navigate }: DataTableProps)
     globalFilter: { enabled: false },
     columnFilters: [
       { columnId: 'id', searchKey: 'paymentId', type: 'string' },
+      { columnId: 'status', searchKey: 'status', type: 'array' },
+      { columnId: 'amountDue', searchKey: 'amountDueRange', type: 'array' },
+      { columnId: 'amountPaid', searchKey: 'amountPaidRange', type: 'array' },
+      { columnId: 'dueDate', searchKey: 'dueDateRange', type: 'array' },
     ],
   })
 
@@ -67,6 +71,7 @@ export function PremiumsTable({ data, total, search, navigate }: DataTableProps)
     },
     enableRowSelection: true,
     manualPagination: true,
+    manualFiltering: true,
     rowCount: total,
     pageCount: Math.ceil(total / pagination.pageSize),
     onPaginationChange,
@@ -97,7 +102,21 @@ export function PremiumsTable({ data, total, search, navigate }: DataTableProps)
         table={table}
         searchPlaceholder='Filter by payment ID...'
         searchKey='id'
-        filters={[]}
+        filters={[
+          {
+            columnId: 'status',
+            title: 'Status',
+            options: [
+              { label: 'Paid', value: 'paid' },
+              { label: 'Unpaid', value: 'unpaid' },
+              { label: 'Overdue', value: 'overdue' },
+            ],
+          },
+        ]}
+        rangeFilters={[
+          { columnId: 'amountDue', title: 'Amount Due' },
+          { columnId: 'amountPaid', title: 'Amount Paid' },
+        ]}
       />
       <div className='overflow-hidden rounded-md border'>
         <Table>

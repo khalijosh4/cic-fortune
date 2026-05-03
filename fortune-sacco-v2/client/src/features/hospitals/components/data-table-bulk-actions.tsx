@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { type Table } from '@tanstack/react-table'
 import { Trash2, Download } from 'lucide-react'
 import { toast } from 'sonner'
-import { sleep } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
   Tooltip,
@@ -10,6 +9,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { DataTableBulkActions as BulkActionsToolbar } from '@/components/data-table'
+import { downloadCsv } from '@/lib/export'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { Hospital, useDeleteHospital } from '@/hooks/use-hospitals'
 
@@ -25,15 +25,9 @@ export function DataTableBulkActions<TData>({
 
   const handleBulkExport = () => {
     const selectedHospitals = selectedRows.map((row) => row.original as Hospital)
-    toast.promise(sleep(1000), {
-      loading: 'Exporting hospitals...',
-      success: () => {
-        table.resetRowSelection()
-        return `Exported ${selectedHospitals.length} hospital${selectedHospitals.length > 1 ? 's' : ''} to CSV.`
-      },
-      error: 'Error exporting',
-    })
+    downloadCsv(selectedHospitals, 'hospitals-export')
     table.resetRowSelection()
+    toast.success(`Exported ${selectedHospitals.length} hospital record${selectedHospitals.length > 1 ? 's' : ''} to CSV.`)
   }
 
   const deleteHospital = useDeleteHospital()

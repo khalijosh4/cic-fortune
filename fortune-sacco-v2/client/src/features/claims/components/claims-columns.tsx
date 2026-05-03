@@ -52,21 +52,21 @@ export const claimsColumns: ColumnDef<Claim>[] = [
   {
     accessorKey: 'amountClaimed',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Amount Claimed (KES)' />
+      <DataTableColumnHeader column={column} title='Amount Claimed (KES)' className='justify-center' />
     ),
     cell: ({ row }) => {
       const amount = row.getValue('amountClaimed') as string | number;
-      return <div>{amount ? Number(amount).toLocaleString() : '0'}</div>
+      return <div className='text-center'>{amount ? Number(amount).toLocaleString() : '0'}</div>
     },
   },
   {
     accessorKey: 'amountApproved',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Amount Approved (KES)' />
+      <DataTableColumnHeader column={column} title='Amount Approved (KES)' className='justify-center' />
     ),
     cell: ({ row }) => {
       const amount = row.getValue('amountApproved') as string | number;
-      return <div>{amount ? Number(amount).toLocaleString() : '—'}</div>
+      return <div className='text-center'>{amount ? Number(amount).toLocaleString() : '—'}</div>
     },
   },
   {

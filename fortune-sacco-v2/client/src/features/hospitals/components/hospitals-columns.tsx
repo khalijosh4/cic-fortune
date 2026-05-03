@@ -80,11 +80,11 @@ export const hospitalsColumns: ColumnDef<Hospital>[] = [
   {
     accessorKey: 'claimLimit',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Claim Limit (KES)' />
+      <DataTableColumnHeader column={column} title='Claim Limit (KES)' className='justify-center' />
     ),
     cell: ({ row }) => {
       const amount = row.getValue('claimLimit') as string | number;
-      return <div>{amount ? Number(amount).toLocaleString() : '—'}</div>
+      return <div className='text-center'>{amount ? Number(amount).toLocaleString() : '—'}</div>
     },
   },
   {

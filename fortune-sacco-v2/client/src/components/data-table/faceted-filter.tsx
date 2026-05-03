@@ -35,7 +35,14 @@ export function DataTableFacetedFilter<TData, TValue>({
   title,
   options,
 }: DataTableFacetedFilterProps<TData, TValue>) {
-  const facets = column?.getFacetedUniqueValues()
+  let facets: Map<any, number> | undefined
+  try {
+    facets = column?.getFacetedUniqueValues()
+  } catch (error) {
+    // Suppress internal TanStack table crash
+    facets = new Map()
+  }
+  
   const selectedValues = new Set(column?.getFilterValue() as string[])
 
   return (

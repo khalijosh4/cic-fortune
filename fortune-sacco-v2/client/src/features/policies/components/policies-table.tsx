@@ -52,6 +52,10 @@ export function PoliciesTable({ data, total, search, navigate }: DataTableProps)
     columnFilters: [
       { columnId: 'name', searchKey: 'name', type: 'string' },
       { columnId: 'status', searchKey: 'status', type: 'array' },
+      { columnId: 'annualLimit', searchKey: 'annualRange', type: 'array' },
+      { columnId: 'outpatientLimit', searchKey: 'outpatientRange', type: 'array' },
+      { columnId: 'inpatientLimit', searchKey: 'inpatientRange', type: 'array' },
+      { columnId: 'maternityLimit', searchKey: 'maternityRange', type: 'array' },
     ],
   })
 
@@ -68,6 +72,7 @@ export function PoliciesTable({ data, total, search, navigate }: DataTableProps)
     },
     enableRowSelection: true,
     manualPagination: true,
+    manualFiltering: true,
     rowCount: total,
     pageCount: Math.ceil(total / pagination.pageSize),
     onPaginationChange,
@@ -108,6 +113,12 @@ export function PoliciesTable({ data, total, search, navigate }: DataTableProps)
               { label: 'Pending', value: 'pending' },
             ],
           },
+        ]}
+        rangeFilters={[
+          { columnId: 'annualLimit', title: 'Annual Limit' },
+          { columnId: 'outpatientLimit', title: 'Outpatient' },
+          { columnId: 'inpatientLimit', title: 'Inpatient' },
+          { columnId: 'maternityLimit', title: 'Maternity' },
         ]}
       />
       <div className='overflow-hidden rounded-md border'>

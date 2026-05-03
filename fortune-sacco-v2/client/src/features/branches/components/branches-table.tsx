@@ -51,6 +51,9 @@ export function BranchesTable({ data, total, search, navigate }: DataTableProps)
     globalFilter: { enabled: false },
     columnFilters: [
       { columnId: 'branchName', searchKey: 'branchName', type: 'string' },
+      { columnId: 'location', searchKey: 'location', type: 'string' },
+      { columnId: 'totalPolicies', searchKey: 'policiesRange', type: 'array' },
+      { columnId: 'totalActivePolicies', searchKey: 'activePoliciesRange', type: 'array' },
     ],
   })
 
@@ -67,6 +70,7 @@ export function BranchesTable({ data, total, search, navigate }: DataTableProps)
     },
     enableRowSelection: true,
     manualPagination: true,
+    manualFiltering: true,
     rowCount: total,
     pageCount: Math.ceil(total / pagination.pageSize),
     onPaginationChange,
@@ -98,6 +102,16 @@ export function BranchesTable({ data, total, search, navigate }: DataTableProps)
         searchPlaceholder='Filter by branch name...'
         searchKey='branchName'
         filters={[]}
+        rangeFilters={[
+          {
+            columnId: 'totalPolicies',
+            title: 'Policies',
+          },
+          {
+            columnId: 'totalActivePolicies',
+            title: 'Active Policies',
+          }
+        ]}
       />
       <div className='overflow-hidden rounded-md border'>
         <Table>

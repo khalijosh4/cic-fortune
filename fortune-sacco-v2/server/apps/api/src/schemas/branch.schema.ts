@@ -43,6 +43,11 @@ export const ListBranchSchema = {
   querystring: Type.Object({
     limit: Type.Optional(Type.Number()),
     offset: Type.Optional(Type.Number()),
+    location: Type.Optional(Type.String()),
+    minPolicies: Type.Optional(Type.Number()),
+    maxPolicies: Type.Optional(Type.Number()),
+    minActivePolicies: Type.Optional(Type.Number()),
+    maxActivePolicies: Type.Optional(Type.Number()),
   }),
   response: {
     200: Type.Object({
@@ -53,6 +58,8 @@ export const ListBranchSchema = {
         totalPolicies: Type.Number(),
         totalActivePolicies: Type.Number(),
         totalClaims: Type.Number(),
+        location: Type.String(),
+        managerName: Type.String(),
       })),
       total: Type.Number(),
     }),

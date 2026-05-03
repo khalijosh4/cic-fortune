@@ -42,21 +42,41 @@ export const branchesColumns: ColumnDef<Branch>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: 'totalMembers',
+    accessorKey: 'location',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Members' />
+      <DataTableColumnHeader column={column} title='Location' />
     ),
     cell: ({ row }) => (
-      <Badge variant='outline'>{row.getValue('totalMembers')}</Badge>
+      <div className='max-w-[200px] truncate'>{row.getValue('location')}</div>
+    ),
+  },
+  {
+    accessorKey: 'managerName',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Manager' />
+    ),
+    cell: ({ row }) => (
+      <div className='max-w-[150px] truncate'>{row.getValue('managerName')}</div>
+    ),
+  },
+  {
+    accessorKey: 'totalMembers',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Members' className='justify-center' />
+    ),
+    cell: ({ row }) => (
+      <div className='flex justify-center'>
+        <Badge variant='outline'>{row.getValue('totalMembers')}</Badge>
+      </div>
     ),
   },
   {
     accessorKey: 'totalPolicies',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Policies' />
+      <DataTableColumnHeader column={column} title='Policies' className='justify-center' />
     ),
     cell: ({ row }) => (
-      <div className='flex items-center'>
+      <div className='flex justify-center items-center'>
         <span>{row.getValue('totalPolicies')}</span>
       </div>
     ),
@@ -64,10 +84,10 @@ export const branchesColumns: ColumnDef<Branch>[] = [
   {
     accessorKey: 'totalActivePolicies',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Active Policies' />
+      <DataTableColumnHeader column={column} title='Active Policies' className='justify-center' />
     ),
     cell: ({ row }) => (
-      <div className='flex items-center'>
+      <div className='flex justify-center items-center'>
         <span className='text-green-600 font-semibold'>{row.getValue('totalActivePolicies')}</span>
       </div>
     ),
@@ -75,10 +95,10 @@ export const branchesColumns: ColumnDef<Branch>[] = [
   {
     accessorKey: 'totalClaims',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Claims' />
+      <DataTableColumnHeader column={column} title='Claims' className='justify-center' />
     ),
     cell: ({ row }) => (
-      <div className='flex items-center'>
+      <div className='flex justify-center items-center'>
         <span>{row.getValue('totalClaims')}</span>
       </div>
     ),

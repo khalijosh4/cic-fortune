@@ -16,7 +16,20 @@ interface PremiumsResponse {
   total: number
 }
 
-export function usePremiums(limit = 10, offset = 0, filters?: { memberId?: string }) {
+export function usePremiums(
+  limit = 10,
+  offset = 0,
+  filters?: {
+    memberId?: string
+    status?: string
+    minAmountDue?: number
+    maxAmountDue?: number
+    minAmountPaid?: number
+    maxAmountPaid?: number
+    startDate?: string
+    endDate?: string
+  }
+) {
   return useQuery<PremiumsResponse>({
     queryKey: ['premiums', limit, offset, filters],
     queryFn: async () => {
@@ -24,6 +37,27 @@ export function usePremiums(limit = 10, offset = 0, filters?: { memberId?: strin
         params: { limit, offset, ...filters },
       })
       return response.data
+    },
+  })
+}
+
+export function useBulkUpdatePremiums() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ ids, status }: { ids: string[]; status: string }) => {
+      const response = await api.put('/premiums/bulk-status', { ids, status })
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['premiums'] })
+      toast.success('Premiums updated', {
+        description: 'Selected premiums have been successfully updated.',
+      })
+    },
+    onError: (error: any) => {
+      toast.error('Update failed', {
+        description: error.response?.data?.message || 'An error occurred during bulk update.',
+      })
     },
   })
 }

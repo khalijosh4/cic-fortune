@@ -19,6 +19,10 @@ export const ListAuditLogSchema = {
     offset: Type.Optional(Type.Number()),
     module: Type.Optional(Type.String()),
     type: Type.Optional(Type.String()),
+    status: Type.Optional(Type.String()),
+    userRole: Type.Optional(Type.String()),
+    startDate: Type.Optional(Type.String()),
+    endDate: Type.Optional(Type.String()),
   }),
   response: {
     200: Type.Object({

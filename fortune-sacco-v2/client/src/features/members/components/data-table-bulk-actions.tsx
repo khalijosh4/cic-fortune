@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { type Table } from '@tanstack/react-table'
 import { Trash2, CircleArrowUp, Download } from 'lucide-react'
 import { toast } from 'sonner'
-import { sleep } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -17,7 +16,8 @@ import {
 } from '@/components/ui/tooltip'
 import { DataTableBulkActions as BulkActionsToolbar } from '@/components/data-table'
 import { ConfirmDialog } from '@/components/confirm-dialog'
-import { Member, useDeleteMember } from '@/hooks/use-members'
+import { downloadCsv } from '@/lib/export'
+import { Member, useDeleteMember, useBulkUpdateMembers } from '@/hooks/use-members'
 
 type DataTableBulkActionsProps<TData> = {
   table: Table<TData>
@@ -29,30 +29,18 @@ export function DataTableBulkActions<TData>({
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const selectedRows = table.getFilteredSelectedRowModel().rows
 
-  const handleBulkStatusChange = (status: string) => {
-    const selectedMembers = selectedRows.map((row) => row.original as Member)
-    toast.promise(sleep(1000), {
-      loading: 'Updating status...',
-      success: () => {
-        table.resetRowSelection()
-        return `Status updated to "${status}" for ${selectedMembers.length} member${selectedMembers.length > 1 ? 's' : ''}.`
-      },
-      error: 'Error updating status',
-    })
+  const bulkUpdateStatus = useBulkUpdateMembers()
+  const handleBulkStatusChange = async (status: string) => {
+    const selectedIds = selectedRows.map((row) => (row.original as Member).id)
+    await bulkUpdateStatus.mutateAsync({ ids: selectedIds, status })
     table.resetRowSelection()
   }
 
   const handleBulkExport = () => {
     const selectedMembers = selectedRows.map((row) => row.original as Member)
-    toast.promise(sleep(1000), {
-      loading: 'Exporting members...',
-      success: () => {
-        table.resetRowSelection()
-        return `Exported ${selectedMembers.length} member${selectedMembers.length > 1 ? 's' : ''} to CSV.`
-      },
-      error: 'Error exporting',
-    })
+    downloadCsv(selectedMembers, 'members-export')
     table.resetRowSelection()
+    toast.success(`Exported ${selectedMembers.length} member${selectedMembers.length > 1 ? 's' : ''} to CSV.`)
   }
 
   const deleteMember = useDeleteMember()

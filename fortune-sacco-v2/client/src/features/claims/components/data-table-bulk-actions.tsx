@@ -3,7 +3,6 @@ import { useState } from 'react'
 import { type Table } from '@tanstack/react-table'
 import { Trash2, CircleArrowUp, Download } from 'lucide-react'
 import { toast } from 'sonner'
-import { sleep } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -18,7 +17,8 @@ import {
 } from '@/components/ui/tooltip'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { DataTableBulkActions as BulkActionsToolbar } from '@/components/data-table'
-import { Claim, useDeleteClaim } from '@/hooks/use-claims'
+import { downloadCsv } from '@/lib/export'
+import { Claim, useDeleteClaim, useBulkUpdateClaims } from '@/hooks/use-claims'
 
 type DataTableBulkActionsProps<TData> = {
   table: Table<TData>
@@ -30,30 +30,18 @@ export function DataTableBulkActions<TData>({
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const selectedRows = table.getFilteredSelectedRowModel().rows
 
-  const handleBulkStatusChange = (status: string) => {
-    const selectedClaims = selectedRows.map((row) => row.original as Claim)
-    toast.promise(sleep(1000), {
-      loading: 'Updating status...',
-      success: () => {
-        table.resetRowSelection()
-        return `Status updated to "${status}" for ${selectedClaims.length} claim${selectedClaims.length > 1 ? 's' : ''}.`
-      },
-      error: 'Error updating status',
-    })
+  const bulkUpdateStatus = useBulkUpdateClaims()
+  const handleBulkStatusChange = async (status: string) => {
+    const selectedIds = selectedRows.map((row) => (row.original as Claim).id)
+    await bulkUpdateStatus.mutateAsync({ ids: selectedIds, status })
     table.resetRowSelection()
   }
 
   const handleBulkExport = () => {
     const selectedClaims = selectedRows.map((row) => row.original as Claim)
-    toast.promise(sleep(1000), {
-      loading: 'Exporting claims...',
-      success: () => {
-        table.resetRowSelection()
-        return `Exported ${selectedClaims.length} claim${selectedClaims.length > 1 ? 's' : ''} to CSV.`
-      },
-      error: 'Error exporting',
-    })
+    downloadCsv(selectedClaims, 'claims-export')
     table.resetRowSelection()
+    toast.success(`Exported ${selectedClaims.length} claim${selectedClaims.length > 1 ? 's' : ''} to CSV.`)
   }
 
   const deleteClaim = useDeleteClaim()

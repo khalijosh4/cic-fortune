@@ -3,7 +3,9 @@ import { type Table } from '@tanstack/react-table'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { DataTableFacetedFilter } from './faceted-filter'
+import { DataTableRangeFilter } from './range-filter'
 import { DataTableViewOptions } from './view-options'
+import { ComponentErrorBoundary } from '@/components/error-boundary'
 
 type DataTableToolbarProps<TData> = {
   table: Table<TData>
@@ -18,6 +20,13 @@ type DataTableToolbarProps<TData> = {
       icon?: React.ComponentType<{ className?: string }>
     }[]
   }[]
+  rangeFilters?: {
+    columnId: string
+    title: string
+    min?: number
+    max?: number
+    step?: number
+  }[]
 }
 
 export function DataTableToolbar<TData>({
@@ -25,6 +34,7 @@ export function DataTableToolbar<TData>({
   searchPlaceholder = 'Filter...',
   searchKey,
   filters = [],
+  rangeFilters = [],
 }: DataTableToolbarProps<TData>) {
   const isFiltered =
     table.getState().columnFilters.length > 0 || table.getState().globalFilter
@@ -56,12 +66,28 @@ export function DataTableToolbar<TData>({
             const column = table.getColumn(filter.columnId)
             if (!column) return null
             return (
-              <DataTableFacetedFilter
-                key={filter.columnId}
-                column={column}
-                title={filter.title}
-                options={filter.options}
-              />
+              <ComponentErrorBoundary key={filter.columnId}>
+                <DataTableFacetedFilter
+                  column={column}
+                  title={filter.title}
+                  options={filter.options}
+                />
+              </ComponentErrorBoundary>
+            )
+          })}
+          {rangeFilters.map((filter) => {
+            const column = table.getColumn(filter.columnId)
+            if (!column) return null
+            return (
+              <ComponentErrorBoundary key={filter.columnId}>
+                <DataTableRangeFilter
+                  column={column}
+                  title={filter.title}
+                  min={filter.min}
+                  max={filter.max}
+                  step={filter.step}
+                />
+              </ComponentErrorBoundary>
             )
           })}
         </div>

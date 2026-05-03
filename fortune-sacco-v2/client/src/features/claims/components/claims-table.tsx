@@ -52,6 +52,8 @@ export function ClaimsTable({ data, total, search, navigate }: DataTableProps) {
     columnFilters: [
       { columnId: 'id', searchKey: 'claimId', type: 'string' },
       { columnId: 'status', searchKey: 'status', type: 'array' },
+      { columnId: 'amountClaimed', searchKey: 'claimedRange', type: 'array' },
+      { columnId: 'amountApproved', searchKey: 'approvedRange', type: 'array' },
     ],
   })
 
@@ -68,6 +70,7 @@ export function ClaimsTable({ data, total, search, navigate }: DataTableProps) {
     },
     enableRowSelection: true,
     manualPagination: true,
+    manualFiltering: true,
     rowCount: total,
     pageCount: Math.ceil(total / pagination.pageSize),
     onPaginationChange,
@@ -108,6 +111,10 @@ export function ClaimsTable({ data, total, search, navigate }: DataTableProps) {
               { label: 'Pending', value: 'pending' },
             ],
           },
+        ]}
+        rangeFilters={[
+          { columnId: 'amountClaimed', title: 'Amount Claimed' },
+          { columnId: 'amountApproved', title: 'Amount Approved' },
         ]}
       />
       <div className='overflow-hidden rounded-md border'>

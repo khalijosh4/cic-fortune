@@ -43,6 +43,15 @@ export const ListPolicySchema = {
   querystring: Type.Object({
     limit: Type.Optional(Type.Number()),
     offset: Type.Optional(Type.Number()),
+    status: Type.Optional(Type.String()),
+    minAnnualLimit: Type.Optional(Type.Number()),
+    maxAnnualLimit: Type.Optional(Type.Number()),
+    minOutpatientLimit: Type.Optional(Type.Number()),
+    maxOutpatientLimit: Type.Optional(Type.Number()),
+    minInpatientLimit: Type.Optional(Type.Number()),
+    maxInpatientLimit: Type.Optional(Type.Number()),
+    minMaternityLimit: Type.Optional(Type.Number()),
+    maxMaternityLimit: Type.Optional(Type.Number()),
   }),
   response: {
     200: Type.Object({
