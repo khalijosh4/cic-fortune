@@ -57,6 +57,19 @@ const branchRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     if (!updatedBranch) return reply.notFound('Branch not found');
     return reply.send(updatedBranch as any);
   });
+
+  fastify.delete('/:id', async (request: any, reply) => {
+    if (request.user.role !== 'admin') {
+      return reply.forbidden('Only admins can delete branches');
+    }
+
+    const deleteResult = await db.delete(branch)
+      .where(eq(branch.id, request.params.id))
+      .returning() as any;
+    
+    if (deleteResult.length === 0) return reply.notFound('Branch not found');
+    return reply.send({ message: 'Branch deleted successfully' });
+  });
 };
 
 export default branchRoutes;

@@ -44,3 +44,21 @@ export const ListPremiumSchema = {
     }),
   },
 };
+export const GetPremiumSchema = {
+  params: Type.Object({ id: Type.String() }),
+  response: {
+    200: PremiumSchema,
+  },
+};
+export const UpdatePremiumSchema = {
+  params: Type.Object({ id: Type.String() }),
+  body: Type.Partial(Type.Object({
+    amountDue: Type.String(),
+    amountPaid: Type.String(),
+    dueDate: Type.String(),
+    paymentMethod: Type.String(),
+  })),
+  response: {
+    200: PremiumSchema,
+  },
+};

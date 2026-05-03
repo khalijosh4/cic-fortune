@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DataTableColumnHeader } from '@/components/data-table'
 import { Branch } from '@/hooks/use-branches'
+import { DataTableRowActions } from './data-table-row-actions'
 
 export const branchesColumns: ColumnDef<Branch>[] = [
   {
@@ -35,7 +36,7 @@ export const branchesColumns: ColumnDef<Branch>[] = [
       <DataTableColumnHeader column={column} title='Branch Name' />
     ),
     cell: ({ row }) => (
-      <div className='w-[150px] font-medium'>{row.getValue('branchName')}</div>
+      <div className='max-w-[200px] truncate font-medium'>{row.getValue('branchName')}</div>
     ),
     enableSorting: true,
     enableHiding: false,
@@ -81,5 +82,9 @@ export const branchesColumns: ColumnDef<Branch>[] = [
         <span>{row.getValue('totalClaims')}</span>
       </div>
     ),
+  },
+  {
+    id: 'actions',
+    cell: ({ row }) => <DataTableRowActions row={row} />,
   },
 ]

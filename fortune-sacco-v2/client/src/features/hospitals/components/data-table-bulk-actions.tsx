@@ -1,4 +1,4 @@
-
+import { useState } from 'react'
 import { type Table } from '@tanstack/react-table'
 import { Trash2, Download } from 'lucide-react'
 import { toast } from 'sonner'
@@ -10,7 +10,8 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { DataTableBulkActions as BulkActionsToolbar } from '@/components/data-table'
-import { Hospital } from '@/hooks/use-hospitals'
+import { ConfirmDialog } from '@/components/confirm-dialog'
+import { Hospital, useDeleteHospital } from '@/hooks/use-hospitals'
 
 type DataTableBulkActionsProps<TData> = {
   table: Table<TData>
@@ -19,6 +20,7 @@ type DataTableBulkActionsProps<TData> = {
 export function DataTableBulkActions<TData>({
   table,
 }: DataTableBulkActionsProps<TData>) {
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const selectedRows = table.getFilteredSelectedRowModel().rows
 
   const handleBulkExport = () => {
@@ -34,58 +36,67 @@ export function DataTableBulkActions<TData>({
     table.resetRowSelection()
   }
 
-  const handleDelete = () => {
+  const deleteHospital = useDeleteHospital()
+  const handleConfirmDelete = async () => {
     const selectedHospitals = selectedRows.map((row) => row.original as Hospital)
-    toast.promise(sleep(1000), {
-      loading: 'Deleting hospitals...',
-      success: () => {
-        table.resetRowSelection()
-        return `Deleted ${selectedHospitals.length} hospital${selectedHospitals.length > 1 ? 's' : ''}.`
-      },
-      error: 'Error deleting',
-    })
+    for (const h of selectedHospitals) {
+      await deleteHospital.mutateAsync(h.id)
+    }
     table.resetRowSelection()
+    setShowDeleteDialog(false)
   }
 
   return (
-    <BulkActionsToolbar table={table} entityName='hospital'>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant='outline'
-            size='icon'
-            onClick={() => handleBulkExport()}
-            className='size-8'
-            aria-label='Export hospitals'
-            title='Export hospitals'
-          >
-            <Download />
-            <span className='sr-only'>Export hospitals</span>
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>Export hospitals</p>
-        </TooltipContent>
-      </Tooltip>
+    <>
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        handleConfirm={handleConfirmDelete}
+        title='Delete Hospitals'
+        desc={`Are you sure you want to delete ${selectedRows.length} hospital${selectedRows.length > 1 ? 's' : ''}? This action cannot be undone.`}
+        confirmText='Delete'
+        destructive
+        isLoading={deleteHospital.isPending}
+      />
+      <BulkActionsToolbar table={table} entityName='hospital'>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant='outline'
+              size='icon'
+              onClick={() => handleBulkExport()}
+              className='size-8'
+              aria-label='Export hospitals'
+              title='Export hospitals'
+            >
+              <Download />
+              <span className='sr-only'>Export hospitals</span>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Export hospitals</p>
+          </TooltipContent>
+        </Tooltip>
 
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant='destructive'
-            size='icon'
-            onClick={handleDelete}
-            className='size-8'
-            aria-label='Delete selected hospitals'
-            title='Delete selected hospitals'
-          >
-            <Trash2 />
-            <span className='sr-only'>Delete selected hospitals</span>
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>Delete selected hospitals</p>
-        </TooltipContent>
-      </Tooltip>
-    </BulkActionsToolbar>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant='destructive'
+              size='icon'
+              onClick={() => setShowDeleteDialog(true)}
+              className='size-8'
+              aria-label='Delete selected hospitals'
+              title='Delete selected hospitals'
+            >
+              <Trash2 />
+              <span className='sr-only'>Delete selected hospitals</span>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Delete selected hospitals</p>
+          </TooltipContent>
+        </Tooltip>
+      </BulkActionsToolbar>
+    </>
   )
 }

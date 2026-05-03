@@ -5,8 +5,10 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { useHospitals } from '@/hooks/use-hospitals'
-import { GeneralError } from '@/features/errors/general-error'
+import { QueryError } from '@/components/query-error'
 import { HospitalsTable } from './components/hospitals-table'
+import { Button } from '@/components/ui/button'
+import { Plus } from 'lucide-react'
 
 const route = getRouteApi('/_authenticated/hospitals/')
 
@@ -32,15 +34,18 @@ export function Hospitals() {
           <div>
             <h2 className='text-2xl font-bold tracking-tight'>Hospitals</h2>
             <p className='text-muted-foreground'>
-              View accredited hospitals and their claim limits.
+              Manage healthcare providers and their service levels.
             </p>
           </div>
-          {data && (
-            <p className='text-sm text-muted-foreground'>
-              {data.total.toLocaleString()} total hospitals
-            </p>
-          )}
+          <Button className='space-x-1' onClick={() => navigate({ to: '/hospitals/new' })}>
+            <span>New Hospital</span> <Plus size={18} />
+          </Button>
         </div>
+        {data && (
+          <p className='text-sm text-muted-foreground'>
+            {data.total.toLocaleString()} total hospitals
+          </p>
+        )}
 
         {isLoading ? (
           <div className='flex h-64 w-full items-center justify-center'>
@@ -50,9 +55,9 @@ export function Hospitals() {
             </div>
           </div>
         ) : error ? (
-          <GeneralError />
+          <QueryError error={error} />
         ) : (
-          <HospitalsTable data={data?.data || []} search={search} navigate={navigate} />
+          <HospitalsTable data={data?.data || []} total={data?.total || 0} search={search} navigate={navigate} />
         )}
       </Main>
     </>

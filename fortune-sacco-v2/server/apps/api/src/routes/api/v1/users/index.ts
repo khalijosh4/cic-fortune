@@ -71,6 +71,19 @@ const userRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     if (!updated) return reply.notFound('User not found');
     return reply.send(updated as any);
   });
+
+  fastify.delete('/:id', async (request: any, reply) => {
+    if (request.user.role !== 'admin') {
+      return reply.forbidden('Only admins can delete users');
+    }
+
+    const deleteResult = await db.delete(user)
+      .where(eq(user.id, request.params.id))
+      .returning() as any;
+    
+    if (deleteResult.length === 0) return reply.notFound('User not found');
+    return reply.send({ message: 'User deleted successfully' });
+  });
 };
 
 export default userRoutes;

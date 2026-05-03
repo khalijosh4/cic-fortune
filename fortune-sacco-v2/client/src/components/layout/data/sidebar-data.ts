@@ -1,11 +1,4 @@
 import {
-  LayoutDashboard,
-  Building2,
-  Hospital,
-  ShieldCheck,
-  Users,
-  FileText,
-  DollarSign,
   Settings,
   UserCog,
   Wrench,
@@ -14,6 +7,13 @@ import {
   Monitor,
   HelpCircle,
   Command,
+  Hospital,
+  Building2,
+  LayoutDashboard,
+  ShieldCheck,
+  Users,
+  FileText,
+  DollarSign,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 

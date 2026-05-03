@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DataTableColumnHeader } from '@/components/data-table'
 import { User } from '@/hooks/use-users'
+import { DataTableRowActions } from './data-table-row-actions'
 
 const roleColor: Record<string, string> = {
   admin: 'bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300',
@@ -43,7 +44,11 @@ export const usersColumns: ColumnDef<User>[] = [
     cell: ({ row }) => {
       const first = row.original.firstName || ''
       const last = row.original.lastName || ''
-      return <div className='font-medium'>{`${first} ${last}`.trim() || '—'}</div>
+      return (
+        <div className='max-w-[200px] truncate font-medium'>
+          {`${first} ${last}`.trim() || '—'}
+        </div>
+      )
     },
   },
   {
@@ -52,7 +57,9 @@ export const usersColumns: ColumnDef<User>[] = [
       <DataTableColumnHeader column={column} title='Email' />
     ),
     cell: ({ row }) => (
-      <div className='text-muted-foreground'>{row.getValue('email') || '—'}</div>
+      <div className='max-w-[200px] truncate text-muted-foreground'>
+        {row.getValue('email') || '—'}
+      </div>
     ),
   },
   {
@@ -92,5 +99,9 @@ export const usersColumns: ColumnDef<User>[] = [
         </div>
       )
     },
+  },
+  {
+    id: 'actions',
+    cell: ({ row }) => <DataTableRowActions row={row} />,
   },
 ]

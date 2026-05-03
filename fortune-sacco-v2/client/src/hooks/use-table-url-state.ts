@@ -113,10 +113,12 @@ export function useTableUrlState(
   const pagination: PaginationState = useMemo(() => {
     const rawPage = (search as SearchRecord)[pageKey]
     const rawPageSize = (search as SearchRecord)[pageSizeKey]
-    const pageNum = typeof rawPage === 'number' ? rawPage : defaultPage
-    const pageSizeNum =
-      typeof rawPageSize === 'number' ? rawPageSize : defaultPageSize
-    return { pageIndex: Math.max(0, pageNum - 1), pageSize: pageSizeNum }
+    const pageNum = rawPage != null ? Number(rawPage) : defaultPage
+    const pageSizeNum = rawPageSize != null ? Number(rawPageSize) : defaultPageSize
+    return {
+      pageIndex: Math.max(0, (isNaN(pageNum) ? defaultPage : pageNum) - 1),
+      pageSize: isNaN(pageSizeNum) ? defaultPageSize : pageSizeNum,
+    }
   }, [search, pageKey, pageSizeKey, defaultPage, defaultPageSize])
 
   const onPaginationChange: OnChangeFn<PaginationState> = (updater) => {

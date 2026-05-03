@@ -5,7 +5,8 @@ import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 const { auditLog } = schema;
 
 import { 
-  ListAuditLogSchema 
+  ListAuditLogSchema,
+  GetAuditLogSchema
 } from '#/schemas/audit-log.schema.js';
 
 const auditLogRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
@@ -23,6 +24,12 @@ const auditLogRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     const count = countResult[0]?.count ?? 0;
 
     return reply.send({ data: data as any, total: Number(count) });
+  });
+
+  fastify.get('/:id', { schema: GetAuditLogSchema }, async (request, reply) => {
+    const [found] = await db.select().from(auditLog).where(eq(auditLog.id, request.params.id)).limit(1);
+    if (!found) return reply.notFound('Audit log entry not found');
+    return reply.send(found as any);
   });
 };
 

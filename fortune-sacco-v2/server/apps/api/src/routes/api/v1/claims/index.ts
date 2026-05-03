@@ -7,7 +7,8 @@ import {
   CreateClaimSchema, 
   ListClaimSchema, 
   ApproveClaimSchema, 
-  RejectClaimSchema 
+  RejectClaimSchema,
+  UpdateClaimSchema 
 } from '#/schemas/claim.schema.js';
 import { ClaimsService } from '#/services/claims.service.js';
 
@@ -89,6 +90,35 @@ const claimRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     
     if (!updated) return reply.notFound('Claim not found');
     return reply.send(updated as any);
+  });
+
+  fastify.put('/:id', { schema: UpdateClaimSchema }, async (request, reply) => {
+    if (request.user.role !== 'admin') {
+      return reply.forbidden('Only admins can update claims');
+    }
+
+    const updateResult = await db.update(claim)
+      .set(request.body as any)
+      .where(eq(claim.id, request.params.id))
+      .returning() as any;
+    
+    const updated = updateResult[0];
+    
+    if (!updated) return reply.notFound('Claim not found');
+    return reply.send(updated as any);
+  });
+
+  fastify.delete('/:id', async (request: any, reply) => {
+    if (request.user.role !== 'admin') {
+      return reply.forbidden('Only admins can delete claims');
+    }
+
+    const deleteResult = await db.delete(claim)
+      .where(eq(claim.id, request.params.id))
+      .returning() as any;
+    
+    if (deleteResult.length === 0) return reply.notFound('Claim not found');
+    return reply.send({ message: 'Claim deleted successfully' });
   });
 };
 

@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DataTableColumnHeader } from '@/components/data-table'
 import { Hospital } from '@/hooks/use-hospitals'
+import { DataTableRowActions } from './data-table-row-actions'
 
 const typeColor: Record<string, string> = {
   private: 'bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300',
@@ -45,7 +46,7 @@ export const hospitalsColumns: ColumnDef<Hospital>[] = [
       <DataTableColumnHeader column={column} title='Hospital Name' />
     ),
     cell: ({ row }) => (
-      <div className='w-[150px] font-medium'>{row.getValue('name')}</div>
+      <div className='max-w-[200px] truncate font-medium'>{row.getValue('name')}</div>
     ),
   },
   {
@@ -54,7 +55,9 @@ export const hospitalsColumns: ColumnDef<Hospital>[] = [
       <DataTableColumnHeader column={column} title='Location' />
     ),
     cell: ({ row }) => (
-      <div className='text-muted-foreground'>{row.getValue('location') || '—'}</div>
+      <div className='max-w-[200px] truncate text-muted-foreground'>
+        {row.getValue('location') || '—'}
+      </div>
     ),
   },
   {
@@ -83,5 +86,9 @@ export const hospitalsColumns: ColumnDef<Hospital>[] = [
       const amount = row.getValue('claimLimit') as string | number;
       return <div>{amount ? Number(amount).toLocaleString() : '—'}</div>
     },
+  },
+  {
+    id: 'actions',
+    cell: ({ row }) => <DataTableRowActions row={row} />,
   },
 ]

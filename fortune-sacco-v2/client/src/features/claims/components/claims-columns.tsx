@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DataTableColumnHeader } from '@/components/data-table'
 import { Claim } from '@/hooks/use-claims'
+import { DataTableRowActions } from './data-table-row-actions'
 
 const statusColor: Record<string, string> = {
   approved: 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300',
@@ -109,5 +110,9 @@ export const claimsColumns: ColumnDef<Claim>[] = [
         </div>
       )
     },
+  },
+  {
+    id: 'actions',
+    cell: ({ row }) => <DataTableRowActions row={row} />,
   },
 ]

@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DataTableColumnHeader } from '@/components/data-table'
 import { AuditLog } from '@/hooks/use-audit-logs'
+import { DataTableRowActions } from './data-table-row-actions'
 
 const statusColor: Record<string, string> = {
   Success: 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300',
@@ -57,9 +58,9 @@ export const auditLogsColumns: ColumnDef<AuditLog>[] = [
       const email = row.original.userEmail;
       const role = row.original.userRole;
       return (
-        <div className='flex flex-col'>
-          <span className='text-sm font-medium'>{email ?? '—'}</span>
-          <span className='text-xs text-muted-foreground capitalize'>
+        <div className='flex flex-col max-w-[200px]'>
+          <span className='text-sm font-medium truncate'>{email ?? '—'}</span>
+          <span className='text-xs text-muted-foreground capitalize truncate'>
             {role ?? ''}
           </span>
         </div>
@@ -115,5 +116,9 @@ export const auditLogsColumns: ColumnDef<AuditLog>[] = [
         </Badge>
       )
     },
+  },
+  {
+    id: 'actions',
+    cell: ({ row }) => <DataTableRowActions row={row} />,
   },
 ]

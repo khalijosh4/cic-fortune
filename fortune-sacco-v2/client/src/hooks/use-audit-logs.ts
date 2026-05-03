@@ -30,3 +30,12 @@ export function useAuditLogs(limit = 10, offset = 0, filters?: { module?: string
     },
   })
 }
+export function useAuditLog(id: string) {
+  return useQuery<AuditLog>({
+    queryKey: ['audit-logs', id],
+    queryFn: async () => {
+      const response = await api.get(`/audit-logs/${id}`)
+      return response.data
+    },
+  })
+}

@@ -5,8 +5,10 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { useUsers } from '@/hooks/use-users'
-import { GeneralError } from '@/features/errors/general-error'
+import { QueryError } from '@/components/query-error'
 import { UsersTable } from './components/users-table'
+import { Button } from '@/components/ui/button'
+import { Plus } from 'lucide-react'
 
 const route = getRouteApi('/_authenticated/users/')
 
@@ -32,15 +34,18 @@ export function Users() {
           <div>
             <h2 className='text-2xl font-bold tracking-tight'>User Management</h2>
             <p className='text-muted-foreground'>
-              Manage employees and their access roles.
+              Manage employee accounts and their system roles.
             </p>
           </div>
-          {data && (
-            <p className='text-sm text-muted-foreground'>
-              {data.total.toLocaleString()} total users
-            </p>
-          )}
+          <Button className='space-x-1' onClick={() => navigate({ to: '/users/new' })}>
+            <span>New User</span> <Plus size={18} />
+          </Button>
         </div>
+        {data && (
+          <p className='text-sm text-muted-foreground'>
+            {data.total.toLocaleString()} total users
+          </p>
+        )}
 
         {isLoading ? (
           <div className='flex h-64 w-full items-center justify-center'>
@@ -50,9 +55,9 @@ export function Users() {
             </div>
           </div>
         ) : error ? (
-          <GeneralError />
+          <QueryError error={error} />
         ) : (
-          <UsersTable data={data?.data || []} search={search} navigate={navigate} />
+          <UsersTable data={data?.data || []} total={data?.total || 0} search={search} navigate={navigate} />
         )}
       </Main>
     </>

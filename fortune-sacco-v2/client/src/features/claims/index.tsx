@@ -5,7 +5,7 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { useClaims } from '@/hooks/use-claims'
-import { GeneralError } from '@/features/errors/general-error'
+import { QueryError } from '@/components/query-error'
 import { ClaimsTable } from './components/claims-table'
 
 const route = getRouteApi('/_authenticated/claims/')
@@ -50,9 +50,9 @@ export function Claims() {
             </div>
           </div>
         ) : error ? (
-          <GeneralError />
+          <QueryError error={error} />
         ) : (
-          <ClaimsTable data={data?.data || []} search={search} navigate={navigate} />
+          <ClaimsTable data={data?.data || []} total={data?.total || 0} search={search} navigate={navigate} />
         )}
       </Main>
     </>

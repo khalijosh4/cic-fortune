@@ -55,6 +55,19 @@ const memberRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     if (!updated) return reply.notFound('Member not found');
     return reply.send(updated as any);
   });
+
+  fastify.delete('/:id', async (request: any, reply) => {
+    if (request.user.role !== 'admin') {
+      return reply.forbidden('Only admins can delete members');
+    }
+
+    const deleteResult = await db.delete(member)
+      .where(eq(member.id, request.params.id))
+      .returning() as any;
+    
+    if (deleteResult.length === 0) return reply.notFound('Member not found');
+    return reply.send({ message: 'Member deleted successfully' });
+  });
 };
 
 export default memberRoutes;

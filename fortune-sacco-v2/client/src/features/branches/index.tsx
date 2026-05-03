@@ -5,8 +5,10 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { useBranches } from '@/hooks/use-branches'
-import { GeneralError } from '@/features/errors/general-error'
+import { QueryError } from '@/components/query-error'
 import { BranchesTable } from './components/branches-table'
+import { Button } from '@/components/ui/button'
+import { Plus } from 'lucide-react'
 
 const route = getRouteApi('/_authenticated/branches/')
 
@@ -35,6 +37,9 @@ export function Branches() {
               Overview of all Fortune Sacco branches and their performance.
             </p>
           </div>
+          <Button className='space-x-1' onClick={() => navigate({ to: '/branches/new' })}>
+            <span>New Branch</span> <Plus size={18} />
+          </Button>
         </div>
         {isLoading ? (
           <div className='flex h-svh w-full items-center justify-center'>
@@ -44,9 +49,9 @@ export function Branches() {
             </div>
           </div>
         ) : error ? (
-          <GeneralError />
+          <QueryError error={error} />
         ) : (
-          <BranchesTable data={data?.data || []} search={search} navigate={navigate} />
+          <BranchesTable data={data?.data || []} total={data?.total || 0} search={search} navigate={navigate} />
         )}
       </Main>
     </>

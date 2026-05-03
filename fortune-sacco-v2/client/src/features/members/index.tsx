@@ -5,8 +5,10 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { useMembers } from '@/hooks/use-members'
-import { GeneralError } from '@/features/errors/general-error'
+import { QueryError } from '@/components/query-error'
 import { MembersTable } from './components/members-table'
+import { Button } from '@/components/ui/button'
+import { Plus } from 'lucide-react'
 
 const route = getRouteApi('/_authenticated/members/')
 
@@ -32,15 +34,18 @@ export function Members() {
           <div>
             <h2 className='text-2xl font-bold tracking-tight'>Members</h2>
             <p className='text-muted-foreground'>
-              Manage insured customers and their policy coverage.
+              Manage policyholders and their coverage status.
             </p>
           </div>
-          {data && (
-            <p className='text-sm text-muted-foreground'>
-              {data.total.toLocaleString()} total members
-            </p>
-          )}
+          <Button className='space-x-1' onClick={() => navigate({ to: '/members/new' })}>
+            <span>New Member</span> <Plus size={18} />
+          </Button>
         </div>
+        {data && (
+          <p className='text-sm text-muted-foreground'>
+            {data.total.toLocaleString()} total members
+          </p>
+        )}
 
         {isLoading ? (
           <div className='flex h-64 w-full items-center justify-center'>
@@ -50,9 +55,9 @@ export function Members() {
             </div>
           </div>
         ) : error ? (
-          <GeneralError />
+          <QueryError error={error} />
         ) : (
-          <MembersTable data={data?.data || []} search={search} navigate={navigate} />
+          <MembersTable data={data?.data || []} total={data?.total || 0} search={search} navigate={navigate} />
         )}
       </Main>
     </>

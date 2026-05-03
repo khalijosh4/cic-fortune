@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DataTableColumnHeader } from '@/components/data-table'
 import { Policy } from '@/hooks/use-policies'
+import { DataTableRowActions } from './data-table-row-actions'
 
 const statusColor: Record<string, string> = {
   active: 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300',
@@ -41,7 +42,7 @@ export const policiesColumns: ColumnDef<Policy>[] = [
       <DataTableColumnHeader column={column} title='Policy Name' />
     ),
     cell: ({ row }) => (
-      <div className='w-[150px] font-medium'>{row.getValue('name')}</div>
+      <div className='max-w-[200px] truncate font-medium'>{row.getValue('name')}</div>
     ),
   },
   {
@@ -100,5 +101,9 @@ export const policiesColumns: ColumnDef<Policy>[] = [
         </Badge>
       )
     },
+  },
+  {
+    id: 'actions',
+    cell: ({ row }) => <DataTableRowActions row={row} />,
   },
 ]

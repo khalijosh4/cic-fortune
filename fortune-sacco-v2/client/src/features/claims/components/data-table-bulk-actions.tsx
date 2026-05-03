@@ -1,4 +1,5 @@
 
+import { useState } from 'react'
 import { type Table } from '@tanstack/react-table'
 import { Trash2, CircleArrowUp, Download } from 'lucide-react'
 import { toast } from 'sonner'
@@ -15,8 +16,9 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { ConfirmDialog } from '@/components/confirm-dialog'
 import { DataTableBulkActions as BulkActionsToolbar } from '@/components/data-table'
-import { Claim } from '@/hooks/use-claims'
+import { Claim, useDeleteClaim } from '@/hooks/use-claims'
 
 type DataTableBulkActionsProps<TData> = {
   table: Table<TData>
@@ -25,6 +27,7 @@ type DataTableBulkActionsProps<TData> = {
 export function DataTableBulkActions<TData>({
   table,
 }: DataTableBulkActionsProps<TData>) {
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const selectedRows = table.getFilteredSelectedRowModel().rows
 
   const handleBulkStatusChange = (status: string) => {
@@ -53,17 +56,14 @@ export function DataTableBulkActions<TData>({
     table.resetRowSelection()
   }
 
-  const handleDelete = () => {
+  const deleteClaim = useDeleteClaim()
+  const handleDelete = async () => {
     const selectedClaims = selectedRows.map((row) => row.original as Claim)
-    toast.promise(sleep(1000), {
-      loading: 'Deleting claims...',
-      success: () => {
-        table.resetRowSelection()
-        return `Deleted ${selectedClaims.length} claim${selectedClaims.length > 1 ? 's' : ''}.`
-      },
-      error: 'Error deleting',
-    })
+    for (const c of selectedClaims) {
+      await deleteClaim.mutateAsync(c.id)
+    }
     table.resetRowSelection()
+    setShowDeleteDialog(false)
   }
 
   const statuses = [
@@ -73,6 +73,7 @@ export function DataTableBulkActions<TData>({
   ]
 
   return (
+    <>
     <BulkActionsToolbar table={table} entityName='claim'>
       <DropdownMenu>
         <Tooltip>
@@ -131,7 +132,7 @@ export function DataTableBulkActions<TData>({
           <Button
             variant='destructive'
             size='icon'
-            onClick={handleDelete}
+            onClick={() => setShowDeleteDialog(true)}
             className='size-8'
             aria-label='Delete selected claims'
             title='Delete selected claims'
@@ -145,5 +146,16 @@ export function DataTableBulkActions<TData>({
         </TooltipContent>
       </Tooltip>
     </BulkActionsToolbar>
+    <ConfirmDialog
+      open={showDeleteDialog}
+      onOpenChange={setShowDeleteDialog}
+      handleConfirm={handleDelete}
+      title='Delete Claims'
+      desc={`Are you sure you want to delete ${selectedRows.length} selected claim${selectedRows.length > 1 ? 's' : ''}? This action cannot be undone.`}
+      confirmText='Delete'
+      destructive
+      isLoading={deleteClaim.isPending}
+    />
+    </>
   )
 }

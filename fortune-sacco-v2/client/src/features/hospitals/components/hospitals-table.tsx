@@ -28,11 +28,12 @@ import { DataTableBulkActions } from './data-table-bulk-actions'
 
 type DataTableProps = {
   data: Hospital[]
+  total: number
   search: Record<string, unknown>
   navigate: NavigateFn
 }
 
-export function HospitalsTable({ data, search, navigate }: DataTableProps) {
+export function HospitalsTable({ data, total, search, navigate }: DataTableProps) {
   const [rowSelection, setRowSelection] = useState({})
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [sorting, setSorting] = useState<SortingState>([])
@@ -45,7 +46,7 @@ export function HospitalsTable({ data, search, navigate }: DataTableProps) {
     ensurePageInRange,
   } = useTableUrlState({
     search,
-    navigate,
+    navigate, 
     pagination: { defaultPage: 1, defaultPageSize: 20 },
     globalFilter: { enabled: false },
     columnFilters: [
@@ -66,6 +67,9 @@ export function HospitalsTable({ data, search, navigate }: DataTableProps) {
       columnVisibility,
     },
     enableRowSelection: true,
+    manualPagination: true,
+    rowCount: total,
+    pageCount: Math.ceil(total / pagination.pageSize),
     onPaginationChange,
     onColumnFiltersChange,
     onRowSelectionChange: setRowSelection,

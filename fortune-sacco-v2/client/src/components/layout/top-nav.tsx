@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router'
-import { Menu } from 'lucide-react'
+//import { Menu } from 'lucide-react'
+import { Menu } from '@hugeicons/core-free-icons'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -8,6 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { HugeiconsIcon } from '@hugeicons/react'
 
 type TopNavProps = React.HTMLAttributes<HTMLElement> & {
   links: {
@@ -28,7 +30,7 @@ export function TopNav({ className, links, ...props }: TopNavProps) {
             variant='outline'
             className={cn('md:size-7 lg:hidden', className)}
           >
-            <Menu />
+            <HugeiconsIcon icon={Menu} />
             <span className='sr-only'>Toggle navigation menu</span>
           </Button>
         </DropdownMenuTrigger>

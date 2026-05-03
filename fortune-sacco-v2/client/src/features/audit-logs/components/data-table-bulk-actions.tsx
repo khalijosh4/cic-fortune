@@ -1,4 +1,5 @@
 
+import { useState } from 'react'
 import { type Table } from '@tanstack/react-table'
 import { Trash2, Download } from 'lucide-react'
 import { toast } from 'sonner'
@@ -9,6 +10,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { ConfirmDialog } from '@/components/confirm-dialog'
 import { DataTableBulkActions as BulkActionsToolbar } from '@/components/data-table'
 import { AuditLog } from '@/hooks/use-audit-logs'
 
@@ -19,6 +21,7 @@ type DataTableBulkActionsProps<TData> = {
 export function DataTableBulkActions<TData>({
   table,
 }: DataTableBulkActionsProps<TData>) {
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const selectedRows = table.getFilteredSelectedRowModel().rows
 
   const handleBulkExport = () => {
@@ -40,14 +43,15 @@ export function DataTableBulkActions<TData>({
       loading: 'Deleting audit logs...',
       success: () => {
         table.resetRowSelection()
+        setShowDeleteDialog(false)
         return `Deleted ${selectedLogs.length} audit log${selectedLogs.length > 1 ? 's' : ''}.`
       },
       error: 'Error deleting',
     })
-    table.resetRowSelection()
   }
 
   return (
+    <>
     <BulkActionsToolbar table={table} entityName='audit log'>
       <Tooltip>
         <TooltipTrigger asChild>
@@ -73,7 +77,7 @@ export function DataTableBulkActions<TData>({
           <Button
             variant='destructive'
             size='icon'
-            onClick={handleDelete}
+            onClick={() => setShowDeleteDialog(true)}
             className='size-8'
             aria-label='Delete selected audit logs'
             title='Delete selected audit logs'
@@ -87,5 +91,15 @@ export function DataTableBulkActions<TData>({
         </TooltipContent>
       </Tooltip>
     </BulkActionsToolbar>
+    <ConfirmDialog
+      open={showDeleteDialog}
+      onOpenChange={setShowDeleteDialog}
+      handleConfirm={handleDelete}
+      title='Delete Audit Logs'
+      desc={`Are you sure you want to delete ${selectedRows.length} selected audit log${selectedRows.length > 1 ? 's' : ''}? This action cannot be undone.`}
+      confirmText='Delete'
+      destructive
+    />
+    </>
   )
 }

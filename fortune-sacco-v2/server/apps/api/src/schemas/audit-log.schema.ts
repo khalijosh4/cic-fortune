@@ -27,3 +27,9 @@ export const ListAuditLogSchema = {
     }),
   },
 };
+export const GetAuditLogSchema = {
+  params: Type.Object({ id: Type.String() }),
+  response: {
+    200: AuditLogSchema,
+  },
+};

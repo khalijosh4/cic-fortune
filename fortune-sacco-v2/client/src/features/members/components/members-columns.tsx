@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DataTableColumnHeader } from '@/components/data-table'
 import { Member } from '@/hooks/use-members'
+import { DataTableRowActions } from './data-table-row-actions'
 
 const statusColor: Record<string, string> = {
   active: 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300',
@@ -42,7 +43,7 @@ export const membersColumns: ColumnDef<Member>[] = [
       <DataTableColumnHeader column={column} title='Name' />
     ),
     cell: ({ row }) => (
-      <div className='w-[150px] font-medium'>{row.getValue('name')}</div>
+      <div className='max-w-[200px] truncate font-medium'>{row.getValue('name')}</div>
     ),
     enableSorting: true,
     enableHiding: false,
@@ -92,5 +93,9 @@ export const membersColumns: ColumnDef<Member>[] = [
       const limit = row.getValue('usedAnnualLimit') as string | number;
       return <div>{limit ? Number(limit).toLocaleString() : '0'}</div>
     },
+  },
+  {
+    id: 'actions',
+    cell: ({ row }) => <DataTableRowActions row={row} />,
   },
 ]

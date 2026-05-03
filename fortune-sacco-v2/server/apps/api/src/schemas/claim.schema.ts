@@ -57,3 +57,15 @@ export const ListClaimSchema = {
     }),
   },
 };
+export const UpdateClaimSchema = {
+  params: Type.Object({ id: Type.String() }),
+  body: Type.Partial(Type.Object({
+    amountClaimed: Type.String(),
+    amountApproved: Type.String(),
+    status: Type.String(),
+    diagnosis: Type.String(),
+  })),
+  response: {
+    200: ClaimSchema,
+  },
+};

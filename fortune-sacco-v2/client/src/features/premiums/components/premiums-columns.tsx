@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DataTableColumnHeader } from '@/components/data-table'
 import { Premium } from '@/hooks/use-premiums'
+import { DataTableRowActions } from './data-table-row-actions'
 
 export const premiumsColumns: ColumnDef<Premium>[] = [
   {
@@ -115,5 +116,9 @@ export const premiumsColumns: ColumnDef<Premium>[] = [
         </Badge>
       )
     },
+  },
+  {
+    id: 'actions',
+    cell: ({ row }) => <DataTableRowActions row={row} />,
   },
 ]

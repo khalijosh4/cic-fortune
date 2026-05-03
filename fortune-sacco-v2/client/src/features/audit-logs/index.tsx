@@ -5,7 +5,7 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { useAuditLogs } from '@/hooks/use-audit-logs'
-import { GeneralError } from '@/features/errors/general-error'
+import { QueryError } from '@/components/query-error'
 import { AuditLogsTable } from './components/audit-logs-table'
 
 const route = getRouteApi('/_authenticated/audit-logs/')
@@ -50,9 +50,9 @@ export function AuditLogs() {
             </div>
           </div>
         ) : error ? (
-          <GeneralError />
+          <QueryError error={error} />
         ) : (
-          <AuditLogsTable data={data?.data || []} search={search} navigate={navigate} />
+          <AuditLogsTable data={data?.data || []} total={data?.total || 0} search={search} navigate={navigate} />
         )}
       </Main>
     </>

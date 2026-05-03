@@ -5,7 +5,7 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { usePremiums } from '@/hooks/use-premiums'
-import { GeneralError } from '@/features/errors/general-error'
+import { QueryError } from '@/components/query-error'
 import { PremiumsTable } from './components/premiums-table'
 
 const route = getRouteApi('/_authenticated/premiums/')
@@ -50,9 +50,9 @@ export function Premiums() {
             </div>
           </div>
         ) : error ? (
-          <GeneralError />
+          <QueryError error={error} />
         ) : (
-          <PremiumsTable data={data?.data || []} search={search} navigate={navigate} />
+          <PremiumsTable data={data?.data || []} total={data?.total || 0} search={search} navigate={navigate} />
         )}
       </Main>
     </>

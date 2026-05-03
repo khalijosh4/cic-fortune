@@ -51,6 +51,19 @@ const policyRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     if (!updated) return reply.notFound('Policy not found');
     return reply.send(updated as any);
   });
+
+  fastify.delete('/:id', async (request: any, reply) => {
+    if (request.user.role !== 'admin') {
+      return reply.forbidden('Only admins can delete policies');
+    }
+
+    const deleteResult = await db.delete(policy)
+      .where(eq(policy.id, request.params.id))
+      .returning() as any;
+    
+    if (deleteResult.length === 0) return reply.notFound('Policy not found');
+    return reply.send({ message: 'Policy deleted successfully' });
+  });
 };
 
 export default policyRoutes;

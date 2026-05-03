@@ -28,11 +28,12 @@ import { DataTableBulkActions } from './data-table-bulk-actions'
 
 type DataTableProps = {
   data: Premium[]
+  total: number
   search: Record<string, unknown>
   navigate: NavigateFn
 }
 
-export function PremiumsTable({ data, search, navigate }: DataTableProps) {
+export function PremiumsTable({ data, total, search, navigate }: DataTableProps) {
   const [rowSelection, setRowSelection] = useState({})
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [sorting, setSorting] = useState<SortingState>([])
@@ -65,6 +66,9 @@ export function PremiumsTable({ data, search, navigate }: DataTableProps) {
       columnVisibility,
     },
     enableRowSelection: true,
+    manualPagination: true,
+    rowCount: total,
+    pageCount: Math.ceil(total / pagination.pageSize),
     onPaginationChange,
     onColumnFiltersChange,
     onRowSelectionChange: setRowSelection,

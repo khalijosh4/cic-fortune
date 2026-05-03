@@ -1,4 +1,4 @@
-
+import { useState } from 'react'
 import { type Table } from '@tanstack/react-table'
 import { Trash2, Download } from 'lucide-react'
 import { toast } from 'sonner'
@@ -10,7 +10,8 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { DataTableBulkActions as BulkActionsToolbar } from '@/components/data-table'
-import { Branch } from '@/hooks/use-branches'
+import { ConfirmDialog } from '@/components/confirm-dialog'
+import { Branch, useDeleteBranch } from '@/hooks/use-branches'
 
 type DataTableBulkActionsProps<TData> = {
   table: Table<TData>
@@ -19,6 +20,7 @@ type DataTableBulkActionsProps<TData> = {
 export function DataTableBulkActions<TData>({
   table,
 }: DataTableBulkActionsProps<TData>) {
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const selectedRows = table.getFilteredSelectedRowModel().rows
 
   const handleBulkExport = () => {
@@ -34,58 +36,67 @@ export function DataTableBulkActions<TData>({
     table.resetRowSelection()
   }
 
-  const handleDelete = () => {
+  const deleteBranch = useDeleteBranch()
+  const handleConfirmDelete = async () => {
     const selectedBranches = selectedRows.map((row) => row.original as Branch)
-    toast.promise(sleep(1000), {
-      loading: 'Deleting branches...',
-      success: () => {
-        table.resetRowSelection()
-        return `Deleted ${selectedBranches.length} branch${selectedBranches.length > 1 ? 'es' : ''}.`
-      },
-      error: 'Error deleting',
-    })
+    for (const b of selectedBranches) {
+      await deleteBranch.mutateAsync(b.branchId)
+    }
     table.resetRowSelection()
+    setShowDeleteDialog(false)
   }
 
   return (
-    <BulkActionsToolbar table={table} entityName='branch'>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant='outline'
-            size='icon'
-            onClick={() => handleBulkExport()}
-            className='size-8'
-            aria-label='Export branches'
-            title='Export branches'
-          >
-            <Download />
-            <span className='sr-only'>Export branches</span>
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>Export branches</p>
-        </TooltipContent>
-      </Tooltip>
+    <>
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        handleConfirm={handleConfirmDelete}
+        title='Delete Branches'
+        desc={`Are you sure you want to delete ${selectedRows.length} branch${selectedRows.length > 1 ? 'es' : ''}? This action cannot be undone.`}
+        confirmText='Delete'
+        destructive
+        isLoading={deleteBranch.isPending}
+      />
+      <BulkActionsToolbar table={table} entityName='branch'>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant='outline'
+              size='icon'
+              onClick={() => handleBulkExport()}
+              className='size-8'
+              aria-label='Export branches'
+              title='Export branches'
+            >
+              <Download />
+              <span className='sr-only'>Export branches</span>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Export branches</p>
+          </TooltipContent>
+        </Tooltip>
 
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant='destructive'
-            size='icon'
-            onClick={handleDelete}
-            className='size-8'
-            aria-label='Delete selected branches'
-            title='Delete selected branches'
-          >
-            <Trash2 />
-            <span className='sr-only'>Delete selected branches</span>
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>Delete selected branches</p>
-        </TooltipContent>
-      </Tooltip>
-    </BulkActionsToolbar>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant='destructive'
+              size='icon'
+              onClick={() => setShowDeleteDialog(true)}
+              className='size-8'
+              aria-label='Delete selected branches'
+              title='Delete selected branches'
+            >
+              <Trash2 />
+              <span className='sr-only'>Delete selected branches</span>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Delete selected branches</p>
+          </TooltipContent>
+        </Tooltip>
+      </BulkActionsToolbar>
+    </>
   )
 }

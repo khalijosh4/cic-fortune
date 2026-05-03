@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { DotsHorizontalIcon } from '@radix-ui/react-icons'
 import { type Row } from '@tanstack/react-table'
-import { Trash2, UserPen } from 'lucide-react'
+import { Eye, Trash2, UserPen } from 'lucide-react'
+import { useNavigate } from '@tanstack/react-router'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -10,17 +12,34 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { type User } from '../data/schema'
-import { useUsers } from './users-provider'
+import { ConfirmDialog } from '@/components/confirm-dialog'
+import { type User, useDeleteUser } from '@/hooks/use-users'
 
 type DataTableRowActionsProps = {
   row: Row<User>
 }
 
 export function DataTableRowActions({ row }: DataTableRowActionsProps) {
-  const { setOpen, setCurrentRow } = useUsers()
+  const navigate = useNavigate()
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const deleteUser = useDeleteUser()
+  const id = row.original.id
+
   return (
     <>
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        handleConfirm={() => {
+          deleteUser.mutate(id)
+          setShowDeleteDialog(false)
+        }}
+        title='Delete User'
+        desc='Are you sure you want to delete this user? This action cannot be undone.'
+        confirmText='Delete'
+        destructive
+        isLoading={deleteUser.isPending}
+      />
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
           <Button
@@ -33,10 +52,15 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
         </DropdownMenuTrigger>
         <DropdownMenuContent align='end' className='w-40'>
           <DropdownMenuItem
-            onClick={() => {
-              setCurrentRow(row.original)
-              setOpen('edit')
-            }}
+            onClick={() => navigate({ to: '/users/$id', params: { id } })}
+          >
+            View Details
+            <DropdownMenuShortcut>
+              <Eye size={16} />
+            </DropdownMenuShortcut>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => navigate({ to: '/users/$id', params: { id } })}
           >
             Edit
             <DropdownMenuShortcut>
@@ -45,11 +69,8 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            onClick={() => {
-              setCurrentRow(row.original)
-              setOpen('delete')
-            }}
-            className='text-red-500!'
+            onSelect={() => setShowDeleteDialog(true)}
+            className='text-destructive focus:text-destructive'
           >
             Delete
             <DropdownMenuShortcut>

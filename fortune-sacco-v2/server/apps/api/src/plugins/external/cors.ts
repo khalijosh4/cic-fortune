@@ -8,7 +8,9 @@ export const autoConfig: FastifyCorsOptions = {
       return;
     }
     cb(new Error('Not allowed by CORS'), false);
-  }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  credentials: true,
 };
 
 export default FastifyCors;

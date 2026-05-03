@@ -5,8 +5,10 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { usePolicies } from '@/hooks/use-policies'
-import { GeneralError } from '@/features/errors/general-error'
+import { QueryError } from '@/components/query-error'
 import { PoliciesTable } from './components/policies-table'
+import { Button } from '@/components/ui/button'
+import { Plus } from 'lucide-react'
 
 const route = getRouteApi('/_authenticated/policies/')
 
@@ -32,15 +34,18 @@ export function Policies() {
           <div>
             <h2 className='text-2xl font-bold tracking-tight'>Policies</h2>
             <p className='text-muted-foreground'>
-              Manage health insurance policies and coverage limits.
+              Configure insurance plans and coverage limits.
             </p>
           </div>
-          {data && (
-            <p className='text-sm text-muted-foreground'>
-              {data.total.toLocaleString()} total policies
-            </p>
-          )}
+          <Button className='space-x-1' onClick={() => navigate({ to: '/policies/new' })}>
+            <span>New Policy</span> <Plus size={18} />
+          </Button>
         </div>
+        {data && (
+          <p className='text-sm text-muted-foreground'>
+            {data.total.toLocaleString()} total policies
+          </p>
+        )}
 
         {isLoading ? (
           <div className='flex h-64 w-full items-center justify-center'>
@@ -50,9 +55,9 @@ export function Policies() {
             </div>
           </div>
         ) : error ? (
-          <GeneralError />
+          <QueryError error={error} />
         ) : (
-          <PoliciesTable data={data?.data || []} search={search} navigate={navigate} />
+          <PoliciesTable data={data?.data || []} total={data?.total || 0} search={search} navigate={navigate} />
         )}
       </Main>
     </>
