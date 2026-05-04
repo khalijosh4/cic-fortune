@@ -72,4 +72,4 @@ async function buildDatabase() {
   console.log('\nDatabase build complete!');
 }
 
-//buildDatabase();
+buildDatabase();
