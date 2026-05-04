@@ -17,7 +17,7 @@ export function Claims() {
   const page = search.page || 1
   const pageSize = search.pageSize || 20
   
-  const { data, isLoading, error } = useClaims(pageSize, (page - 1) * pageSize)
+  const { data, isLoading, error } = useClaims(pageSize, (page - 1) * pageSize, search)
 
   return (
     <>

@@ -15,7 +15,8 @@ const memberRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/', { schema: ListMemberSchema }, async (request, reply) => {
     const { 
       limit = 10, offset = 0, branchId, policyId, 
-      coverType, minPremiumRate, maxPremiumRate, status 
+      coverType, minPremiumRate, maxPremiumRate, status,
+      name, branchName
     } = request.query;
 
     const filters = getTerritoryFilters(request.user, member);
@@ -28,6 +29,13 @@ const memberRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     if (status) filters.push(eq(member.status, status as any));
     if (minPremiumRate) filters.push(sql`${member.premiumRate} >= ${minPremiumRate}`);
     if (maxPremiumRate) filters.push(sql`${member.premiumRate} <= ${maxPremiumRate}`);
+    
+    if (name) {
+      filters.push(sql`(${member.firstName} || ' ' || ${member.lastName}) ILIKE ${`%${name}%`}`);
+    }
+    if (branchName) {
+      filters.push(sql`${schema.branch.name} ILIKE ${`%${branchName}%`}`);
+    }
 
     const whereClause = filters.length > 0 ? and(...filters) : undefined;
 
@@ -118,7 +126,6 @@ const memberRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
 
   fastify.put('/:id', { schema: UpdateMemberSchema }, async (request, reply) => {
     const userRole = (request as any).user.role;
-    const userBranch = (request as any).user.branchId;
 
     const [existing] = await db.select().from(member).where(eq(member.id, request.params.id)).limit(1);
     if (!existing) return reply.notFound('Member not found');

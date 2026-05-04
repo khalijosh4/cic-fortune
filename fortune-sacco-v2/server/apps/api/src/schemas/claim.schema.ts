@@ -55,6 +55,7 @@ export const ListClaimSchema = {
     maxAmountApproved: Type.Optional(Type.Number()),
     startDate: Type.Optional(Type.String()),
     endDate: Type.Optional(Type.String()),
+    name: Type.Optional(Type.String()),
   }),
   response: {
     200: Type.Object({

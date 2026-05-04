@@ -14,11 +14,14 @@ import { getTerritoryFilters, hasAccess } from '#/utils/tebac.util.js';
 
 const userRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/', { schema: ListUserSchema }, async (request, reply) => {
-    const { limit = 10, offset = 0, role, branchId } = request.query;
+    const { limit = 10, offset = 0, role, branchId, name } = request.query;
 
     const filters = getTerritoryFilters(request.user, user);
     if (role) filters.push(eq(user.role, role as any));
     if (branchId) filters.push(eq(user.branchId, branchId));
+    if (name) {
+      filters.push(sql`(${user.firstName} || ' ' || ${user.lastName}) ILIKE ${`%${name}%`}`);
+    }
 
     const whereClause = filters.length > 0 ? and(...filters) : undefined;
 

@@ -27,14 +27,7 @@ interface MembersResponse {
 export function useMembers(
   limit = 10, 
   offset = 0, 
-  filters?: { 
-    branchId?: string; 
-    policyId?: string;
-    coverType?: string;
-    minPremiumRate?: number;
-    maxPremiumRate?: number;
-    status?: string;
-  }
+  filters?: any
 ) {
   return useQuery<MembersResponse>({
     queryKey: ['members', limit, offset, filters],

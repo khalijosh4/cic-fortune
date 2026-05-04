@@ -68,6 +68,8 @@ export const ListMemberSchema = {
     minPremiumRate: Type.Optional(Type.Number()),
     maxPremiumRate: Type.Optional(Type.Number()),
     status: Type.Optional(Type.String()),
+    name: Type.Optional(Type.String()),
+    branchName: Type.Optional(Type.String()),
   }),
   response: {
     200: Type.Object({

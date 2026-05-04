@@ -19,16 +19,7 @@ interface PremiumsResponse {
 export function usePremiums(
   limit = 10,
   offset = 0,
-  filters?: {
-    memberId?: string
-    status?: string
-    minAmountDue?: number
-    maxAmountDue?: number
-    minAmountPaid?: number
-    maxAmountPaid?: number
-    startDate?: string
-    endDate?: string
-  }
+  filters?: any
 ) {
   return useQuery<PremiumsResponse>({
     queryKey: ['premiums', limit, offset, filters],

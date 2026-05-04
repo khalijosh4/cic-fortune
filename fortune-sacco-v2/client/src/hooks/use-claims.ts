@@ -22,17 +22,7 @@ interface ClaimsResponse {
 export function useClaims(
   limit = 10, 
   offset = 0, 
-  filters?: { 
-    status?: string; 
-    memberId?: string;
-    hospitalId?: string;
-    minAmountClaimed?: number;
-    maxAmountClaimed?: number;
-    minAmountApproved?: number;
-    maxAmountApproved?: number;
-    startDate?: string;
-    endDate?: string;
-  }
+  filters?: any
 ) {
   return useQuery<ClaimsResponse>({
     queryKey: ['claims', limit, offset, filters],

@@ -19,7 +19,7 @@ const premiumRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     const { 
       limit = 10, offset = 0, memberId, status,
       minAmountDue, maxAmountDue, minAmountPaid, maxAmountPaid,
-      startDate, endDate
+      startDate, endDate, name
     } = request.query;
 
     const filters = [];
@@ -34,6 +34,10 @@ const premiumRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     if (maxAmountPaid) filters.push(sql`${premium.amountPaid} <= ${maxAmountPaid}`);
     if (startDate) filters.push(gte(premium.dueDate, new Date(startDate)));
     if (endDate) filters.push(lte(premium.dueDate, new Date(endDate)));
+    
+    if (name) {
+      filters.push(sql`(${member.firstName} || ' ' || ${member.lastName}) ILIKE ${`%${name}%`}`);
+    }
 
     // TeBAC filtering
     if (['branch_manager', 'claims_officer', 'user'].includes((request as any).user.role)) {

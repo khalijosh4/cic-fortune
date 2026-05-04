@@ -19,7 +19,7 @@ const claimRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     const { 
       limit = 10, offset = 0, memberId, hospitalId, status,
       minAmountClaimed, maxAmountClaimed, minAmountApproved, maxAmountApproved,
-      startDate, endDate
+      startDate, endDate, name
     } = request.query;
 
     const filters = [];
@@ -32,9 +32,12 @@ const claimRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     if (maxAmountApproved) filters.push(sql`${claim.amountApproved} <= ${maxAmountApproved}`);
     if (startDate) filters.push(gte(claim.createdAt, new Date(startDate)));
     if (endDate) filters.push(lte(claim.createdAt, new Date(endDate)));
+    
+    if (name) {
+      filters.push(sql`(${member.firstName} || ' ' || ${member.lastName}) ILIKE ${`%${name}%`}`);
+    }
 
     // Role based filtering (TeBAC)
-    const territoryFilters = getTerritoryFilters(request.user, claim);
     // Note: For branch staff, we need to join with member to filter by branchId
     // Our utility handles direct columns, but for claims we need member branch
     if (['branch_manager', 'claims_officer', 'user'].includes(request.user.role)) {
