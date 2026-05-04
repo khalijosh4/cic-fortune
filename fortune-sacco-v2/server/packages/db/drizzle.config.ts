@@ -14,6 +14,9 @@ export default defineConfig({
     database: process.env.POSTGRES_DB as string,
     user: process.env.POSTGRES_USER,
     password: process.env.POSTGRES_PASSWORD,
-    ssl: false
+    ssl: {
+      rejectUnauthorized: true, // Crucial for Aiven security
+      ca: process.env.DB_CA,     // The content of your certificate
+    },
   }
 });
