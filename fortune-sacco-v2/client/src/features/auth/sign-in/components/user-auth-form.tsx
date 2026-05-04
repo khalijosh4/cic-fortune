@@ -116,7 +116,39 @@ export function UserAuthForm({
           Sign in
         </Button>
 
-
+        <div className='mt-4 space-y-2'>
+          <p className='text-xs text-muted-foreground font-medium uppercase text-center'>
+            Demo Accounts (Click to Autofill)
+          </p>
+          <div className='flex flex-wrap gap-2 justify-center'>
+            {[
+              'admin',
+              'system_admin',
+              'hr',
+              'ceo',
+              'branch_manager',
+              'claims_officer',
+              'hospital',
+            ].map((role) => (
+              <Button
+                key={role}
+                type='button'
+                variant='outline'
+                size='sm'
+                className='text-[10px] h-7 px-2 capitalize'
+                onClick={() => {
+                  form.setValue(
+                    'email',
+                    `${role.toLowerCase().replace('_', '.')}@fortunesacco.co.ke`
+                  )
+                  form.setValue('password', 'Admin@2024')
+                }}
+              >
+                {role.replace('_', ' ')}
+              </Button>
+            ))}
+          </div>
+        </div>
       </form>
     </Form>
   )

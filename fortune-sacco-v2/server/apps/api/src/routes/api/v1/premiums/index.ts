@@ -1,8 +1,8 @@
 import { db, schema } from '@fastify-forge/db';
-import { eq, sql, and, gte, lte } from 'drizzle-orm';
+import { eq, sql, and, gte, lte, getTableColumns } from 'drizzle-orm';
 import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
-const { premium } = schema;
+const { premium, member } = schema;
 
 import { 
   CreatePremiumSchema, 
@@ -34,10 +34,26 @@ const premiumRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     if (startDate) filters.push(gte(premium.dueDate, new Date(startDate)));
     if (endDate) filters.push(lte(premium.dueDate, new Date(endDate)));
 
+    if (['branch_manager', 'claims_officer'].includes((request as any).user.role)) {
+      filters.push(eq(member.branchId, (request as any).user.branchId!));
+    }
+
     const whereClause = filters.length > 0 ? and(...filters) : undefined;
 
-    const data = await db.select().from(premium).where(whereClause).limit(limit).offset(offset);
-    const countResult = await db.select({ count: sql<number>`count(*)` }).from(premium).where(whereClause);
+    const data = await db.select({
+      ...getTableColumns(premium),
+      memberName: sql`${member.firstName} || ' ' || ${member.lastName}`,
+    })
+    .from(premium)
+    .leftJoin(member, eq(premium.memberId, member.id))
+    .where(whereClause)
+    .limit(limit)
+    .offset(offset);
+
+    const countResult = await db.select({ count: sql<number>`count(*)` })
+      .from(premium)
+      .leftJoin(member, eq(premium.memberId, member.id))
+      .where(whereClause);
     const count = countResult[0]?.count ?? 0;
 
     return reply.send({ data: data as any, total: Number(count) });

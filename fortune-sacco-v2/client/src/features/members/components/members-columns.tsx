@@ -67,6 +67,16 @@ export const membersColumns: ColumnDef<Member>[] = [
     ),
   },
   {
+    accessorKey: 'dependentsCount',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Dependents' className='justify-center' />
+    ),
+    cell: ({ row }) => {
+      const count = row.getValue('dependentsCount') as number;
+      return <div className='text-center'>{count ?? '0'}</div>
+    },
+  },
+  {
     accessorKey: 'premiumRate',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Premium Rate (KES)' className='justify-center' />

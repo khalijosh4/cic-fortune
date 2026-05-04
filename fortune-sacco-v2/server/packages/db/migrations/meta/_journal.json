@@ -15,6 +15,13 @@
       "when": 1777628998873,
       "tag": "0001_tired_abomination",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1777887808534,
+      "tag": "0002_worthless_namora",
+      "breakpoints": true
     }
   ]
 }

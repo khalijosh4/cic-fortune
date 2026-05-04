@@ -1,5 +1,10 @@
 import { Type } from '@sinclair/typebox';
 
+export const ErrorResponse = Type.Object({
+  error: Type.String(),
+  message: Type.Optional(Type.String()),
+});
+
 export const MemberSchema = Type.Object({
   id: Type.String(),
   firstName: Type.String(),
@@ -7,6 +12,7 @@ export const MemberSchema = Type.Object({
   branchId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   policyId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   coverType: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  dependentsCount: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
   premiumRate: Type.String(),
   status: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   usedAnnualLimit: Type.Optional(Type.Union([Type.String(), Type.Null()])),
@@ -23,11 +29,13 @@ export const CreateMemberSchema = {
     branchId: Type.Optional(Type.String()),
     policyId: Type.Optional(Type.String()),
     coverType: Type.Optional(Type.String()),
-    premiumRate: Type.String(),
+    dependentsCount: Type.Optional(Type.Number()),
     status: Type.Optional(Type.String()),
   }),
   response: {
     201: MemberSchema,
+    403: ErrorResponse,
+    500: ErrorResponse,
   },
 };
 
@@ -39,11 +47,14 @@ export const UpdateMemberSchema = {
     branchId: Type.Optional(Type.String()),
     policyId: Type.Optional(Type.String()),
     coverType: Type.Optional(Type.String()),
-    premiumRate: Type.Optional(Type.String()),
+    dependentsCount: Type.Optional(Type.Number()),
     status: Type.Optional(Type.String()),
   }),
   response: {
     200: MemberSchema,
+    403: ErrorResponse,
+    404: ErrorResponse,
+    500: ErrorResponse,
   },
 };
 

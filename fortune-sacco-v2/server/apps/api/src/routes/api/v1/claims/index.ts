@@ -1,8 +1,8 @@
 import { db, schema } from '@fastify-forge/db';
-import { eq, sql, and, gte, lte } from 'drizzle-orm';
+import { eq, sql, and, gte, lte, getTableColumns } from 'drizzle-orm';
 import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
-const { claim } = schema;
+const { claim, member } = schema;
 
 import { 
   CreateClaimSchema, 
@@ -35,12 +35,26 @@ const claimRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     // Role based filtering
     if (request.user.role === 'hospital') {
       filters.push(eq(claim.hospitalId, request.user.hospitalId!));
+    } else if (['branch_manager', 'claims_officer'].includes(request.user.role)) {
+      filters.push(eq(member.branchId, (request as any).user.branchId!));
     }
 
     const whereClause = filters.length > 0 ? and(...filters) : undefined;
 
-    const data = await db.select().from(claim).where(whereClause).limit(limit).offset(offset);
-    const countResult = await db.select({ count: sql<number>`count(*)` }).from(claim).where(whereClause);
+    const data = await db.select({
+      ...getTableColumns(claim),
+      memberName: sql`${member.firstName} || ' ' || ${member.lastName}`,
+    })
+    .from(claim)
+    .leftJoin(member, eq(claim.memberId, member.id))
+    .where(whereClause)
+    .limit(limit)
+    .offset(offset);
+
+    const countResult = await db.select({ count: sql<number>`count(*)` })
+      .from(claim)
+      .leftJoin(member, eq(claim.memberId, member.id))
+      .where(whereClause);
     const count = countResult[0]?.count ?? 0;
 
     return reply.send({ data: data as any, total: Number(count) });

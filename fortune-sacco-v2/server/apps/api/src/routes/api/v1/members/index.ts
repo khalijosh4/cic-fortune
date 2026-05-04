@@ -18,7 +18,12 @@ const memberRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     } = request.query;
 
     const filters = [];
-    if (branchId) filters.push(eq(member.branchId, branchId));
+    if (['branch_manager', 'claims_officer'].includes((request as any).user.role)) {
+      filters.push(eq(member.branchId, (request as any).user.branchId!));
+    } else if (branchId) {
+      filters.push(eq(member.branchId, branchId));
+    }
+    
     if (policyId) filters.push(eq(member.policyId, policyId));
     if (coverType) filters.push(eq(member.coverType, coverType as any));
     if (status) filters.push(eq(member.status, status as any));
@@ -63,8 +68,35 @@ const memberRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   });
 
   fastify.post('/', { schema: CreateMemberSchema }, async (request, reply) => {
+    const userRole = (request as any).user.role;
+    if (!['admin', 'system_admin', 'branch_manager', 'claims_officer'].includes(userRole)) {
+      return reply.code(403).send({ error: 'Forbidden' } as any);
+    }
+
+    const payload: any = { ...request.body };
+
+    // TeBAC: force branch assignment for branch staff
+    if (['branch_manager', 'claims_officer'].includes(userRole)) {
+      payload.branchId = (request as any).user.branchId;
+    }
+
+    // Premium Calculation
+    const [rates] = await db.select().from(schema.premiumRate).limit(1);
+    if (!rates) return reply.code(500).send({ error: 'Premium rates not configured' } as any);
+    
+    const dCount = payload.dependentsCount || 0;
+    let premiumRate = Number(rates.m0);
+    if (dCount === 1) premiumRate = Number(rates.m1);
+    else if (dCount === 2) premiumRate = Number(rates.m2);
+    else if (dCount === 3) premiumRate = Number(rates.m3);
+    else if (dCount === 4) premiumRate = Number(rates.m4);
+    else if (dCount === 5) premiumRate = Number(rates.m5);
+    else if (dCount >= 6) premiumRate = Number(rates.m6) + ((dCount - 6) * Number(rates.extra));
+
+    payload.premiumRate = premiumRate.toString();
+
     const insertResult = await db.insert(member).values({
-      ...request.body,
+      ...payload,
       usedAnnualLimit: '0',
       usedOutpatientLimit: '0',
       usedInpatientLimit: '0',
@@ -81,19 +113,53 @@ const memberRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   });
 
   fastify.put('/:id', { schema: UpdateMemberSchema }, async (request, reply) => {
+    const userRole = (request as any).user.role;
+    const userBranch = (request as any).user.branchId;
+
+    const [existing] = await db.select().from(member).where(eq(member.id, request.params.id)).limit(1);
+    if (!existing) return reply.notFound('Member not found');
+
+    if (['branch_manager', 'claims_officer'].includes(userRole)) {
+      if (existing.branchId !== userBranch) {
+        return reply.code(403).send({ error: 'Cannot edit member outside your branch territory' } as any);
+      }
+    }
+
+    const updateData: any = { ...request.body };
+
+    // Field-level Security
+    if (userRole === 'claims_officer') {
+      delete updateData.dependentsCount;
+      delete updateData.coverType;
+    }
+
+    // Recalculate Premium if dependents count changed
+    if (updateData.dependentsCount !== undefined && updateData.dependentsCount !== existing.dependentsCount) {
+      const [rates] = await db.select().from(schema.premiumRate).limit(1);
+      if (rates) {
+        const dCount = updateData.dependentsCount;
+        let premiumRate = Number(rates.m0);
+        if (dCount === 1) premiumRate = Number(rates.m1);
+        else if (dCount === 2) premiumRate = Number(rates.m2);
+        else if (dCount === 3) premiumRate = Number(rates.m3);
+        else if (dCount === 4) premiumRate = Number(rates.m4);
+        else if (dCount === 5) premiumRate = Number(rates.m5);
+        else if (dCount >= 6) premiumRate = Number(rates.m6) + ((dCount - 6) * Number(rates.extra));
+        updateData.premiumRate = premiumRate.toString();
+      }
+    }
+
     const updateResult = await db.update(member)
-      .set(request.body as any)
+      .set(updateData as any)
       .where(eq(member.id, request.params.id))
       .returning() as any;
     
     const updated = updateResult[0];
-    
-    if (!updated) return reply.notFound('Member not found');
     return reply.send(updated as any);
   });
 
   fastify.delete('/:id', async (request: any, reply) => {
-    if (request.user.role !== 'admin') {
+    if (!['admin', 'system_admin'].includes(request.user.role)) {
       return reply.forbidden('Only admins can delete members');
     }
 

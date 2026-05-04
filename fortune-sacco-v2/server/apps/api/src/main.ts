@@ -2,10 +2,24 @@ import { logger } from '@fastify-forge/logger';
 import closeWithGrace from 'close-with-grace';
 import Fastify from 'fastify';
 import fp from 'fastify-plugin';
+import { execSync } from 'child_process';
+import path from 'path';
 
 import bootstrap from '#/app.js';
 
 async function startServer() {
+  try {
+    logger.info('Preparing database (generate, push, seed)...');
+    execSync('pnpm run db:build', { 
+      cwd: path.resolve(process.cwd(), 'packages/db'), 
+      stdio: 'inherit' 
+    });
+    logger.info('Database prepared successfully.');
+  } catch (error) {
+    logger.error({ err: error }, 'Failed to prepare database');
+    // We don't exit here, just log, in case db is already fine or it's a transient issue
+  }
+
   const app = Fastify({
     connectionTimeout: 120_000,
     // 1 minute: suitable for most payloads, including moderate file uploads

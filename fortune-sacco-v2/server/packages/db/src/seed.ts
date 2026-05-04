@@ -84,6 +84,26 @@ async function seed() {
       branchIds = allBranches.map(b => b.id);
     }
 
+    // 3.5 Seed Specific Role Users for Testing
+    console.log('Seeding specific role users...');
+    const roles = ['admin', 'user', 'hospital', 'hr', 'ceo', 'branch_manager', 'claims_officer', 'system_admin'];
+    for (const role of roles) {
+      const email = `${role.toLowerCase().replace('_', '.')}@fortunesacco.co.ke`;
+      const [existing] = await db.select().from(schema.user).where(eq(schema.user.email, email)).limit(1);
+      if (!existing) {
+        await db.insert(schema.user).values({
+          id: faker.string.uuid(),
+          firstName: role.split('_').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' '),
+          lastName: 'User',
+          email,
+          password: hashedPassword,
+          role,
+          branchId: faker.helpers.arrayElement(branchIds), 
+        } as any).onConflictDoNothing();
+        console.log(`Created or updated ${role} user: ${email}`);
+      }
+    }
+
     // 4. Seed Users (Employees)
     console.log('Seeding users...');
     let userIds: string[] = [adminId];
@@ -98,7 +118,7 @@ async function seed() {
         email: faker.internet.email({ firstName, lastName }).toLowerCase().slice(0, 100),
         phoneNumber: faker.phone.number().slice(0, 15),
         password: hashedPassword, // Reuse same password for simplicity in dev
-        role: faker.helpers.arrayElement(['admin', 'user']),
+        role: faker.helpers.arrayElement(['admin', 'user', 'hr', 'ceo', 'branch_manager', 'claims_officer', 'system_admin']),
         branchId: faker.helpers.arrayElement(branchIds),
       } as any).onConflictDoNothing().returning();
       const res = insertRes?.[0];
@@ -115,6 +135,21 @@ async function seed() {
         .set({ manager: faker.helpers.arrayElement(userIds) })
         .where(eq(schema.branch.id, bId));
     }
+
+    // 4.5 Seed Premium Rates
+    console.log('Seeding premium rates...');
+    await db.insert(schema.premiumRate).values({
+      id: faker.string.uuid(),
+      planName: 'Option III',
+      m0: '9989',
+      m1: '14460',
+      m2: '23063',
+      m3: '28667',
+      m4: '32172',
+      m5: '33899',
+      m6: '36489',
+      extra: '5089',
+    } as any).onConflictDoNothing();
 
     // 5. Seed Policies
     console.log('Seeding policies...');
@@ -144,6 +179,15 @@ async function seed() {
     let memberIds: string[] = [];
     for (let i = 0; i < MEMBER_COUNT; i++) {
       const mId = faker.string.uuid();
+      const dependentsCount = faker.number.int({ min: 0, max: 8 });
+      let calculatedPremium = 9989;
+      if (dependentsCount === 1) calculatedPremium = 14460;
+      else if (dependentsCount === 2) calculatedPremium = 23063;
+      else if (dependentsCount === 3) calculatedPremium = 28667;
+      else if (dependentsCount === 4) calculatedPremium = 32172;
+      else if (dependentsCount === 5) calculatedPremium = 33899;
+      else if (dependentsCount >= 6) calculatedPremium = 36489 + ((dependentsCount - 6) * 5089);
+
       const insertRes: any = await db.insert(schema.member).values({
         id: mId,
         firstName: faker.person.firstName(),
@@ -151,7 +195,8 @@ async function seed() {
         branchId: faker.helpers.arrayElement(branchIds),
         policyId: faker.helpers.arrayElement(policyIds),
         coverType: faker.helpers.arrayElement(['family', 'individual', 'corporate group']),
-        premiumRate: faker.number.int({ min: 1000, max: 20000 }).toString(),
+        dependentsCount,
+        premiumRate: calculatedPremium.toString(),
         status: faker.helpers.arrayElement(['active', 'expired', 'pending']),
         usedAnnualLimit: '0',
       } as any).onConflictDoNothing().returning();
@@ -209,7 +254,7 @@ async function seed() {
       await db.insert(schema.auditLog).values({
         id: faker.string.uuid(),
         userEmail: faker.internet.email().toLowerCase(),
-        userRole: faker.helpers.arrayElement(['admin', 'user']),
+        userRole: faker.helpers.arrayElement(['admin', 'user', 'hr', 'ceo', 'branch_manager', 'claims_officer', 'system_admin']),
         branchName: faker.location.city() + ' Branch',
         action: faker.helpers.arrayElement(['Login', 'Logout', 'Create Member', 'Update Policy', 'Approve Claim']),
         module: faker.helpers.arrayElement(['Auth', 'Members', 'Policies', 'Claims']),

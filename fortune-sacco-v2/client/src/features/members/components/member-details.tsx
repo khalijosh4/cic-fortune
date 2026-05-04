@@ -15,6 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useMember, useUpdateMember, useCreateMember } from '@/hooks/use-members'
 import { useBranches } from '@/hooks/use-branches'
 import { usePolicies } from '@/hooks/use-policies'
+import { useAuthStore } from '@/stores/auth-store'
 import { Loader2 } from 'lucide-react'
 import { useEffect } from 'react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -25,11 +26,19 @@ const memberFormSchema = z.object({
   branchId: z.string().min(1, 'Branch is required'),
   policyId: z.string().min(1, 'Policy is required'),
   coverType: z.string().min(1, 'Cover type is required'),
-  premiumRate: z.string().min(1, 'Premium rate is required'),
+  dependentsCount: z.coerce.number().min(0, 'Dependents count cannot be negative'),
   status: z.string().min(1, 'Status is required'),
 })
 
-type MemberFormValues = z.infer<typeof memberFormSchema>
+interface MemberFormValues {
+  firstName: string
+  lastName: string
+  branchId: string
+  policyId: string
+  coverType: string
+  dependentsCount: number
+  status: string
+}
 
 interface MemberDetailsProps {
   id?: string
@@ -42,16 +51,18 @@ export function MemberDetails({ id }: MemberDetailsProps) {
   const { data: policiesData } = usePolicies(100, 0)
   const updateMember = useUpdateMember(id || '')
   const createMember = useCreateMember()
+  const authUser = useAuthStore((state) => state.auth.user)
+  const isClaimsOfficer = authUser?.role === 'claims_officer'
 
   const form = useForm<MemberFormValues>({
-    resolver: zodResolver(memberFormSchema),
+    resolver: zodResolver(memberFormSchema) as any,
     defaultValues: {
       firstName: '',
       lastName: '',
       branchId: '',
       policyId: '',
       coverType: '',
-      premiumRate: '',
+      dependentsCount: 0,
       status: 'active',
     },
   })
@@ -64,7 +75,7 @@ export function MemberDetails({ id }: MemberDetailsProps) {
         branchId: member.branchId || '',
         policyId: member.policyId || '',
         coverType: member.coverType || '',
-        premiumRate: member.premiumRate || '',
+        dependentsCount: member.dependentsCount || 0,
         status: member.status || 'active',
       })
     }
@@ -223,12 +234,17 @@ export function MemberDetails({ id }: MemberDetailsProps) {
 
             <FormField
               control={form.control}
-              name='premiumRate'
+              name='dependentsCount'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Premium Rate (KES)</FormLabel>
+                  <FormLabel>Dependents Count</FormLabel>
                   <FormControl>
-                    <Input placeholder='Enter premium rate' {...field} />
+                    <Input 
+                      type='number' 
+                      placeholder='Enter number of dependents' 
+                      {...field} 
+                      disabled={!isNew && isClaimsOfficer}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

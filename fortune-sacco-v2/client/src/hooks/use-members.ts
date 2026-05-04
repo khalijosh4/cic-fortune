@@ -9,6 +9,7 @@ export interface Member {
   branchId?: string | null
   policyId?: string | null
   coverType?: string | null
+  dependentsCount?: number | null
   premiumRate: string
   status?: string | null
   usedAnnualLimit?: string | null

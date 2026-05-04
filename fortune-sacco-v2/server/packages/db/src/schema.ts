@@ -1,5 +1,5 @@
 import { 
-  pgEnum, pgTable, uuid, varchar, numeric, pgView, timestamp, text, type AnyPgColumn
+  pgEnum, pgTable, uuid, varchar, numeric, pgView, timestamp, text, integer, type AnyPgColumn
 } from 'drizzle-orm/pg-core';
 import { sql, eq } from 'drizzle-orm';
 import type { InferSelectModel } from 'drizzle-orm';
@@ -7,7 +7,7 @@ import type { InferSelectModel } from 'drizzle-orm';
 
 // 1. Enums First
 export const HospitalTypeEnum = pgEnum('HospitalType', ['private', 'county', 'teaching', 'clinic', 'specialist', 'referral', 'public']);
-export const RolesEnum = pgEnum('UserRole', ['admin', 'user', 'hospital']);
+export const RolesEnum = pgEnum('UserRole', ['admin', 'user', 'hospital', 'hr', 'ceo', 'branch_manager', 'claims_officer', 'system_admin']);
 export const PolicyStatusEnum = pgEnum('PolicyStatus', ['active', 'expired', 'pending']);
 export const PolicyCoverTypeEnum = pgEnum('CoverType', ['family', 'individual', 'corporate group']);
 export const ClaimStatusEnum = pgEnum('ClaimStatus', ['approved', 'pending', 'rejected']);
@@ -84,6 +84,7 @@ export const member = pgTable('member', {
   branchId: uuid('branch_id').references(() => branch.id),
   policyId: uuid('policy_id').references(() => policy.id), // Current active policy
   coverType: PolicyCoverTypeEnum('cover_type').default('individual'),
+  dependentsCount: integer('dependents_count').default(0),
   premiumRate: numeric('premium_rate', { precision: 12, scale: 2 }).notNull(),
   status: PolicyStatusEnum('status').default('pending'),
   usedAnnualLimit: numeric('used_annual_limit', { precision: 15, scale: 2 }).default('0'),
@@ -119,6 +120,19 @@ export const premium = pgTable('premium', {
   amountPaid: numeric('amount_paid', { precision: 12, scale: 2 }).default('0'),
   dueDate: timestamp('due_date').notNull(),
   paymentMethod: PaymentMethodEnum('payment_method'),
+});
+
+export const premiumRate = pgTable('premium_rate', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  planName: varchar('plan_name', { length: 100 }).notNull(),
+  m0: numeric('m_0', { precision: 12, scale: 2 }).notNull(),
+  m1: numeric('m_1', { precision: 12, scale: 2 }).notNull(),
+  m2: numeric('m_2', { precision: 12, scale: 2 }).notNull(),
+  m3: numeric('m_3', { precision: 12, scale: 2 }).notNull(),
+  m4: numeric('m_4', { precision: 12, scale: 2 }).notNull(),
+  m5: numeric('m_5', { precision: 12, scale: 2 }).notNull(),
+  m6: numeric('m_6', { precision: 12, scale: 2 }).notNull(),
+  extra: numeric('extra', { precision: 12, scale: 2 }).notNull(),
 });
 
 // 3. Types (Moved here to ensure 'user' table is fully defined)
