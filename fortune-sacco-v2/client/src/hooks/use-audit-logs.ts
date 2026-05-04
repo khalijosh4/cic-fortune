@@ -22,14 +22,7 @@ interface AuditLogsResponse {
 export function useAuditLogs(
   limit = 10,
   offset = 0,
-  filters?: {
-    module?: string
-    type?: string
-    status?: string
-    userRole?: string
-    startDate?: string
-    endDate?: string
-  }
+  filters?: any
 ) {
   return useQuery<AuditLogsResponse>({
     queryKey: ['audit-logs', limit, offset, filters],

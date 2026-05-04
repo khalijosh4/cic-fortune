@@ -22,7 +22,7 @@ interface UsersResponse {
   total: number
 }
 
-export function useUsers(limit = 10, offset = 0, filters?: { role?: string; branchId?: string }) {
+export function useUsers(limit = 10, offset = 0, filters?: any) {
   return useQuery<UsersResponse>({
     queryKey: ['users', limit, offset, filters],
     queryFn: async () => {

@@ -17,7 +17,7 @@ export function AuditLogs() {
   const page = search.page || 1
   const pageSize = search.pageSize || 20
   
-  const { data, isLoading, error } = useAuditLogs(pageSize, (page - 1) * pageSize)
+  const { data, isLoading, error } = useAuditLogs(pageSize, (page - 1) * pageSize, search)
 
   return (
     <>
