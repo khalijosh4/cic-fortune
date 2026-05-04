@@ -12,6 +12,10 @@ export const pool = new pg.Pool({
   user: process.env.POSTGRES_USER,
   password: process.env.POSTGRES_PASSWORD,
   max: 10,
+ssl: process.env.DB_CA ? {
+    rejectUnauthorized: true,
+    ca: process.env.DB_CA,
+  } : false,
 });
 
 export const db = drizzle({ client: pool, schema });
