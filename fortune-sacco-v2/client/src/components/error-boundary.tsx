@@ -10,8 +10,8 @@ export function ComponentErrorFallback({ error, resetErrorBoundary }: FallbackPr
         <AlertCircle className="h-3 w-3" />
         <span className="font-semibold">Widget Error</span>
       </div>
-      <p className="opacity-80 break-words max-w-[150px] truncate" title={error.message}>
-        {error.message}
+      <p className="opacity-80 break-words max-w-[150px] truncate" title={error instanceof Error ? error.message : String(error)}>
+        {error instanceof Error ? error.message : String(error)}
       </p>
       <Button variant="outline" size="sm" onClick={resetErrorBoundary} className="h-5 px-2 text-[10px] mt-1 border-destructive/30 hover:bg-destructive/20 hover:text-destructive">
         <RefreshCcw className="mr-1 h-2 w-2" />
