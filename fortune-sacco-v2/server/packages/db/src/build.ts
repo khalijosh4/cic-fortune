@@ -23,6 +23,10 @@ async function checkDatabaseConnection() {
     database: POSTGRES_DB,
     user: POSTGRES_USER,
     password: POSTGRES_PASSWORD,
+  ssl: DB_CA ? {
+      rejectUnauthorized: true,
+      ca: DB_CA,
+    } : false,
   });
   
   try {
