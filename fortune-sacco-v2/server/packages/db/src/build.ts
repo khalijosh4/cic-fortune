@@ -7,7 +7,7 @@ import path from 'path';
 dotenv.config({ path: path.resolve(process.cwd(), '../../apps/api/.env') });
 
 async function checkDatabaseConnection() {
-  const { POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD } = process.env;
+  const { POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, DB_CA } = process.env;
   
   if (!POSTGRES_HOST || !POSTGRES_DB || !POSTGRES_USER) {
     console.error('ERROR: Database configuration variables are missing.');
