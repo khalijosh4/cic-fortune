@@ -2,8 +2,8 @@ import { logger } from '@fastify-forge/logger';
 import closeWithGrace from 'close-with-grace';
 import Fastify from 'fastify';
 import fp from 'fastify-plugin';
-import { execSync } from 'child_process';
-import path from 'path';
+//import { execSync } from 'child_process';
+//import path from 'path';
 
 import bootstrap from '#/app.js';
 
