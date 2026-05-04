@@ -8,8 +8,9 @@ import path from 'path';
 import bootstrap from '#/app.js';
 
 async function startServer() {
+/*
   try {
-    /* 
+     
 logger.info('Preparing database (generate, push, seed)...');
     execSync('pnpm run db:build', { 
       cwd: path.resolve(process.cwd(), 'packages/db'), 
