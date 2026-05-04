@@ -9,7 +9,8 @@ import bootstrap from '#/app.js';
 
 async function startServer() {
   try {
-    logger.info('Preparing database (generate, push, seed)...');
+    /* 
+logger.info('Preparing database (generate, push, seed)...');
     execSync('pnpm run db:build', { 
       cwd: path.resolve(process.cwd(), 'packages/db'), 
       stdio: 'inherit' 
@@ -19,6 +20,8 @@ async function startServer() {
     logger.error({ err: error }, 'Failed to prepare database');
     // We don't exit here, just log, in case db is already fine or it's a transient issue
   }
+
+*/
 
   const app = Fastify({
     connectionTimeout: 120_000,
