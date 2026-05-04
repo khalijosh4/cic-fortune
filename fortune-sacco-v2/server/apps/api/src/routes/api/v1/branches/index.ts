@@ -9,6 +9,7 @@ import {
   GetBranchSchema, 
   UpdateBranchSchema 
 } from '#/schemas/branch.schema.js';
+import { getTerritoryFilters, hasAccess } from '#/utils/tebac.util.js';
 
 const branchRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/', { schema: ListBranchSchema }, async (request, reply) => {
@@ -17,7 +18,7 @@ const branchRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
       minPolicies, maxPolicies, minActivePolicies, maxActivePolicies 
     } = request.query;
 
-    const filters = [];
+    const filters = getTerritoryFilters(request.user, branch);
     if (location) filters.push(sql`${branch.location} ILIKE ${`%${location}%`}`);
     if (minPolicies) filters.push(sql`${branchStats.totalPolicies} >= ${minPolicies}`);
     if (maxPolicies) filters.push(sql`${branchStats.totalPolicies} <= ${maxPolicies}`);
@@ -66,6 +67,11 @@ const branchRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/:id', { schema: GetBranchSchema }, async (request, reply) => {
     const [foundBranch] = await db.select().from(branch).where(eq(branch.id, request.params.id)).limit(1);
     if (!foundBranch) return reply.notFound('Branch not found');
+    
+    if (!hasAccess(request.user, foundBranch)) {
+      return reply.forbidden('Access denied to branch outside your territory');
+    }
+    
     return reply.send(foundBranch as any);
   });
 

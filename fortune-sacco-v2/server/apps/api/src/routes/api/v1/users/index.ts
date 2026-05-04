@@ -10,12 +10,13 @@ import {
   ListUserSchema, 
   UpdateUserSchema 
 } from '#/schemas/user.schema.js';
+import { getTerritoryFilters, hasAccess } from '#/utils/tebac.util.js';
 
 const userRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/', { schema: ListUserSchema }, async (request, reply) => {
     const { limit = 10, offset = 0, role, branchId } = request.query;
 
-    const filters = [];
+    const filters = getTerritoryFilters(request.user, user);
     if (role) filters.push(eq(user.role, role as any));
     if (branchId) filters.push(eq(user.branchId, branchId));
 
@@ -65,18 +66,28 @@ const userRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/:id', async (request: any, reply) => {
     const [found] = await db.select().from(user).where(eq(user.id, request.params.id)).limit(1);
     if (!found) return reply.notFound('User not found');
+    
+    if (!hasAccess(request.user, found)) {
+      return reply.forbidden('Access denied to user outside your territory');
+    }
+    
     return reply.send(found as any);
   });
 
   fastify.put('/:id', { schema: UpdateUserSchema }, async (request, reply) => {
+    const [existing] = await db.select().from(user).where(eq(user.id, request.params.id)).limit(1);
+    if (!existing) return reply.notFound('User not found');
+
+    if (!hasAccess(request.user, existing)) {
+      return reply.forbidden('Cannot edit user outside your territory');
+    }
+
     const updateResult = await db.update(user)
       .set(request.body as any)
       .where(eq(user.id, request.params.id))
       .returning() as any;
     
     const updated = updateResult[0];
-    
-    if (!updated) return reply.notFound('User not found');
     return reply.send(updated as any);
   });
 

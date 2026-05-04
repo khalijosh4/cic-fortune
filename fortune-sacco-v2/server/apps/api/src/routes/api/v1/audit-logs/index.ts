@@ -8,12 +8,24 @@ import {
   ListAuditLogSchema,
   GetAuditLogSchema
 } from '#/schemas/audit-log.schema.js';
+import { getTerritoryFilters, hasAccess } from '#/utils/tebac.util.js';
 
 const auditLogRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/', { schema: ListAuditLogSchema }, async (request, reply) => {
     const { limit = 10, offset = 0, module, type, status, userRole, startDate, endDate } = request.query;
 
     const filters = [];
+    
+    // TeBAC filtering for audit logs
+    if (['branch_manager', 'claims_officer', 'user'].includes(request.user.role) && request.user.branchId) {
+      const [branch] = await db.select().from(schema.branch).where(eq(schema.branch.id, request.user.branchId)).limit(1);
+      if (branch) {
+        filters.push(eq(auditLog.branchName, branch.name));
+      }
+    } else if (request.user.role === 'hospital' && request.user.hospitalId) {
+       // Audit logs don't have hospitalId/hospitalName currently, but we can filter if they did
+    }
+
     if (module) filters.push(eq(auditLog.module, module));
     if (type) filters.push(eq(auditLog.type, type));
     if (status) filters.push(eq(auditLog.status, status));
@@ -33,6 +45,15 @@ const auditLogRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/:id', { schema: GetAuditLogSchema }, async (request, reply) => {
     const [found] = await db.select().from(auditLog).where(eq(auditLog.id, request.params.id)).limit(1);
     if (!found) return reply.notFound('Audit log entry not found');
+
+    // TeBAC check for detail view
+    if (['branch_manager', 'claims_officer', 'user'].includes(request.user.role) && request.user.branchId) {
+      const [branch] = await db.select().from(schema.branch).where(eq(schema.branch.id, request.user.branchId)).limit(1);
+      if (branch && found.branchName !== branch.name) {
+        return reply.forbidden('Access denied to audit log outside your territory');
+      }
+    }
+
     return reply.send(found as any);
   });
 };

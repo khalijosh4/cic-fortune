@@ -8,12 +8,13 @@ import {
   ListHospitalSchema, 
   UpdateHospitalSchema 
 } from '#/schemas/hospital.schema.js';
+import { getTerritoryFilters, hasAccess } from '#/utils/tebac.util.js';
 
 const hospitalRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/', { schema: ListHospitalSchema }, async (request, reply) => {
     const { limit = 10, offset = 0, location, minClaimLimit, maxClaimLimit } = request.query;
 
-    const filters = [];
+    const filters = getTerritoryFilters(request.user, hospital);
     if (location) filters.push(sql`${hospital.location} ILIKE ${`%${location}%`}`);
     if (minClaimLimit) filters.push(sql`${hospital.claimLimit} >= ${minClaimLimit}`);
     if (maxClaimLimit) filters.push(sql`${hospital.claimLimit} <= ${maxClaimLimit}`);
@@ -40,6 +41,11 @@ const hospitalRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/:id', async (request: any, reply) => {
     const [found] = await db.select().from(hospital).where(eq(hospital.id, request.params.id)).limit(1);
     if (!found) return reply.notFound('Hospital not found');
+    
+    if (!hasAccess(request.user, found)) {
+      return reply.forbidden('Access denied to hospital outside your territory');
+    }
+    
     return reply.send(found as any);
   });
 

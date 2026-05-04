@@ -12,6 +12,7 @@ import {
   UpdatePremiumSchema 
 } from '#/schemas/premium.schema.js';
 import { PremiumService } from '#/services/premium.service.js';
+import { getTerritoryFilters, hasAccess } from '#/utils/tebac.util.js';
 
 const premiumRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/', { schema: ListPremiumSchema }, async (request, reply) => {
@@ -34,7 +35,8 @@ const premiumRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     if (startDate) filters.push(gte(premium.dueDate, new Date(startDate)));
     if (endDate) filters.push(lte(premium.dueDate, new Date(endDate)));
 
-    if (['branch_manager', 'claims_officer'].includes((request as any).user.role)) {
+    // TeBAC filtering
+    if (['branch_manager', 'claims_officer', 'user'].includes((request as any).user.role)) {
       filters.push(eq(member.branchId, (request as any).user.branchId!));
     }
 
@@ -102,8 +104,21 @@ const premiumRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   });
   
   fastify.get('/:id', { schema: GetPremiumSchema }, async (request, reply) => {
-    const [found] = await db.select().from(premium).where(eq(premium.id, request.params.id)).limit(1);
+    const [found] = await db.select({
+      ...getTableColumns(premium),
+      branchId: member.branchId,
+    })
+    .from(premium)
+    .leftJoin(member, eq(premium.memberId, member.id))
+    .where(eq(premium.id, request.params.id))
+    .limit(1);
+
     if (!found) return reply.notFound('Premium record not found');
+    
+    if (!hasAccess(request.user, found)) {
+      return reply.forbidden('Access denied to premium record outside your territory');
+    }
+    
     return reply.send(found as any);
   });
 

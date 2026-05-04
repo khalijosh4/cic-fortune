@@ -12,6 +12,7 @@ import {
   UpdateClaimSchema 
 } from '#/schemas/claim.schema.js';
 import { ClaimsService } from '#/services/claims.service.js';
+import { getTerritoryFilters, hasAccess } from '#/utils/tebac.util.js';
 
 const claimRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/', { schema: ListClaimSchema }, async (request, reply) => {
@@ -32,11 +33,14 @@ const claimRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     if (startDate) filters.push(gte(claim.createdAt, new Date(startDate)));
     if (endDate) filters.push(lte(claim.createdAt, new Date(endDate)));
 
-    // Role based filtering
-    if (request.user.role === 'hospital') {
-      filters.push(eq(claim.hospitalId, request.user.hospitalId!));
-    } else if (['branch_manager', 'claims_officer'].includes(request.user.role)) {
-      filters.push(eq(member.branchId, (request as any).user.branchId!));
+    // Role based filtering (TeBAC)
+    const territoryFilters = getTerritoryFilters(request.user, claim);
+    // Note: For branch staff, we need to join with member to filter by branchId
+    // Our utility handles direct columns, but for claims we need member branch
+    if (['branch_manager', 'claims_officer', 'user'].includes(request.user.role)) {
+       filters.push(eq(member.branchId, (request as any).user.branchId!));
+    } else if (request.user.role === 'hospital') {
+       filters.push(eq(claim.hospitalId, request.user.hospitalId!));
     }
 
     const whereClause = filters.length > 0 ? and(...filters) : undefined;
@@ -106,8 +110,20 @@ const claimRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   });
 
   fastify.get('/:id', async (request: any, reply) => {
-    const [found] = await db.select().from(claim).where(eq(claim.id, request.params.id)).limit(1);
+    const [found] = await db.select({
+      ...getTableColumns(claim),
+      branchId: member.branchId,
+    })
+    .from(claim)
+    .leftJoin(member, eq(claim.memberId, member.id))
+    .where(eq(claim.id, request.params.id))
+    .limit(1);
+    
     if (!found) return reply.notFound('Claim not found');
+
+    if (!hasAccess(request.user, found)) {
+      return reply.forbidden('Access denied to claim outside your territory');
+    }
 
     const evaluation = await ClaimsService.evaluateClaimLimits(found.id);
     return reply.send({ ...found, evaluation } as any);

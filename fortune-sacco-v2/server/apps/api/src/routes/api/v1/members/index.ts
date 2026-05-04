@@ -9,6 +9,7 @@ import {
   ListMemberSchema, 
   UpdateMemberSchema 
 } from '#/schemas/member.schema.js';
+import { getTerritoryFilters, hasAccess } from '#/utils/tebac.util.js';
 
 const memberRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/', { schema: ListMemberSchema }, async (request, reply) => {
@@ -17,10 +18,8 @@ const memberRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
       coverType, minPremiumRate, maxPremiumRate, status 
     } = request.query;
 
-    const filters = [];
-    if (['branch_manager', 'claims_officer'].includes((request as any).user.role)) {
-      filters.push(eq(member.branchId, (request as any).user.branchId!));
-    } else if (branchId) {
+    const filters = getTerritoryFilters(request.user, member);
+    if (branchId) {
       filters.push(eq(member.branchId, branchId));
     }
     
@@ -109,6 +108,11 @@ const memberRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/:id', async (request: any, reply) => {
     const [found] = await db.select().from(member).where(eq(member.id, request.params.id)).limit(1);
     if (!found) return reply.notFound('Member not found');
+    
+    if (!hasAccess(request.user, found)) {
+      return reply.forbidden('Access denied to member outside your territory');
+    }
+    
     return reply.send(found as any);
   });
 
@@ -119,10 +123,8 @@ const memberRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     const [existing] = await db.select().from(member).where(eq(member.id, request.params.id)).limit(1);
     if (!existing) return reply.notFound('Member not found');
 
-    if (['branch_manager', 'claims_officer'].includes(userRole)) {
-      if (existing.branchId !== userBranch) {
-        return reply.code(403).send({ error: 'Cannot edit member outside your branch territory' } as any);
-      }
+    if (!hasAccess(request.user, existing)) {
+      return reply.forbidden('Cannot edit member outside your territory');
     }
 
     const updateData: any = { ...request.body };
@@ -159,6 +161,13 @@ const memberRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   });
 
   fastify.delete('/:id', async (request: any, reply) => {
+    const [existing] = await db.select().from(member).where(eq(member.id, request.params.id)).limit(1);
+    if (!existing) return reply.notFound('Member not found');
+
+    if (!hasAccess(request.user, existing)) {
+      return reply.forbidden('Access denied to member outside your territory');
+    }
+
     if (!['admin', 'system_admin'].includes(request.user.role)) {
       return reply.forbidden('Only admins can delete members');
     }
