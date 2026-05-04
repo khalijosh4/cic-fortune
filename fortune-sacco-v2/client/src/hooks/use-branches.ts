@@ -21,13 +21,7 @@ interface BranchesResponse {
 export function useBranches(
   limit = 10, 
   offset = 0, 
-  filters?: { 
-    location?: string;
-    minPolicies?: number;
-    maxPolicies?: number;
-    minActivePolicies?: number;
-    maxActivePolicies?: number;
-  }
+  filters?: any
 ) {
   return useQuery<BranchesResponse>({
     queryKey: ['branches', limit, offset, filters],

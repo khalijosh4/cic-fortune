@@ -18,12 +18,7 @@ interface HospitalsResponse {
 export function useHospitals(
   limit = 10, 
   offset = 0, 
-  filters?: { 
-    type?: string;
-    location?: string;
-    minClaimLimit?: number;
-    maxClaimLimit?: number;
-  }
+  filters?: any
 ) {
   return useQuery<HospitalsResponse>({
     queryKey: ['hospitals', limit, offset, filters],
