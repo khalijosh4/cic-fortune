@@ -12,7 +12,7 @@ import {
   UpdatePremiumSchema 
 } from '#/schemas/premium.schema.js';
 import { PremiumService } from '#/services/premium.service.js';
-import { getTerritoryFilters, hasAccess } from '#/utils/tebac.util.js';
+import { hasAccess } from '#/utils/tebac.util.js';
 
 const premiumRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/', { schema: ListPremiumSchema }, async (request, reply) => {

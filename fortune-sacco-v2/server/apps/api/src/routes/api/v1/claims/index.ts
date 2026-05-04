@@ -12,7 +12,7 @@ import {
   UpdateClaimSchema 
 } from '#/schemas/claim.schema.js';
 import { ClaimsService } from '#/services/claims.service.js';
-import { getTerritoryFilters, hasAccess } from '#/utils/tebac.util.js';
+import { hasAccess } from '#/utils/tebac.util.js';
 
 const claimRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/', { schema: ListClaimSchema }, async (request, reply) => {

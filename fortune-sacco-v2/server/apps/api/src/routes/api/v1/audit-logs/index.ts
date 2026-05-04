@@ -8,7 +8,7 @@ import {
   ListAuditLogSchema,
   GetAuditLogSchema
 } from '#/schemas/audit-log.schema.js';
-import { getTerritoryFilters, hasAccess } from '#/utils/tebac.util.js';
+
 
 const auditLogRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/', { schema: ListAuditLogSchema }, async (request, reply) => {
