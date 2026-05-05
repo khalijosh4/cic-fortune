@@ -1,6 +1,10 @@
 import { defineConfig } from 'drizzle-kit';
-import { resolve } from 'path';
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
 import { config } from 'dotenv';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 config({ path: resolve(__dirname, '../../apps/api/.env') });
 
@@ -14,9 +18,11 @@ export default defineConfig({
     database: process.env.POSTGRES_DB as string,
     user: process.env.POSTGRES_USER,
     password: process.env.POSTGRES_PASSWORD,
-    ssl: {
-      rejectUnauthorized: true, // Crucial for Aiven security
-      ca: process.env.DB_CA,     // The content of your certificate
-    },
+    ...(process.env.DB_CA ? {
+      ssl: {
+        rejectUnauthorized: true,
+        ca: process.env.DB_CA,
+      }
+    } : {}),
   }
 });
