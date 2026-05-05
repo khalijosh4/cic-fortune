@@ -1,3 +1,5 @@
+import path from 'node:path';
+
 import FastifyEnv, { type FastifyEnvOptions } from '@fastify/env';
 import { Type } from '@sinclair/typebox';
 
@@ -48,7 +50,10 @@ const schema = Type.Object({
 });
 
 export const autoConfig: FastifyEnvOptions = {
-  schema
+  schema,
+  dotenv: {
+    path: path.join(import.meta.dirname, '../../../.env')
+  }
 };
 
 export default FastifyEnv;
