@@ -25,6 +25,7 @@ logger.info('Preparing database (generate, push, seed)...');
 */
 
   const app = Fastify({
+    pluginTimeout: 60000,
     connectionTimeout: 120_000,
     // 1 minute: suitable for most payloads, including moderate file uploads
     requestTimeout: 60_000,
