@@ -4,8 +4,9 @@
   "packageManager": "pnpm@10.2.0",
   "type": "module",
   "scripts": {
-    "start": "nx run-many -t serve",
-    "build": "nx run-many -t build",
+    "dev": "nx run-many -t serve",
+    "start": "node apps/api/dist/main.js",
+    "build": "NX_DAEMON=false npx nx build api --prod --parallel=1",
     "lint": "nx run-many -t lint",
     "typecheck": "nx run-many -t typecheck",
     "test": "nx run-many -t test",
