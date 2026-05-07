@@ -15,7 +15,7 @@ import { sendEnrollmentEmail, sendEnrollmentSms } from '#/utils/notification.uti
 const memberRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/', { schema: ListMemberSchema }, async (request, reply) => {
     const { 
-      limit = 10, offset = 0, branchId, policyId, 
+      limit = 10, offset = 0, branchId, planId, 
       coverType, 'coverType[]': coverTypes,
       minPremiumRate, maxPremiumRate, 'premiumRange[]': premiumRange,
       status, 'status[]': statuses,
@@ -27,7 +27,7 @@ const memberRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
       filters.push(eq(member.branchId, branchId));
     }
     
-    if (policyId) filters.push(eq(member.policyId, policyId));
+    if (planId) filters.push(eq(member.planId, planId));
     
     if (coverType) filters.push(eq(member.coverType, coverType as any));
     if (coverTypes && coverTypes.length > 0) {
@@ -131,22 +131,22 @@ const memberRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
 
     // Fetch branch and policy names for the notification
     let branchName = 'Unknown Branch';
-    let policyName = 'Insurance Policy';
+    let planName = 'Insurance Plan';
 
     if (newMember.branchId) {
       const [branchRecord] = await db.select({ name: schema.branch.name }).from(schema.branch).where(eq(schema.branch.id, newMember.branchId)).limit(1);
       if (branchRecord) branchName = branchRecord.name;
     }
 
-    if (newMember.policyId) {
-      const [policyRecord] = await db.select({ name: schema.policy.name }).from(schema.policy).where(eq(schema.policy.id, newMember.policyId)).limit(1);
-      if (policyRecord) policyName = policyRecord.name;
+    if (newMember.planId) {
+      const [planRecord] = await db.select({ name: schema.premiumRate.planName }).from(schema.premiumRate).where(eq(schema.premiumRate.id, newMember.planId)).limit(1);
+      if (planRecord) planName = planRecord.name;
     }
 
     const memberDetails = {
       ...newMember,
       branchName,
-      policyName
+      planName
     };
 
     // Send notifications asynchronously (don't block the response)
@@ -229,22 +229,22 @@ const memberRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
 
     // Fetch branch and policy names
     let branchName = 'Unknown Branch';
-    let policyName = 'Insurance Policy';
+    let planName = 'Insurance Plan';
 
     if (found.branchId) {
       const [branchRecord] = await db.select({ name: schema.branch.name }).from(schema.branch).where(eq(schema.branch.id, found.branchId)).limit(1);
       if (branchRecord) branchName = branchRecord.name;
     }
 
-    if (found.policyId) {
-      const [policyRecord] = await db.select({ name: schema.policy.name }).from(schema.policy).where(eq(schema.policy.id, found.policyId)).limit(1);
-      if (policyRecord) policyName = policyRecord.name;
+    if (found.planId) {
+      const [planRecord] = await db.select({ name: schema.premiumRate.planName }).from(schema.premiumRate).where(eq(schema.premiumRate.id, found.planId)).limit(1);
+      if (planRecord) planName = planRecord.name;
     }
 
     const memberDetails = {
       ...found,
       branchName,
-      policyName
+      planName
     };
 
     let emailPromise: Promise<any> = Promise.resolve();

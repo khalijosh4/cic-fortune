@@ -4,7 +4,7 @@ export const ClaimSchema = Type.Object({
   id: Type.String(),
   memberId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   hospitalId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-  policyId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  planId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   amountClaimed: Type.String(),
   amountApproved: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   status: Type.Optional(Type.Union([Type.String(), Type.Null()])),
@@ -16,7 +16,7 @@ export const CreateClaimSchema = {
   body: Type.Object({
     memberId: Type.String(),
     hospitalId: Type.String(),
-    policyId: Type.String(),
+    planId: Type.String(),
     amountClaimed: Type.String(),
     diagnosis: Type.Optional(Type.String()),
   }),

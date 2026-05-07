@@ -8,7 +8,6 @@ import { faker } from '@faker-js/faker';
 // Constants for counts
 const BRANCH_COUNT = 15;
 const HOSPITAL_COUNT = 10;
-const POLICY_COUNT = 20;
 const USER_COUNT = 50;
 const MEMBER_COUNT = 200;
 const CLAIM_COUNT = 100;
@@ -16,8 +15,12 @@ const PREMIUM_COUNT = 300;
 const AUDIT_LOG_COUNT = 100;
 
 async function seed() {
-  console.log('--- Starting Database Seed with Faker ---');
-  faker.seed(12345); // For deterministic results
+  const isProd = process.env.NODE_ENV === 'production' || process.env.SEED_MODE === 'prod';
+  console.log(`--- Starting Database Seed (${isProd ? 'Production' : 'Development'}) ---`);
+  
+  if (!isProd) {
+    faker.seed(12345); // For deterministic results
+  }
 
   try {
     // 1. Seed Initial Admin User
@@ -138,9 +141,16 @@ async function seed() {
 
     // 4.5 Seed Premium Rates
     console.log('Seeding premium rates...');
+    const planId = faker.string.uuid();
     await db.insert(schema.premiumRate).values({
-      id: faker.string.uuid(),
+      id: planId,
       planName: 'Option III',
+      inpatientLimit: '1000000',
+      outpatientLimit: '100000',
+      maternityLimit: '50000',
+      dentalLimit: '10000',
+      opticalLimit: '10000',
+      lastExpenseLimit: '50000',
       m0: '9989',
       m1: '14460',
       m2: '23063',
@@ -150,28 +160,11 @@ async function seed() {
       m6: '36489',
       extra: '5089',
     } as any).onConflictDoNothing();
+    const planIds = [planId];
 
-    // 5. Seed Policies
-    console.log('Seeding policies...');
-    let policyIds: string[] = [];
-    for (let i = 0; i < POLICY_COUNT; i++) {
-      const pId = faker.string.uuid();
-      const annualLimit = faker.number.int({ min: 100000, max: 1000000 });
-      const insertRes: any = await db.insert(schema.policy).values({
-        id: pId,
-        name: faker.commerce.productName() + ' Cover',
-        annualLimit: annualLimit.toString(),
-        outpatientLimit: (annualLimit * 0.2).toString(),
-        inpatientLimit: (annualLimit * 0.7).toString(),
-        maternityLimit: (annualLimit * 0.1).toString(),
-        status: faker.helpers.arrayElement(['active', 'expired', 'pending']),
-      } as any).onConflictDoNothing().returning();
-      const res = insertRes?.[0];
-      if (res) policyIds.push(res.id);
-    }
-    if (policyIds.length === 0) {
-      const allPolicies = await db.select({ id: schema.policy.id }).from(schema.policy);
-      policyIds = allPolicies.map(p => p.id);
+    if (isProd) {
+      console.log('--- Production Database Seed Completed Successfully ---');
+      return;
     }
 
     // 6. Seed Members (Customers)
@@ -193,7 +186,7 @@ async function seed() {
         firstName: faker.person.firstName(),
         lastName: faker.person.lastName(),
         branchId: faker.helpers.arrayElement(branchIds),
-        policyId: faker.helpers.arrayElement(policyIds),
+        planId: faker.helpers.arrayElement(planIds),
         coverType: faker.helpers.arrayElement(['family', 'individual', 'corporate group']),
         dependentsCount,
         premiumRate: calculatedPremium.toString(),
@@ -213,7 +206,6 @@ async function seed() {
     for (let i = 0; i < CLAIM_COUNT; i++) {
       const mId = faker.helpers.arrayElement(memberIds);
       const hId = faker.helpers.arrayElement(hospitalIds);
-      const pId = faker.helpers.arrayElement(policyIds);
       const amount = faker.number.int({ min: 500, max: 50000 });
       const status = faker.helpers.arrayElement(['approved', 'pending', 'rejected']);
       
@@ -221,7 +213,7 @@ async function seed() {
         id: faker.string.uuid(),
         memberId: mId,
         hospitalId: hId,
-        policyId: pId,
+        planId: faker.helpers.arrayElement(planIds),
         amountClaimed: amount.toString(),
         amountApproved: status === 'approved' ? (amount * 0.9).toString() : null,
         status: status,

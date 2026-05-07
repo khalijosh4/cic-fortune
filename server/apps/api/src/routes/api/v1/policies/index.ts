@@ -1,104 +1,76 @@
 import { db, schema } from '@fastify-forge/db';
-import { eq, sql, and, inArray } from 'drizzle-orm';
+import { eq, sql, and } from 'drizzle-orm';
 import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-const { policy } = schema;
+const { premiumRate } = schema;
 
 import { 
-  CreatePolicySchema, 
-  ListPolicySchema, 
-  UpdatePolicySchema 
+  CreatePlanSchema, 
+  ListPlanSchema, 
+  UpdatePlanSchema 
 } from '#/schemas/policy.schema.js';
 
-const policyRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
-  fastify.get('/', { schema: ListPolicySchema }, async (request, reply) => {
+const planRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
+  fastify.get('/', { schema: ListPlanSchema }, async (request, reply) => {
     const { 
-      limit = 10, offset = 0, status, 'status[]': statuses, name,
-      minAnnualLimit, maxAnnualLimit, 'annualRange[]': annualRange,
-      minOutpatientLimit, maxOutpatientLimit, 'outpatientRange[]': outpatientRange,
-      minInpatientLimit, maxInpatientLimit, 'inpatientRange[]': inpatientRange,
-      minMaternityLimit, maxMaternityLimit, 'maternityRange[]': maternityRange,
+      limit = 10, offset = 0, planName
     } = request.query;
 
     const filters = [];
-    if (status) filters.push(eq(policy.status, status as any));
-    if (statuses && statuses.length > 0) {
-      filters.push(inArray(policy.status, statuses as any));
-    }
-    if (name) filters.push(sql`${policy.name} ILIKE ${`%${name}%`}`);
-
-    if (annualRange?.[0] !== undefined) filters.push(sql`${policy.annualLimit} >= ${annualRange[0]}`);
-    if (annualRange?.[1] !== undefined) filters.push(sql`${policy.annualLimit} <= ${annualRange[1]}`);
-    if (minAnnualLimit) filters.push(sql`${policy.annualLimit} >= ${minAnnualLimit}`);
-    if (maxAnnualLimit) filters.push(sql`${policy.annualLimit} <= ${maxAnnualLimit}`);
-    
-    if (outpatientRange?.[0] !== undefined) filters.push(sql`${policy.outpatientLimit} >= ${outpatientRange[0]}`);
-    if (outpatientRange?.[1] !== undefined) filters.push(sql`${policy.outpatientLimit} <= ${outpatientRange[1]}`);
-    if (minOutpatientLimit) filters.push(sql`${policy.outpatientLimit} >= ${minOutpatientLimit}`);
-    if (maxOutpatientLimit) filters.push(sql`${policy.outpatientLimit} <= ${maxOutpatientLimit}`);
-    
-    if (inpatientRange?.[0] !== undefined) filters.push(sql`${policy.inpatientLimit} >= ${inpatientRange[0]}`);
-    if (inpatientRange?.[1] !== undefined) filters.push(sql`${policy.inpatientLimit} <= ${inpatientRange[1]}`);
-    if (minInpatientLimit) filters.push(sql`${policy.inpatientLimit} >= ${minInpatientLimit}`);
-    if (maxInpatientLimit) filters.push(sql`${policy.inpatientLimit} <= ${maxInpatientLimit}`);
-    
-    if (maternityRange?.[0] !== undefined) filters.push(sql`${policy.maternityLimit} >= ${maternityRange[0]}`);
-    if (maternityRange?.[1] !== undefined) filters.push(sql`${policy.maternityLimit} <= ${maternityRange[1]}`);
-    if (minMaternityLimit) filters.push(sql`${policy.maternityLimit} >= ${minMaternityLimit}`);
-    if (maxMaternityLimit) filters.push(sql`${policy.maternityLimit} <= ${maxMaternityLimit}`);
+    if (planName) filters.push(sql`${premiumRate.planName} ILIKE ${`%${planName}%`}`);
 
     const whereClause = filters.length > 0 ? and(...filters) : undefined;
 
-    const data = await db.select().from(policy).where(whereClause).limit(limit).offset(offset);
-    const countResult = await db.select({ count: sql<number>`count(*)` }).from(policy).where(whereClause);
+    const data = await db.select().from(premiumRate).where(whereClause).limit(limit).offset(offset);
+    const countResult = await db.select({ count: sql<number>`count(*)` }).from(premiumRate).where(whereClause);
     const count = countResult[0]?.count ?? 0;
 
     return reply.send({ data: data as any, total: Number(count) });
   });
 
-  fastify.post('/', { schema: CreatePolicySchema }, async (request, reply) => {
-    if (request.user.role !== 'admin') {
-      return reply.forbidden('Only admins can create policies');
+  fastify.post('/', { schema: CreatePlanSchema }, async (request, reply) => {
+    if (request.user.role !== 'admin' && request.user.role !== 'system_admin') {
+      return reply.forbidden('Only admins can create plans');
     }
 
-    const insertResult = await db.insert(policy).values(request.body as any).returning() as any;
-    const newPolicy = insertResult[0];
-    return reply.code(201).send(newPolicy as any);
+    const insertResult = await db.insert(premiumRate).values(request.body as any).returning() as any;
+    const newPlan = insertResult[0];
+    return reply.code(201).send(newPlan as any);
   });
 
   fastify.get('/:id', async (request: any, reply) => {
-    const [found] = await db.select().from(policy).where(eq(policy.id, request.params.id)).limit(1);
-    if (!found) return reply.notFound('Policy not found');
+    const [found] = await db.select().from(premiumRate).where(eq(premiumRate.id, request.params.id)).limit(1);
+    if (!found) return reply.notFound('Plan not found');
     return reply.send(found as any);
   });
 
-  fastify.put('/:id', { schema: UpdatePolicySchema }, async (request, reply) => {
-    if (request.user.role !== 'admin') {
-      return reply.forbidden('Only admins can update policies');
+  fastify.put('/:id', { schema: UpdatePlanSchema }, async (request, reply) => {
+    if (request.user.role !== 'admin' && request.user.role !== 'system_admin') {
+      return reply.forbidden('Only admins can update plans');
     }
 
-    const updateResult = await db.update(policy)
+    const updateResult = await db.update(premiumRate)
       .set(request.body as any)
-      .where(eq(policy.id, request.params.id))
+      .where(eq(premiumRate.id, request.params.id))
       .returning() as any;
     
     const updated = updateResult[0];
     
-    if (!updated) return reply.notFound('Policy not found');
+    if (!updated) return reply.notFound('Plan not found');
     return reply.send(updated as any);
   });
 
   fastify.delete('/:id', async (request: any, reply) => {
-    if (request.user.role !== 'admin') {
-      return reply.forbidden('Only admins can delete policies');
+    if (request.user.role !== 'admin' && request.user.role !== 'system_admin') {
+      return reply.forbidden('Only admins can delete plans');
     }
 
-    const deleteResult = await db.delete(policy)
-      .where(eq(policy.id, request.params.id))
+    const deleteResult = await db.delete(premiumRate)
+      .where(eq(premiumRate.id, request.params.id))
       .returning() as any;
     
-    if (deleteResult.length === 0) return reply.notFound('Policy not found');
-    return reply.send({ message: 'Policy deleted successfully' });
+    if (deleteResult.length === 0) return reply.notFound('Plan not found');
+    return reply.send({ message: 'Plan deleted successfully' });
   });
 };
 
-export default policyRoutes;
+export default planRoutes;

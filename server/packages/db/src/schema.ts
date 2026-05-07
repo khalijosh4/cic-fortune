@@ -51,15 +51,7 @@ export const policy: any = pgTable('policy', {
 });
 */
 
-export const policy = pgTable('policy', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  name: varchar('name', { length: 255 }).notNull(),
-  annualLimit: numeric('annual_limit', { precision: 15, scale: 2 }).notNull(),
-  outpatientLimit: numeric('outpatient_limit', { precision: 15, scale: 2 }),
-  inpatientLimit: numeric('inpatient_limit', { precision: 15, scale: 2 }),
-  maternityLimit: numeric('maternity_limit', { precision: 15, scale: 2 }),
-  status: PolicyStatusEnum('status').default('pending'),
-});
+// Policy table removed in favor of consolidated premiumRate (Plan) table
 
 /*
 export const member: any = pgTable('member', {
@@ -84,7 +76,7 @@ export const member = pgTable('member', {
   email: varchar('email', { length: 100 }),
   phoneNumber: varchar('phone_number', { length: 20 }),
   branchId: uuid('branch_id').references(() => branch.id),
-  policyId: uuid('policy_id').references(() => policy.id), // Current active policy
+  planId: uuid('plan_id').references(() => premiumRate.id), // Reference to the selected plan/rate
   coverType: PolicyCoverTypeEnum('cover_type').default('individual'),
   dependentsCount: integer('dependents_count').default(0),
   premiumRate: numeric('premium_rate', { precision: 12, scale: 2 }).notNull(),
@@ -99,7 +91,7 @@ export const claim = pgTable('claim', {
   id: uuid('id').primaryKey().defaultRandom(),
   memberId: uuid('member_id').references(() => member.id),
   hospitalId: uuid('hospital_id').references(() => hospital.id),
-  policyId: uuid('policy_id').references(() => policy.id),
+  planId: uuid('plan_id').references(() => premiumRate.id),
   amountClaimed: numeric('amount_claimed', { precision: 15, scale: 2 }).notNull(),
   amountApproved: numeric('amount_approved', { precision: 15, scale: 2 }),
   status: ClaimStatusEnum('status').default('pending'),
@@ -127,6 +119,14 @@ export const premium = pgTable('premium', {
 export const premiumRate = pgTable('premium_rate', {
   id: uuid('id').primaryKey().defaultRandom(),
   planName: varchar('plan_name', { length: 100 }).notNull(),
+  // Benefit Limits (from charts)
+  inpatientLimit: numeric('inpatient_limit', { precision: 15, scale: 2 }).notNull(),
+  outpatientLimit: numeric('outpatient_limit', { precision: 15, scale: 2 }).notNull(),
+  maternityLimit: numeric('maternity_limit', { precision: 15, scale: 2 }),
+  dentalLimit: numeric('dental_limit', { precision: 15, scale: 2 }),
+  opticalLimit: numeric('optical_limit', { precision: 15, scale: 2 }),
+  lastExpenseLimit: numeric('last_expense_limit', { precision: 15, scale: 2 }),
+  // Premium Rates (Costs)
   m0: numeric('m_0', { precision: 12, scale: 2 }).notNull(),
   m1: numeric('m_1', { precision: 12, scale: 2 }).notNull(),
   m2: numeric('m_2', { precision: 12, scale: 2 }).notNull(),
@@ -160,13 +160,13 @@ export const branchStats = pgView('branch_stats').as((db) => {
       branchId: branch.id,
       branchName: branch.name,
       totalMembers: sql<number>`count(${member.id})`.mapWith(Number).as('total_members'),
-      totalPolicies: sql<number>`count(${member.policyId})`.mapWith(Number).as('total_policies'),
-      totalActivePolicies: sql<number>`count(${member.policyId}) filter (where ${policy.status} = 'active')`.mapWith(Number).as('total_active_policies'),
+      totalActiveMembers: sql<number>`count(${member.id}) filter (where ${member.status} = 'active')`.mapWith(Number).as('total_active_members'),
+      totalPolicies: sql<number>`count(${member.id})`.mapWith(Number).as('total_policies'),
+      totalActivePolicies: sql<number>`count(${member.id}) filter (where ${member.status} = 'active')`.mapWith(Number).as('total_active_policies'),
       totalClaims: sql<number>`count(${claim.id})`.mapWith(Number).as('total_claims'),
     })
     .from(branch)
     .leftJoin(member, eq(branch.id, member.branchId))
-    .leftJoin(policy, eq(member.policyId, policy.id))
     .leftJoin(claim, eq(member.id, claim.memberId))
     .groupBy(branch.id, branch.name);
 });

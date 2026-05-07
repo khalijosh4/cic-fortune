@@ -1,6 +1,6 @@
 import { db, schema } from '@fastify-forge/db';
 import { eq } from 'drizzle-orm';
-const { claim, member, policy } = schema;
+const { claim, member, premiumRate } = schema;
 
 export class ClaimsService {
   static async evaluateClaimLimits(claimId: string) {
@@ -11,12 +11,12 @@ export class ClaimsService {
     const [memberData] = await db.select().from(member).where(eq(member.id, claimData.memberId)).limit(1);
     if (!memberData) throw new Error('Member not found');
 
-    if (!memberData.policyId) throw new Error('Member has no policy associated');
-    const [policyData] = await db.select().from(policy).where(eq(policy.id, memberData.policyId)).limit(1);
-    if (!policyData) throw new Error('Policy not found');
+    if (!memberData.planId) throw new Error('Member has no plan associated');
+    const [planData] = await db.select().from(premiumRate).where(eq(premiumRate.id, memberData.planId)).limit(1);
+    if (!planData) throw new Error('Plan not found');
 
     const amountClaimed = parseFloat(claimData.amountClaimed);
-    const annualLimit = parseFloat(policyData.annualLimit);
+    const annualLimit = parseFloat(planData.inpatientLimit);
     const usedAnnualLimit = parseFloat(memberData.usedAnnualLimit || '0');
 
     const remainingAnnualLimit = annualLimit - usedAnnualLimit;

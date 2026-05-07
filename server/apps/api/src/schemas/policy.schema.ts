@@ -1,67 +1,80 @@
 import { Type } from '@sinclair/typebox';
 
-export const PolicySchema = Type.Object({
+export const PlanSchema = Type.Object({
   id: Type.String(),
-  name: Type.String(),
-  annualLimit: Type.String(),
-  outpatientLimit: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-  inpatientLimit: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  planName: Type.String(),
+  inpatientLimit: Type.String(),
+  outpatientLimit: Type.String(),
   maternityLimit: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-  status: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  dentalLimit: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  opticalLimit: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  lastExpenseLimit: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  m0: Type.String(),
+  m1: Type.String(),
+  m2: Type.String(),
+  m3: Type.String(),
+  m4: Type.String(),
+  m5: Type.String(),
+  m6: Type.String(),
+  extra: Type.String(),
 });
 
-export const CreatePolicySchema = {
+export const CreatePlanSchema = {
   body: Type.Object({
-    name: Type.String(),
-    annualLimit: Type.String(),
-    outpatientLimit: Type.Optional(Type.String()),
-    inpatientLimit: Type.Optional(Type.String()),
+    planName: Type.String(),
+    inpatientLimit: Type.String(),
+    outpatientLimit: Type.String(),
     maternityLimit: Type.Optional(Type.String()),
-    status: Type.Optional(Type.String()),
+    dentalLimit: Type.Optional(Type.String()),
+    opticalLimit: Type.Optional(Type.String()),
+    lastExpenseLimit: Type.Optional(Type.String()),
+    m0: Type.String(),
+    m1: Type.String(),
+    m2: Type.String(),
+    m3: Type.String(),
+    m4: Type.String(),
+    m5: Type.String(),
+    m6: Type.String(),
+    extra: Type.String(),
   }),
   response: {
-    201: PolicySchema,
+    201: PlanSchema,
   },
 };
 
-export const UpdatePolicySchema = {
+export const UpdatePlanSchema = {
   params: Type.Object({ id: Type.String() }),
   body: Type.Object({
-    name: Type.Optional(Type.String()),
-    annualLimit: Type.Optional(Type.String()),
-    outpatientLimit: Type.Optional(Type.String()),
+    planName: Type.Optional(Type.String()),
     inpatientLimit: Type.Optional(Type.String()),
+    outpatientLimit: Type.Optional(Type.String()),
     maternityLimit: Type.Optional(Type.String()),
-    status: Type.Optional(Type.String()),
+    dentalLimit: Type.Optional(Type.String()),
+    opticalLimit: Type.Optional(Type.String()),
+    lastExpenseLimit: Type.Optional(Type.String()),
+    m0: Type.Optional(Type.String()),
+    m1: Type.Optional(Type.String()),
+    m2: Type.Optional(Type.String()),
+    m3: Type.Optional(Type.String()),
+    m4: Type.Optional(Type.String()),
+    m5: Type.Optional(Type.String()),
+    m6: Type.Optional(Type.String()),
+    extra: Type.Optional(Type.String()),
   }),
   response: {
-    200: PolicySchema,
+    200: PlanSchema,
   },
 };
 
-export const ListPolicySchema = {
+export const ListPlanSchema = {
   querystring: Type.Object({
     limit: Type.Optional(Type.Number()),
     offset: Type.Optional(Type.Number()),
-    status: Type.Optional(Type.String()),
-    'status[]': Type.Optional(Type.Array(Type.String())),
-    name: Type.Optional(Type.String()),
-    minAnnualLimit: Type.Optional(Type.Number()),
-    maxAnnualLimit: Type.Optional(Type.Number()),
-    'annualRange[]': Type.Optional(Type.Array(Type.Number())),
-    minOutpatientLimit: Type.Optional(Type.Number()),
-    maxOutpatientLimit: Type.Optional(Type.Number()),
-    'outpatientRange[]': Type.Optional(Type.Array(Type.Number())),
-    minInpatientLimit: Type.Optional(Type.Number()),
-    maxInpatientLimit: Type.Optional(Type.Number()),
-    'inpatientRange[]': Type.Optional(Type.Array(Type.Number())),
-    minMaternityLimit: Type.Optional(Type.Number()),
-    maxMaternityLimit: Type.Optional(Type.Number()),
-    'maternityRange[]': Type.Optional(Type.Array(Type.Number())),
+    planName: Type.Optional(Type.String()),
   }),
   response: {
     200: Type.Object({
-      data: Type.Array(PolicySchema),
+      data: Type.Array(PlanSchema),
       total: Type.Number(),
     }),
   },

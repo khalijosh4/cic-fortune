@@ -16,4 +16,6 @@ CREATE TABLE "premium_rate" (
 	"extra" numeric(12, 2) NOT NULL
 );
 --> statement-breakpoint
+ALTER TABLE "member" ADD COLUMN "email" varchar(100);--> statement-breakpoint
+ALTER TABLE "member" ADD COLUMN "phone_number" varchar(20);--> statement-breakpoint
 ALTER TABLE "member" ADD COLUMN "dependents_count" integer DEFAULT 0;

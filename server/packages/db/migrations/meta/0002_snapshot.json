@@ -1,5 +1,5 @@
 {
-  "id": "ac1fce0f-2193-4eb4-9a02-94be266cedbc",
+  "id": "d01cc589-953b-46ed-85eb-a5a0d9b569c4",
   "prevId": "75fd240b-e654-4cb3-9283-1fa60230a404",
   "version": "7",
   "dialect": "postgresql",
@@ -324,6 +324,18 @@
           "type": "varchar(50)",
           "primaryKey": false,
           "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "phone_number": {
+          "name": "phone_number",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
         },
         "branch_id": {
           "name": "branch_id",
