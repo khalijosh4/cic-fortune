@@ -11,7 +11,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { cn } from '@/lib/utils'
+import { cn, getMinMax } from '@/lib/utils'
 import { type NavigateFn, useTableUrlState } from '@/hooks/use-table-url-state'
 import {
   Table,
@@ -138,6 +138,7 @@ export function MembersTable({ data, total, search, navigate }: DataTableProps) 
           {
             columnId: 'premiumRate',
             title: 'Premium Rate',
+            ...getMinMax(data, d => d.premiumRate)
           }
         ]}
       />

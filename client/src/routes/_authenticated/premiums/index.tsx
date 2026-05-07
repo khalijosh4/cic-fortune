@@ -6,6 +6,11 @@ const premiumSearchSchema = z.object({
   page: z.number().optional().catch(1),
   pageSize: z.number().optional().catch(20),
   paymentId: z.string().optional().catch(''),
+  status: z.array(z.string()).optional().catch([]),
+  amountDueRange: z.array(z.number()).optional().catch([]),
+  amountPaidRange: z.array(z.number()).optional().catch([]),
+  dueDateRange: z.array(z.string()).optional().catch([]),
+  name: z.string().optional().catch(''),
 })
 
 export const Route = createFileRoute('/_authenticated/premiums/')({

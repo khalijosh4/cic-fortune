@@ -1,5 +1,5 @@
 import { db, schema } from '@fastify-forge/db';
-import { eq, sql, and } from 'drizzle-orm';
+import { eq, sql, and, inArray } from 'drizzle-orm';
 import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 const { hospital } = schema;
 
@@ -12,10 +12,17 @@ import { getTerritoryFilters, hasAccess } from '#/utils/tebac.util.js';
 
 const hospitalRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/', { schema: ListHospitalSchema }, async (request, reply) => {
-    const { limit = 10, offset = 0, location, minClaimLimit, maxClaimLimit } = request.query;
+    const { limit = 10, offset = 0, location, name, 'type[]': types, minClaimLimit, maxClaimLimit, 'claimLimitRange[]': claimLimitRange } = request.query;
 
     const filters = getTerritoryFilters(request.user, hospital);
     if (location) filters.push(sql`${hospital.location} ILIKE ${`%${location}%`}`);
+    if (name) filters.push(sql`${hospital.name} ILIKE ${`%${name}%`}`);
+    if (types && types.length > 0) {
+      filters.push(inArray(hospital.type, types as any));
+    }
+    
+    if (claimLimitRange?.[0] !== undefined) filters.push(sql`${hospital.claimLimit} >= ${claimLimitRange[0]}`);
+    if (claimLimitRange?.[1] !== undefined) filters.push(sql`${hospital.claimLimit} <= ${claimLimitRange[1]}`);
     if (minClaimLimit) filters.push(sql`${hospital.claimLimit} >= ${minClaimLimit}`);
     if (maxClaimLimit) filters.push(sql`${hospital.claimLimit} <= ${maxClaimLimit}`);
 

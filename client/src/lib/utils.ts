@@ -46,3 +46,26 @@ export function getDisplayNameInitials(name: string) {
   }
   return parts[0].slice(0, 2).toUpperCase()
 }
+
+export function getMinMax<T>(data: T[], getter: (item: T) => number | string | undefined | null) {
+  if (!data || data.length === 0) return { min: 0, max: 1000000 }
+  
+  let min = Infinity
+  let max = -Infinity
+  
+  for (const item of data) {
+    const val = Number(getter(item))
+    if (!isNaN(val)) {
+      if (val < min) min = val
+      if (val > max) max = val
+    }
+  }
+  
+  if (min === Infinity || max === -Infinity) return { min: 0, max: 1000000 }
+  
+  if (min === max) {
+    return { min: Math.max(0, min - 100), max: max + 100 }
+  }
+  
+  return { min, max }
+}

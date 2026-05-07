@@ -11,7 +11,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { cn } from '@/lib/utils'
+import { cn, getMinMax } from '@/lib/utils'
 import { type NavigateFn, useTableUrlState } from '@/hooks/use-table-url-state'
 import {
   Table,
@@ -120,6 +120,7 @@ export function HospitalsTable({ data, total, search, navigate }: DataTableProps
           {
             columnId: 'claimLimit',
             title: 'Claim Limit',
+            ...getMinMax(data, d => d.claimLimit)
           }
         ]}
       />

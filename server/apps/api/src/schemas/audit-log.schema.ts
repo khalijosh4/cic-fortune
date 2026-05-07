@@ -18,11 +18,17 @@ export const ListAuditLogSchema = {
     limit: Type.Optional(Type.Number()),
     offset: Type.Optional(Type.Number()),
     module: Type.Optional(Type.String()),
+    'module[]': Type.Optional(Type.Array(Type.String())),
     type: Type.Optional(Type.String()),
+    'type[]': Type.Optional(Type.Array(Type.String())),
     status: Type.Optional(Type.String()),
+    'status[]': Type.Optional(Type.Array(Type.String())),
     userRole: Type.Optional(Type.String()),
+    'userRole[]': Type.Optional(Type.Array(Type.String())),
     startDate: Type.Optional(Type.String()),
     endDate: Type.Optional(Type.String()),
+    'timestampRange[]': Type.Optional(Type.Array(Type.String())),
+    action: Type.Optional(Type.String()),
   }),
   response: {
     200: Type.Object({

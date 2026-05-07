@@ -21,7 +21,7 @@ RUN pnpm install --ignore-scripts
 COPY . .
 
 # Build the api app and its dependencies using Nx
-RUN npx nx build api --prod
+RUN npx nx build api
 
 # Stage 2: Runtime
 FROM node:24-alpine AS runner
@@ -44,7 +44,7 @@ COPY --from=builder /app/packages/logger/dist ./packages/logger/dist
 
 # Install ONLY production dependencies
 # This recreates the workspace symlinks correctly
-RUN pnpm install --prod --ignore-scripts
+RUN pnpm install --ignore-scripts
 
 EXPOSE 8080
 

@@ -1,5 +1,5 @@
 import { db, schema } from '@fastify-forge/db';
-import { eq, sql, and, desc, gte, lte } from 'drizzle-orm';
+import { eq, sql, and, desc, gte, lte, inArray } from 'drizzle-orm';
 import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 
 const { auditLog } = schema;
@@ -12,7 +12,15 @@ import {
 
 const auditLogRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/', { schema: ListAuditLogSchema }, async (request, reply) => {
-    const { limit = 10, offset = 0, module, type, status, userRole, startDate, endDate } = request.query;
+    const { 
+      limit = 10, offset = 0, 
+      module, 'module[]': modules,
+      type, 'type[]': types,
+      status, 'status[]': statuses,
+      userRole, 'userRole[]': userRoles,
+      startDate, endDate, 'timestampRange[]': timestampRange,
+      action
+    } = request.query;
 
     const filters = [];
     
@@ -22,16 +30,34 @@ const auditLogRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
       if (branch) {
         filters.push(eq(auditLog.branchName, branch.name));
       }
-    } else if (request.user.role === 'hospital' && request.user.hospitalId) {
-       // Audit logs don't have hospitalId/hospitalName currently, but we can filter if they did
     }
 
     if (module) filters.push(eq(auditLog.module, module));
+    if (modules && modules.length > 0) {
+      filters.push(inArray(auditLog.module, modules as any));
+    }
+
     if (type) filters.push(eq(auditLog.type, type));
+    if (types && types.length > 0) {
+      filters.push(inArray(auditLog.type, types as any));
+    }
+
     if (status) filters.push(eq(auditLog.status, status));
+    if (statuses && statuses.length > 0) {
+      filters.push(inArray(auditLog.status, statuses as any));
+    }
+
     if (userRole) filters.push(eq(auditLog.userRole, userRole));
+    if (userRoles && userRoles.length > 0) {
+      filters.push(inArray(auditLog.userRole, userRoles as any));
+    }
+
+    if (timestampRange?.[0]) filters.push(gte(auditLog.timestamp, new Date(timestampRange[0])));
+    if (timestampRange?.[1]) filters.push(lte(auditLog.timestamp, new Date(timestampRange[1])));
     if (startDate) filters.push(gte(auditLog.timestamp, new Date(startDate)));
     if (endDate) filters.push(lte(auditLog.timestamp, new Date(endDate)));
+
+    if (action) filters.push(sql`${auditLog.action} ILIKE ${`%${action}%`}`);
 
     const whereClause = filters.length > 0 ? and(...filters) : undefined;
 

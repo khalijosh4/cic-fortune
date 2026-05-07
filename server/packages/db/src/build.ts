@@ -4,8 +4,10 @@ import dotenv from 'dotenv';
 import path from 'path';
 
 // Try to load .env from apps/api
-dotenv.config({ path: path.resolve(process.cwd(), '../../apps/api/.env') });
-
+// Only try to load from file if variables aren't already in the environment
+if (!process.env.POSTGRES_HOST) {
+  dotenv.config({ path: path.resolve(process.cwd(), '../../apps/api/.env') });
+}
 async function checkDatabaseConnection() {
   const { POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, DB_CA } = process.env;
   

@@ -18,11 +18,10 @@ export default defineConfig({
     database: process.env.POSTGRES_DB as string,
     user: process.env.POSTGRES_USER,
     password: process.env.POSTGRES_PASSWORD,
-    ...(process.env.DB_CA ? {
-      ssl: {
-        rejectUnauthorized: true,
-        ca: process.env.DB_CA,
-      }
-    } : {}),
+    // Explicitly set ssl based on presence of DB_CA
+    ssl: process.env.DB_CA ? {
+      rejectUnauthorized: true,
+      ca: process.env.DB_CA,
+    } : false,
   }
 });

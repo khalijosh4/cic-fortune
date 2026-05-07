@@ -7,6 +7,9 @@ const claimSearchSchema = z.object({
   pageSize: z.number().optional().catch(20),
   status: z.array(z.string()).optional().catch([]),
   claimId: z.string().optional().catch(''),
+  claimedRange: z.array(z.number()).optional().catch([]),
+  approvedRange: z.array(z.number()).optional().catch([]),
+  name: z.string().optional().catch(''),
 })
 
 export const Route = createFileRoute('/_authenticated/claims/')({

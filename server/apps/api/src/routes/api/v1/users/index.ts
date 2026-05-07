@@ -1,5 +1,5 @@
 import { db, schema } from '@fastify-forge/db';
-import { eq, sql, and } from 'drizzle-orm';
+import { eq, sql, and, inArray } from 'drizzle-orm';
 import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import bcrypt from 'bcryptjs';
 
@@ -14,13 +14,24 @@ import { getTerritoryFilters, hasAccess } from '#/utils/tebac.util.js';
 
 const userRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/', { schema: ListUserSchema }, async (request, reply) => {
-    const { limit = 10, offset = 0, role, branchId, name } = request.query;
+    const { limit = 10, offset = 0, role, 'role[]': roles, branchId, 'branchId[]': branchIds, name, email } = request.query;
 
     const filters = getTerritoryFilters(request.user, user);
     if (role) filters.push(eq(user.role, role as any));
+    if (roles && roles.length > 0) {
+      filters.push(inArray(user.role, roles as any));
+    }
+    
     if (branchId) filters.push(eq(user.branchId, branchId));
+    if (branchIds && branchIds.length > 0) {
+      filters.push(inArray(user.branchId, branchIds as any));
+    }
+
     if (name) {
       filters.push(sql`(${user.firstName} || ' ' || ${user.lastName}) ILIKE ${`%${name}%`}`);
+    }
+    if (email) {
+      filters.push(sql`${user.email} ILIKE ${`%${email}%`}`);
     }
 
     const whereClause = filters.length > 0 ? and(...filters) : undefined;

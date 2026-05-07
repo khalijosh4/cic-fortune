@@ -1,5 +1,5 @@
 import { db, schema } from '@fastify-forge/db';
-import { eq, sql, and, getTableColumns } from 'drizzle-orm';
+import { eq, sql, and, getTableColumns, inArray } from 'drizzle-orm';
 import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 const { member } = schema;
@@ -15,7 +15,9 @@ const memberRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/', { schema: ListMemberSchema }, async (request, reply) => {
     const { 
       limit = 10, offset = 0, branchId, policyId, 
-      coverType, minPremiumRate, maxPremiumRate, status,
+      coverType, 'coverType[]': coverTypes,
+      minPremiumRate, maxPremiumRate, 'premiumRange[]': premiumRange,
+      status, 'status[]': statuses,
       name, branchName
     } = request.query;
 
@@ -25,8 +27,19 @@ const memberRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     }
     
     if (policyId) filters.push(eq(member.policyId, policyId));
+    
     if (coverType) filters.push(eq(member.coverType, coverType as any));
+    if (coverTypes && coverTypes.length > 0) {
+      filters.push(inArray(member.coverType, coverTypes as any));
+    }
+
     if (status) filters.push(eq(member.status, status as any));
+    if (statuses && statuses.length > 0) {
+      filters.push(inArray(member.status, statuses as any));
+    }
+
+    if (premiumRange?.[0] !== undefined) filters.push(sql`${member.premiumRate} >= ${premiumRange[0]}`);
+    if (premiumRange?.[1] !== undefined) filters.push(sql`${member.premiumRate} <= ${premiumRange[1]}`);
     if (minPremiumRate) filters.push(sql`${member.premiumRate} >= ${minPremiumRate}`);
     if (maxPremiumRate) filters.push(sql`${member.premiumRate} <= ${maxPremiumRate}`);
     

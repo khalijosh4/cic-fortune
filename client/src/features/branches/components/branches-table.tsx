@@ -11,7 +11,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { cn } from '@/lib/utils'
+import { cn, getMinMax } from '@/lib/utils'
 import { type NavigateFn, useTableUrlState } from '@/hooks/use-table-url-state'
 import {
   Table,
@@ -106,10 +106,12 @@ export function BranchesTable({ data, total, search, navigate }: DataTableProps)
           {
             columnId: 'totalPolicies',
             title: 'Policies',
+            ...getMinMax(data, d => d.totalPolicies)
           },
           {
             columnId: 'totalActivePolicies',
             title: 'Active Policies',
+            ...getMinMax(data, d => d.totalActivePolicies)
           }
         ]}
       />

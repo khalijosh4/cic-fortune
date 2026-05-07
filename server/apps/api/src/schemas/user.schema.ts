@@ -54,8 +54,11 @@ export const ListUserSchema = {
     limit: Type.Optional(Type.Number()),
     offset: Type.Optional(Type.Number()),
     role: Type.Optional(Type.String()),
+    'role[]': Type.Optional(Type.Array(Type.String())),
     branchId: Type.Optional(Type.String()),
+    'branchId[]': Type.Optional(Type.Array(Type.String())),
     name: Type.Optional(Type.String()),
+    email: Type.Optional(Type.String()),
   }),
   response: {
     200: Type.Object({

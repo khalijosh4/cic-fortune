@@ -43,11 +43,14 @@ export const ListBranchSchema = {
   querystring: Type.Object({
     limit: Type.Optional(Type.Number()),
     offset: Type.Optional(Type.Number()),
+    branchName: Type.Optional(Type.String()),
     location: Type.Optional(Type.String()),
     minPolicies: Type.Optional(Type.Number()),
     maxPolicies: Type.Optional(Type.Number()),
+    'policiesRange[]': Type.Optional(Type.Array(Type.Number())),
     minActivePolicies: Type.Optional(Type.Number()),
     maxActivePolicies: Type.Optional(Type.Number()),
+    'activePoliciesRange[]': Type.Optional(Type.Array(Type.Number())),
   }),
   response: {
     200: Type.Object({

@@ -11,7 +11,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { cn } from '@/lib/utils'
+import { cn, getMinMax } from '@/lib/utils'
 import { type NavigateFn, useTableUrlState } from '@/hooks/use-table-url-state'
 import {
   Table,
@@ -115,10 +115,10 @@ export function PoliciesTable({ data, total, search, navigate }: DataTableProps)
           },
         ]}
         rangeFilters={[
-          { columnId: 'annualLimit', title: 'Annual Limit' },
-          { columnId: 'outpatientLimit', title: 'Outpatient' },
-          { columnId: 'inpatientLimit', title: 'Inpatient' },
-          { columnId: 'maternityLimit', title: 'Maternity' },
+          { columnId: 'annualLimit', title: 'Annual Limit', ...getMinMax(data, d => d.annualLimit) },
+          { columnId: 'outpatientLimit', title: 'Outpatient', ...getMinMax(data, d => d.outpatientLimit) },
+          { columnId: 'inpatientLimit', title: 'Inpatient', ...getMinMax(data, d => d.inpatientLimit) },
+          { columnId: 'maternityLimit', title: 'Maternity', ...getMinMax(data, d => d.maternityLimit) },
         ]}
       />
       <div className='overflow-hidden rounded-md border'>

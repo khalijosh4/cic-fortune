@@ -17,21 +17,44 @@ import { hasAccess } from '#/utils/tebac.util.js';
 const premiumRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/', { schema: ListPremiumSchema }, async (request, reply) => {
     const { 
-      limit = 10, offset = 0, memberId, status,
-      minAmountDue, maxAmountDue, minAmountPaid, maxAmountPaid,
-      startDate, endDate, name
+      limit = 10, offset = 0, memberId, status, 'status[]': statuses,
+      minAmountDue, maxAmountDue, 'amountDueRange[]': amountDueRange,
+      minAmountPaid, maxAmountPaid, 'amountPaidRange[]': amountPaidRange,
+      startDate, endDate, 'dueDateRange[]': dueDateRange, name
     } = request.query;
 
     const filters = [];
     if (memberId) filters.push(eq(premium.memberId, memberId));
+    
+    const applyStatusFilter = (s: string) => {
+      if (s === 'paid') return sql`${premium.amountPaid} IS NOT NULL AND ${premium.amountPaid} >= ${premium.amountDue}`;
+      if (s === 'unpaid') return sql`${premium.amountPaid} IS NULL OR ${premium.amountPaid} < ${premium.amountDue}`;
+      return null;
+    };
+
     if (status) {
-      if (status === 'paid') filters.push(sql`${premium.amountPaid} IS NOT NULL AND ${premium.amountPaid} >= ${premium.amountDue}`);
-      else if (status === 'unpaid') filters.push(sql`${premium.amountPaid} IS NULL OR ${premium.amountPaid} < ${premium.amountDue}`);
+      const f = applyStatusFilter(status);
+      if (f) filters.push(f);
     }
+    if (statuses && statuses.length > 0) {
+      const statusFilters = statuses.map(applyStatusFilter).filter((f): f is NonNullable<ReturnType<typeof applyStatusFilter>> => f !== null);
+      if (statusFilters.length > 0) {
+        filters.push(sql`(${sql.join(statusFilters, sql` OR `)})`);
+      }
+    }
+
+    if (amountDueRange?.[0] !== undefined) filters.push(sql`${premium.amountDue} >= ${amountDueRange[0]}`);
+    if (amountDueRange?.[1] !== undefined) filters.push(sql`${premium.amountDue} <= ${amountDueRange[1]}`);
     if (minAmountDue) filters.push(sql`${premium.amountDue} >= ${minAmountDue}`);
     if (maxAmountDue) filters.push(sql`${premium.amountDue} <= ${maxAmountDue}`);
+    
+    if (amountPaidRange?.[0] !== undefined) filters.push(sql`${premium.amountPaid} >= ${amountPaidRange[0]}`);
+    if (amountPaidRange?.[1] !== undefined) filters.push(sql`${premium.amountPaid} <= ${amountPaidRange[1]}`);
     if (minAmountPaid) filters.push(sql`${premium.amountPaid} >= ${minAmountPaid}`);
     if (maxAmountPaid) filters.push(sql`${premium.amountPaid} <= ${maxAmountPaid}`);
+    
+    if (dueDateRange?.[0]) filters.push(gte(premium.dueDate, new Date(dueDateRange[0])));
+    if (dueDateRange?.[1]) filters.push(lte(premium.dueDate, new Date(dueDateRange[1])));
     if (startDate) filters.push(gte(premium.dueDate, new Date(startDate)));
     if (endDate) filters.push(lte(premium.dueDate, new Date(endDate)));
     

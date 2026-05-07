@@ -11,7 +11,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { cn } from '@/lib/utils'
+import { cn, getMinMax } from '@/lib/utils'
 import { type NavigateFn, useTableUrlState } from '@/hooks/use-table-url-state'
 import {
   Table,
@@ -113,8 +113,8 @@ export function ClaimsTable({ data, total, search, navigate }: DataTableProps) {
           },
         ]}
         rangeFilters={[
-          { columnId: 'amountClaimed', title: 'Amount Claimed' },
-          { columnId: 'amountApproved', title: 'Amount Approved' },
+          { columnId: 'amountClaimed', title: 'Amount Claimed', ...getMinMax(data, d => d.amountClaimed) },
+          { columnId: 'amountApproved', title: 'Amount Approved', ...getMinMax(data, d => d.amountApproved) },
         ]}
       />
       <div className='overflow-hidden rounded-md border'>

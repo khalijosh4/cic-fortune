@@ -1,5 +1,5 @@
 import { db, schema } from '@fastify-forge/db';
-import { eq, sql, and, gte, lte, getTableColumns } from 'drizzle-orm';
+import { eq, sql, and, gte, lte, getTableColumns, inArray } from 'drizzle-orm';
 import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 const { claim, member } = schema;
@@ -17,19 +17,33 @@ import { hasAccess } from '#/utils/tebac.util.js';
 const claimRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/', { schema: ListClaimSchema }, async (request, reply) => {
     const { 
-      limit = 10, offset = 0, memberId, hospitalId, status,
-      minAmountClaimed, maxAmountClaimed, minAmountApproved, maxAmountApproved,
-      startDate, endDate, name
+      limit = 10, offset = 0, memberId, hospitalId, status, 'status[]': statuses,
+      minAmountClaimed, maxAmountClaimed, 'claimedRange[]': claimedRange,
+      minAmountApproved, maxAmountApproved, 'approvedRange[]': approvedRange,
+      startDate, endDate, 'timestampRange[]': timestampRange, name
     } = request.query;
 
     const filters = [];
     if (memberId) filters.push(eq(claim.memberId, memberId));
     if (hospitalId) filters.push(eq(claim.hospitalId, hospitalId));
+    
     if (status) filters.push(eq(claim.status, status as any));
+    if (statuses && statuses.length > 0) {
+      filters.push(inArray(claim.status, statuses as any));
+    }
+
+    if (claimedRange?.[0] !== undefined) filters.push(sql`${claim.amountClaimed} >= ${claimedRange[0]}`);
+    if (claimedRange?.[1] !== undefined) filters.push(sql`${claim.amountClaimed} <= ${claimedRange[1]}`);
     if (minAmountClaimed) filters.push(sql`${claim.amountClaimed} >= ${minAmountClaimed}`);
     if (maxAmountClaimed) filters.push(sql`${claim.amountClaimed} <= ${maxAmountClaimed}`);
+    
+    if (approvedRange?.[0] !== undefined) filters.push(sql`${claim.amountApproved} >= ${approvedRange[0]}`);
+    if (approvedRange?.[1] !== undefined) filters.push(sql`${claim.amountApproved} <= ${approvedRange[1]}`);
     if (minAmountApproved) filters.push(sql`${claim.amountApproved} >= ${minAmountApproved}`);
     if (maxAmountApproved) filters.push(sql`${claim.amountApproved} <= ${maxAmountApproved}`);
+    
+    if (timestampRange?.[0]) filters.push(gte(claim.createdAt, new Date(timestampRange[0])));
+    if (timestampRange?.[1]) filters.push(lte(claim.createdAt, new Date(timestampRange[1])));
     if (startDate) filters.push(gte(claim.createdAt, new Date(startDate)));
     if (endDate) filters.push(lte(claim.createdAt, new Date(endDate)));
     

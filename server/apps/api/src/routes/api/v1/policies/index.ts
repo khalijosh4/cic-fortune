@@ -1,5 +1,5 @@
 import { db, schema } from '@fastify-forge/db';
-import { eq, sql, and } from 'drizzle-orm';
+import { eq, sql, and, inArray } from 'drizzle-orm';
 import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 const { policy } = schema;
 
@@ -12,21 +12,37 @@ import {
 const policyRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/', { schema: ListPolicySchema }, async (request, reply) => {
     const { 
-      limit = 10, offset = 0, status,
-      minAnnualLimit, maxAnnualLimit,
-      minOutpatientLimit, maxOutpatientLimit,
-      minInpatientLimit, maxInpatientLimit,
-      minMaternityLimit, maxMaternityLimit
+      limit = 10, offset = 0, status, 'status[]': statuses, name,
+      minAnnualLimit, maxAnnualLimit, 'annualRange[]': annualRange,
+      minOutpatientLimit, maxOutpatientLimit, 'outpatientRange[]': outpatientRange,
+      minInpatientLimit, maxInpatientLimit, 'inpatientRange[]': inpatientRange,
+      minMaternityLimit, maxMaternityLimit, 'maternityRange[]': maternityRange,
     } = request.query;
 
     const filters = [];
     if (status) filters.push(eq(policy.status, status as any));
+    if (statuses && statuses.length > 0) {
+      filters.push(inArray(policy.status, statuses as any));
+    }
+    if (name) filters.push(sql`${policy.name} ILIKE ${`%${name}%`}`);
+
+    if (annualRange?.[0] !== undefined) filters.push(sql`${policy.annualLimit} >= ${annualRange[0]}`);
+    if (annualRange?.[1] !== undefined) filters.push(sql`${policy.annualLimit} <= ${annualRange[1]}`);
     if (minAnnualLimit) filters.push(sql`${policy.annualLimit} >= ${minAnnualLimit}`);
     if (maxAnnualLimit) filters.push(sql`${policy.annualLimit} <= ${maxAnnualLimit}`);
+    
+    if (outpatientRange?.[0] !== undefined) filters.push(sql`${policy.outpatientLimit} >= ${outpatientRange[0]}`);
+    if (outpatientRange?.[1] !== undefined) filters.push(sql`${policy.outpatientLimit} <= ${outpatientRange[1]}`);
     if (minOutpatientLimit) filters.push(sql`${policy.outpatientLimit} >= ${minOutpatientLimit}`);
     if (maxOutpatientLimit) filters.push(sql`${policy.outpatientLimit} <= ${maxOutpatientLimit}`);
+    
+    if (inpatientRange?.[0] !== undefined) filters.push(sql`${policy.inpatientLimit} >= ${inpatientRange[0]}`);
+    if (inpatientRange?.[1] !== undefined) filters.push(sql`${policy.inpatientLimit} <= ${inpatientRange[1]}`);
     if (minInpatientLimit) filters.push(sql`${policy.inpatientLimit} >= ${minInpatientLimit}`);
     if (maxInpatientLimit) filters.push(sql`${policy.inpatientLimit} <= ${maxInpatientLimit}`);
+    
+    if (maternityRange?.[0] !== undefined) filters.push(sql`${policy.maternityLimit} >= ${maternityRange[0]}`);
+    if (maternityRange?.[1] !== undefined) filters.push(sql`${policy.maternityLimit} <= ${maternityRange[1]}`);
     if (minMaternityLimit) filters.push(sql`${policy.maternityLimit} >= ${minMaternityLimit}`);
     if (maxMaternityLimit) filters.push(sql`${policy.maternityLimit} <= ${maxMaternityLimit}`);
 

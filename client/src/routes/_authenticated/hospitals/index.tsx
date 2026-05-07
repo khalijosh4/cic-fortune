@@ -7,6 +7,8 @@ const hospitalSearchSchema = z.object({
   pageSize: z.number().optional().catch(20),
   type: z.array(z.string()).optional().catch([]),
   name: z.string().optional().catch(''),
+  location: z.string().optional().catch(''),
+  claimLimitRange: z.array(z.number()).optional().catch([]),
 })
 
 export const Route = createFileRoute('/_authenticated/hospitals/')({

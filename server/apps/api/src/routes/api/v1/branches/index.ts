@@ -14,14 +14,22 @@ import { getTerritoryFilters, hasAccess } from '#/utils/tebac.util.js';
 const branchRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/', { schema: ListBranchSchema }, async (request, reply) => {
     const { 
-      limit = 10, offset = 0, location, 
-      minPolicies, maxPolicies, minActivePolicies, maxActivePolicies 
+      limit = 10, offset = 0, location, branchName,
+      minPolicies, maxPolicies, 'policiesRange[]': policiesRange,
+      minActivePolicies, maxActivePolicies, 'activePoliciesRange[]': activePoliciesRange,
     } = request.query;
 
     const filters = getTerritoryFilters(request.user, branch);
     if (location) filters.push(sql`${branch.location} ILIKE ${`%${location}%`}`);
+    if (branchName) filters.push(sql`${branch.name} ILIKE ${`%${branchName}%`}`);
+    
+    if (policiesRange?.[0] !== undefined) filters.push(sql`${branchStats.totalPolicies} >= ${policiesRange[0]}`);
+    if (policiesRange?.[1] !== undefined) filters.push(sql`${branchStats.totalPolicies} <= ${policiesRange[1]}`);
     if (minPolicies) filters.push(sql`${branchStats.totalPolicies} >= ${minPolicies}`);
     if (maxPolicies) filters.push(sql`${branchStats.totalPolicies} <= ${maxPolicies}`);
+    
+    if (activePoliciesRange?.[0] !== undefined) filters.push(sql`${branchStats.totalActivePolicies} >= ${activePoliciesRange[0]}`);
+    if (activePoliciesRange?.[1] !== undefined) filters.push(sql`${branchStats.totalActivePolicies} <= ${activePoliciesRange[1]}`);
     if (minActivePolicies) filters.push(sql`${branchStats.totalActivePolicies} >= ${minActivePolicies}`);
     if (maxActivePolicies) filters.push(sql`${branchStats.totalActivePolicies} <= ${maxActivePolicies}`);
 
