@@ -5,8 +5,11 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { useAuditLogs } from '@/hooks/use-audit-logs'
+import { useAuditLogStats } from '@/hooks/use-stats'
 import { QueryError } from '@/components/query-error'
 import { AuditLogsTable } from './components/audit-logs-table'
+import { StatsCard } from '@/components/stats-card'
+import { ClipboardList, CheckCircle2, XCircle, ShieldCheck } from 'lucide-react'
 
 const route = getRouteApi('/_authenticated/audit-logs/')
 
@@ -16,8 +19,9 @@ export function AuditLogs() {
 
   const page = search.page || 1
   const pageSize = search.pageSize || 20
-  
+
   const { data, isLoading, error } = useAuditLogs(pageSize, (page - 1) * pageSize, search)
+  const { data: stats, isLoading: statsLoading } = useAuditLogStats()
 
   return (
     <>
@@ -35,11 +39,41 @@ export function AuditLogs() {
               Track all system activity and user actions.
             </p>
           </div>
-          {data && (
-            <p className='text-sm text-muted-foreground'>
-              {data.total.toLocaleString()} total events
-            </p>
-          )}
+        </div>
+
+        <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
+          <StatsCard
+            title='Total Events'
+            value={stats?.total ?? 0}
+            description='All recorded system actions'
+            icon={ClipboardList}
+            iconClassName='bg-blue-500/10 text-blue-500'
+            isLoading={statsLoading}
+          />
+          <StatsCard
+            title='Successful'
+            value={stats?.success ?? 0}
+            description='Operations completed successfully'
+            icon={CheckCircle2}
+            iconClassName='bg-emerald-500/10 text-emerald-500'
+            isLoading={statsLoading}
+          />
+          <StatsCard
+            title='Errors'
+            value={stats?.error ?? 0}
+            description='Failed or errored operations'
+            icon={XCircle}
+            iconClassName='bg-rose-500/10 text-rose-500'
+            isLoading={statsLoading}
+          />
+          <StatsCard
+            title='Success Rate'
+            value={stats ? `${stats.successRate}%` : '—'}
+            description='Overall system reliability'
+            icon={ShieldCheck}
+            iconClassName='bg-purple-500/10 text-purple-500'
+            isLoading={statsLoading}
+          />
         </div>
 
         {isLoading ? (

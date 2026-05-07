@@ -15,6 +15,31 @@ import { PremiumService } from '#/services/premium.service.js';
 import { hasAccess } from '#/utils/tebac.util.js';
 
 const premiumRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
+  fastify.get('/stats', async (request, reply) => {
+    // TeBAC filtering
+    const filters = [];
+    if (['branch_manager', 'claims_officer', 'user'].includes((request as any).user.role)) {
+      filters.push(eq(member.branchId, (request as any).user.branchId!));
+    }
+    const whereClause = filters.length > 0 ? and(...filters) : undefined;
+
+    const [stats] = await db.select({
+      totalDue: sql<number>`sum(${premium.amountDue})`,
+      totalPaid: sql<number>`sum(${premium.amountPaid})`,
+      count: sql<number>`count(*)`,
+    })
+    .from(premium)
+    .leftJoin(member, eq(premium.memberId, member.id))
+    .where(whereClause);
+
+    const totalDue = Number(stats?.totalDue || 0);
+    const totalPaid = Number(stats?.totalPaid || 0);
+    const outstanding = totalDue - totalPaid;
+    const collectionRate = totalDue > 0 ? Math.round((totalPaid / totalDue) * 100) : 0;
+
+    return reply.send({ totalDue, totalPaid, outstanding, collectionRate, total: Number(stats?.count || 0) });
+  });
+
   fastify.get('/', { schema: ListPremiumSchema }, async (request, reply) => {
     const { 
       limit = 10, offset = 0, memberId, status, 'status[]': statuses,

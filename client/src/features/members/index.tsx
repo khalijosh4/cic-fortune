@@ -5,10 +5,12 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { useMembers } from '@/hooks/use-members'
+import { useMemberStats } from '@/hooks/use-stats'
 import { QueryError } from '@/components/query-error'
 import { MembersTable } from './components/members-table'
+import { StatsCard } from '@/components/stats-card'
 import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
+import { Plus, Users, UserCheck, Clock, UserX } from 'lucide-react'
 
 const route = getRouteApi('/_authenticated/members/')
 
@@ -18,8 +20,9 @@ export function Members() {
 
   const page = search.page || 1
   const pageSize = search.pageSize || 20
-  
+
   const { data, isLoading, error } = useMembers(pageSize, (page - 1) * pageSize, search)
+  const { data: stats, isLoading: statsLoading } = useMemberStats()
 
   return (
     <>
@@ -41,11 +44,41 @@ export function Members() {
             <span>New Member</span> <Plus size={18} />
           </Button>
         </div>
-        {data && (
-          <p className='text-sm text-muted-foreground'>
-            {data.total.toLocaleString()} total members
-          </p>
-        )}
+
+        <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
+          <StatsCard
+            title='Total Members'
+            value={stats?.total ?? 0}
+            description='All enrolled planholders'
+            icon={Users}
+            iconClassName='bg-blue-500/10 text-blue-500'
+            isLoading={statsLoading}
+          />
+          <StatsCard
+            title='Active'
+            value={stats?.active ?? 0}
+            description='Currently active policies'
+            icon={UserCheck}
+            iconClassName='bg-emerald-500/10 text-emerald-500'
+            isLoading={statsLoading}
+          />
+          <StatsCard
+            title='Pending'
+            value={stats?.pending ?? 0}
+            description='Awaiting activation'
+            icon={Clock}
+            iconClassName='bg-amber-500/10 text-amber-500'
+            isLoading={statsLoading}
+          />
+          <StatsCard
+            title='Expired'
+            value={stats?.expired ?? 0}
+            description='Lapsed or expired policies'
+            icon={UserX}
+            iconClassName='bg-rose-500/10 text-rose-500'
+            isLoading={statsLoading}
+          />
+        </div>
 
         {isLoading ? (
           <div className='flex h-64 w-full items-center justify-center'>

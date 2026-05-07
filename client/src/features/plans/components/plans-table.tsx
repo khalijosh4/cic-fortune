@@ -35,7 +35,13 @@ type DataTableProps = {
 
 export function PlansTable({ data, total, search, navigate }: DataTableProps) {
   const [rowSelection, setRowSelection] = useState({})
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
+    m3: false,
+    m4: false,
+    m5: false,
+    m6: false,
+    extra: false,
+  })
   const [sorting, setSorting] = useState<SortingState>([])
 
   const {

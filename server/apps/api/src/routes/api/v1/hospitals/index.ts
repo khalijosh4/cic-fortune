@@ -11,6 +11,18 @@ import {
 import { getTerritoryFilters, hasAccess } from '#/utils/tebac.util.js';
 
 const hospitalRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
+  fastify.get('/stats', async (request, reply) => {
+    const rows = await db.select({
+      type: hospital.type,
+      count: sql<number>`count(*)`,
+    }).from(hospital).groupBy(hospital.type);
+
+    const total = rows.reduce((sum, r) => sum + Number(r.count), 0);
+    const byType = Object.fromEntries(rows.map(r => [r.type, Number(r.count)]));
+
+    return reply.send({ total, byType });
+  });
+
   fastify.get('/', { schema: ListHospitalSchema }, async (request, reply) => {
     const { limit = 10, offset = 0, location, name, 'type[]': types, minClaimLimit, maxClaimLimit, 'claimLimitRange[]': claimLimitRange } = request.query;
 

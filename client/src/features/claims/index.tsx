@@ -5,8 +5,12 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { useClaims } from '@/hooks/use-claims'
+import { useClaimStats } from '@/hooks/use-stats'
 import { QueryError } from '@/components/query-error'
 import { ClaimsTable } from './components/claims-table'
+import { StatsCard } from '@/components/stats-card'
+import { FileText, CheckCircle, Clock, XCircle } from 'lucide-react'
+import { formatCurrency } from '@/lib/utils'
 
 const route = getRouteApi('/_authenticated/claims/')
 
@@ -16,8 +20,9 @@ export function Claims() {
 
   const page = search.page || 1
   const pageSize = search.pageSize || 20
-  
+
   const { data, isLoading, error } = useClaims(pageSize, (page - 1) * pageSize, search)
+  const { data: stats, isLoading: statsLoading } = useClaimStats()
 
   return (
     <>
@@ -35,11 +40,41 @@ export function Claims() {
               View and manage all insurance claims.
             </p>
           </div>
-          {data && (
-            <p className='text-sm text-muted-foreground'>
-              {data.total.toLocaleString()} total claims
-            </p>
-          )}
+        </div>
+
+        <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
+          <StatsCard
+            title='Total Claims'
+            value={stats?.total ?? 0}
+            description={stats ? `${formatCurrency(stats.totalAmountClaimed)} claimed` : ''}
+            icon={FileText}
+            iconClassName='bg-blue-500/10 text-blue-500'
+            isLoading={statsLoading}
+          />
+          <StatsCard
+            title='Approved'
+            value={stats?.approved ?? 0}
+            description={stats ? `${formatCurrency(stats.totalAmountApproved)} paid out` : ''}
+            icon={CheckCircle}
+            iconClassName='bg-emerald-500/10 text-emerald-500'
+            isLoading={statsLoading}
+          />
+          <StatsCard
+            title='Pending'
+            value={stats?.pending ?? 0}
+            description='Awaiting review'
+            icon={Clock}
+            iconClassName='bg-amber-500/10 text-amber-500'
+            isLoading={statsLoading}
+          />
+          <StatsCard
+            title='Rejected'
+            value={stats?.rejected ?? 0}
+            description='Declined claims'
+            icon={XCircle}
+            iconClassName='bg-rose-500/10 text-rose-500'
+            isLoading={statsLoading}
+          />
         </div>
 
         {isLoading ? (

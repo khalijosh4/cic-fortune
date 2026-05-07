@@ -10,6 +10,22 @@ import {
 } from '#/schemas/plan.schema.js';
 
 const planRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
+  fastify.get('/stats', async (request, reply) => {
+    const [stats] = await db.select({
+      total: sql<number>`count(*)`,
+      avgInpatient: sql<number>`avg(${premiumRate.inpatientLimit})`,
+      avgOutpatient: sql<number>`avg(${premiumRate.outpatientLimit})`,
+      avgMaternity: sql<number>`avg(${premiumRate.maternityLimit})`,
+    }).from(premiumRate);
+
+    return reply.send({
+      total: Number(stats?.total || 0),
+      avgInpatient: Number(stats?.avgInpatient || 0),
+      avgOutpatient: Number(stats?.avgOutpatient || 0),
+      avgMaternity: Number(stats?.avgMaternity || 0),
+    });
+  });
+
   fastify.get('/', { schema: ListPlanSchema }, async (request, reply) => {
     const { 
       limit = 10, offset = 0, planName

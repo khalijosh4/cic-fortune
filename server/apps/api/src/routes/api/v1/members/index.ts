@@ -13,6 +13,25 @@ import { getTerritoryFilters, hasAccess } from '#/utils/tebac.util.js';
 import { sendEnrollmentEmail, sendEnrollmentSms } from '#/utils/notification.util.js';
 
 const memberRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
+  fastify.get('/stats', async (request, reply) => {
+    const filters = getTerritoryFilters(request.user, member);
+    const whereClause = filters.length > 0 ? and(...filters) : undefined;
+
+    const [stats] = await db.select({
+      total: sql<number>`count(*)`,
+      active: sql<number>`count(*) filter (where ${member.status} = 'active')`,
+      pending: sql<number>`count(*) filter (where ${member.status} = 'pending')`,
+      expired: sql<number>`count(*) filter (where ${member.status} = 'expired')`,
+    }).from(member).where(whereClause);
+
+    return reply.send({
+      total: Number(stats?.total || 0),
+      active: Number(stats?.active || 0),
+      pending: Number(stats?.pending || 0),
+      expired: Number(stats?.expired || 0),
+    });
+  });
+
   fastify.get('/', { schema: ListMemberSchema }, async (request, reply) => {
     const { 
       limit = 10, offset = 0, branchId, planId, 
@@ -106,8 +125,10 @@ const memberRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     }
 
     // Premium Calculation
-    const [rates] = await db.select().from(schema.premiumRate).limit(1);
-    if (!rates) return reply.code(500).send({ error: 'Premium rates not configured' } as any);
+    if (!payload.planId) return reply.code(400).send({ error: 'Plan is required' } as any);
+    
+    const [rates] = await db.select().from(schema.premiumRate).where(eq(schema.premiumRate.id, payload.planId)).limit(1);
+    if (!rates) return reply.code(400).send({ error: 'Selected plan not found or invalid' } as any);
     
     const dCount = payload.dependentsCount || 0;
     let premiumRate = Number(rates.m0);
@@ -116,7 +137,7 @@ const memberRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     else if (dCount === 3) premiumRate = Number(rates.m3);
     else if (dCount === 4) premiumRate = Number(rates.m4);
     else if (dCount === 5) premiumRate = Number(rates.m5);
-    else if (dCount >= 6) premiumRate = Number(rates.m6) + ((dCount - 6) * Number(rates.extra));
+    else if (dCount >= 6) premiumRate = Number(rates.m6) + (Math.max(0, dCount - 6) * Number(rates.extra));
 
     payload.premiumRate = premiumRate.toString();
 
@@ -194,18 +215,20 @@ const memberRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
       delete updateData.coverType;
     }
 
-    // Recalculate Premium if dependents count changed
-    if (updateData.dependentsCount !== undefined && updateData.dependentsCount !== existing.dependentsCount) {
-      const [rates] = await db.select().from(schema.premiumRate).limit(1);
+    // Recalculate Premium if dependents count or plan changed
+    if ((updateData.dependentsCount !== undefined && updateData.dependentsCount !== existing.dependentsCount) || 
+        (updateData.planId !== undefined && updateData.planId !== existing.planId)) {
+      const planId = updateData.planId || existing.planId;
+      const [rates] = await db.select().from(schema.premiumRate).where(eq(schema.premiumRate.id, planId)).limit(1);
       if (rates) {
-        const dCount = updateData.dependentsCount;
+        const dCount = updateData.dependentsCount !== undefined ? updateData.dependentsCount : existing.dependentsCount;
         let premiumRate = Number(rates.m0);
         if (dCount === 1) premiumRate = Number(rates.m1);
         else if (dCount === 2) premiumRate = Number(rates.m2);
         else if (dCount === 3) premiumRate = Number(rates.m3);
         else if (dCount === 4) premiumRate = Number(rates.m4);
         else if (dCount === 5) premiumRate = Number(rates.m5);
-        else if (dCount >= 6) premiumRate = Number(rates.m6) + ((dCount - 6) * Number(rates.extra));
+        else if (dCount >= 6) premiumRate = Number(rates.m6) + (Math.max(0, dCount - 6) * Number(rates.extra));
         updateData.premiumRate = premiumRate.toString();
       }
     }

@@ -11,6 +11,32 @@ import {
 
 
 const auditLogRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
+  fastify.get('/stats', async (request, reply) => {
+    const filters = [];
+    if (['branch_manager', 'claims_officer', 'user'].includes(request.user.role) && request.user.branchId) {
+      const [branchRecord] = await db.select().from(schema.branch).where(eq(schema.branch.id, request.user.branchId)).limit(1);
+      if (branchRecord) filters.push(eq(auditLog.branchName, branchRecord.name));
+    }
+    const whereClause = filters.length > 0 ? and(...filters) : undefined;
+
+    const [stats] = await db.select({
+      total: sql<number>`count(*)`,
+      success: sql<number>`count(*) filter (where ${auditLog.status} = 'success')`,
+      error: sql<number>`count(*) filter (where ${auditLog.status} = 'error')`,
+    }).from(auditLog).where(whereClause);
+
+    const total = Number(stats?.total || 0);
+    const success = Number(stats?.success || 0);
+    const error = Number(stats?.error || 0);
+
+    return reply.send({
+      total,
+      success,
+      error,
+      successRate: total > 0 ? Math.round((success / total) * 100) : 0,
+    });
+  });
+
   fastify.get('/', { schema: ListAuditLogSchema }, async (request, reply) => {
     const { 
       limit = 10, offset = 0, 

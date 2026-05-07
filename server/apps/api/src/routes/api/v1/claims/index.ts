@@ -15,6 +15,37 @@ import { ClaimsService } from '#/services/claims.service.js';
 import { hasAccess } from '#/utils/tebac.util.js';
 
 const claimRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
+  fastify.get('/stats', async (request, reply) => {
+    const roleFilters = [];
+    if (['branch_manager', 'claims_officer', 'user'].includes(request.user.role)) {
+      roleFilters.push(eq(member.branchId, (request as any).user.branchId!));
+    } else if (request.user.role === 'hospital') {
+      roleFilters.push(eq(claim.hospitalId, request.user.hospitalId!));
+    }
+    const whereClause = roleFilters.length > 0 ? and(...roleFilters) : undefined;
+
+    const [stats] = await db.select({
+      total: sql<number>`count(${claim.id})`,
+      approved: sql<number>`count(${claim.id}) filter (where ${claim.status} = 'approved')`,
+      pending: sql<number>`count(${claim.id}) filter (where ${claim.status} = 'pending')`,
+      rejected: sql<number>`count(${claim.id}) filter (where ${claim.status} = 'rejected')`,
+      totalAmountClaimed: sql<number>`sum(${claim.amountClaimed})`,
+      totalAmountApproved: sql<number>`sum(${claim.amountApproved})`,
+    })
+    .from(claim)
+    .leftJoin(member, eq(claim.memberId, member.id))
+    .where(whereClause);
+
+    return reply.send({
+      total: Number(stats?.total || 0),
+      approved: Number(stats?.approved || 0),
+      pending: Number(stats?.pending || 0),
+      rejected: Number(stats?.rejected || 0),
+      totalAmountClaimed: Number(stats?.totalAmountClaimed || 0),
+      totalAmountApproved: Number(stats?.totalAmountApproved || 0),
+    });
+  });
+
   fastify.get('/', { schema: ListClaimSchema }, async (request, reply) => {
     const { 
       limit = 10, offset = 0, memberId, hospitalId, status, 'status[]': statuses,

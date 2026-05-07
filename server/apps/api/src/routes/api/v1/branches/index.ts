@@ -12,6 +12,27 @@ import {
 import { getTerritoryFilters, hasAccess } from '#/utils/tebac.util.js';
 
 const branchRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
+  fastify.get('/stats', async (request, reply) => {
+    const [stats] = await db.select({
+      total: sql<number>`count(${branch.id})`,
+      totalMembers: sql<number>`sum(${branchStats.totalMembers})`,
+      totalClaims: sql<number>`sum(${branchStats.totalClaims})`,
+    })
+    .from(branchStats)
+    .innerJoin(branch, eq(branchStats.id, branch.id));
+
+    const total = Number(stats?.total || 0);
+    const totalMembers = Number(stats?.totalMembers || 0);
+    const totalClaims = Number(stats?.totalClaims || 0);
+
+    return reply.send({
+      total,
+      totalMembers,
+      totalClaims,
+      avgMembers: total > 0 ? Math.round(totalMembers / total) : 0,
+    });
+  });
+
   fastify.get('/', { schema: ListBranchSchema }, async (request, reply) => {
     const { 
       limit = 10, offset = 0, location, branchName,

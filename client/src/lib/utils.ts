@@ -69,3 +69,12 @@ export function getMinMax<T>(data: T[], getter: (item: T) => number | string | u
   
   return { min, max }
 }
+
+export function formatCurrency(value: number, currency = 'KES') {
+  return new Intl.NumberFormat('en-KE', {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(value)
+}

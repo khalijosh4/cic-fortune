@@ -5,8 +5,12 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { usePremiums } from '@/hooks/use-premiums'
+import { usePremiumStats } from '@/hooks/use-stats'
 import { QueryError } from '@/components/query-error'
 import { PremiumsTable } from './components/premiums-table'
+import { StatsCard } from '@/components/stats-card'
+import { Wallet, TrendingUp, AlertCircle, BarChart3 } from 'lucide-react'
+import { formatCurrency } from '@/lib/utils'
 
 const route = getRouteApi('/_authenticated/premiums/')
 
@@ -16,8 +20,9 @@ export function Premiums() {
 
   const page = search.page || 1
   const pageSize = search.pageSize || 20
-  
+
   const { data, isLoading, error } = usePremiums(pageSize, (page - 1) * pageSize, search)
+  const { data: stats, isLoading: statsLoading } = usePremiumStats()
 
   return (
     <>
@@ -35,11 +40,41 @@ export function Premiums() {
               Track premium payments and outstanding balances.
             </p>
           </div>
-          {data && (
-            <p className='text-sm text-muted-foreground'>
-              {data.total.toLocaleString()} total records
-            </p>
-          )}
+        </div>
+
+        <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
+          <StatsCard
+            title='Total Due'
+            value={stats ? formatCurrency(stats.totalDue) : '—'}
+            description='Cumulative premiums billed'
+            icon={Wallet}
+            iconClassName='bg-blue-500/10 text-blue-500'
+            isLoading={statsLoading}
+          />
+          <StatsCard
+            title='Total Collected'
+            value={stats ? formatCurrency(stats.totalPaid) : '—'}
+            description='Total payments received'
+            icon={TrendingUp}
+            iconClassName='bg-emerald-500/10 text-emerald-500'
+            isLoading={statsLoading}
+          />
+          <StatsCard
+            title='Outstanding'
+            value={stats ? formatCurrency(stats.outstanding) : '—'}
+            description='Remaining balance to collect'
+            icon={AlertCircle}
+            iconClassName='bg-rose-500/10 text-rose-500'
+            isLoading={statsLoading}
+          />
+          <StatsCard
+            title='Collection Rate'
+            value={stats ? `${stats.collectionRate}%` : '—'}
+            description='Payments collected vs billed'
+            icon={BarChart3}
+            iconClassName='bg-amber-500/10 text-amber-500'
+            isLoading={statsLoading}
+          />
         </div>
 
         {isLoading ? (
