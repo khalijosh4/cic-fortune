@@ -30,7 +30,9 @@
     "close-with-grace": "^2.2.0",
     "drizzle-orm": "catalog:",
     "fastify": "catalog:fastify",
-    "fastify-plugin": "catalog:fastify"
+    "fastify-plugin": "catalog:fastify",
+    "mailersend": "^2.8.0",
+    "twilio": "^6.0.1"
   },
   "devDependencies": {
     "@types/bcryptjs": "^3.0.0"

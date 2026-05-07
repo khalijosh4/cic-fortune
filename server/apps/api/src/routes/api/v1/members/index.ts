@@ -10,6 +10,7 @@ import {
   UpdateMemberSchema 
 } from '#/schemas/member.schema.js';
 import { getTerritoryFilters, hasAccess } from '#/utils/tebac.util.js';
+import { sendEnrollmentEmail, sendEnrollmentSms } from '#/utils/notification.util.js';
 
 const memberRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/', { schema: ListMemberSchema }, async (request, reply) => {
@@ -95,6 +96,10 @@ const memberRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
 
     const payload: any = { ...request.body };
 
+    if (!payload.email && !payload.phoneNumber) {
+      return reply.code(400).send({ error: 'Bad Request', message: 'An email address or phone number is required' } as any);
+    }
+
     // TeBAC: force branch assignment for branch staff
     if (['branch_manager', 'claims_officer'].includes(userRole)) {
       payload.branchId = (request as any).user.branchId;
@@ -123,6 +128,32 @@ const memberRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
       usedMaternityLimit: '0',
     } as any).returning() as any;
     const newMember = insertResult[0];
+
+    // Fetch branch name for the notification
+    let branchName = 'Unknown Branch';
+    if (newMember.branchId) {
+      const [branchRecord] = await db.select({ name: schema.branch.name }).from(schema.branch).where(eq(schema.branch.id, newMember.branchId)).limit(1);
+      if (branchRecord) branchName = branchRecord.name;
+    }
+
+    const memberDetails = {
+      ...newMember,
+      branchName
+    };
+
+    // Send notifications asynchronously (don't block the response)
+    if (newMember.email && fastify.config.MAILERSEND_API_TOKEN) {
+      sendEnrollmentEmail(newMember.email, memberDetails, fastify.config.MAILERSEND_API_TOKEN).catch((err: any) => {
+        fastify.log.error(`Failed to send enrollment email to ${newMember.email}: ${err}`);
+      });
+    }
+
+    if (newMember.phoneNumber && fastify.config.TWILIO_ACCOUNT_SID && fastify.config.TWILIO_AUTH_TOKEN && fastify.config.TWILIO_PHONE_NUMBER) {
+      sendEnrollmentSms(newMember.phoneNumber, memberDetails, fastify.config.TWILIO_ACCOUNT_SID, fastify.config.TWILIO_AUTH_TOKEN, fastify.config.TWILIO_PHONE_NUMBER).catch((err: any) => {
+        fastify.log.error(`Failed to send enrollment sms to ${newMember.phoneNumber}: ${err}`);
+      });
+    }
+
     return reply.code(201).send(newMember as any);
   });
 

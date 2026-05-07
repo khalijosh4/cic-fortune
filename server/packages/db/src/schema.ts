@@ -81,6 +81,8 @@ export const member = pgTable('member', {
   id: uuid('id').primaryKey().defaultRandom(),
   firstName: varchar('first_name', { length: 50 }).notNull(),
   lastName: varchar('last_name', { length: 50 }).notNull(),
+  email: varchar('email', { length: 100 }),
+  phoneNumber: varchar('phone_number', { length: 20 }),
   branchId: uuid('branch_id').references(() => branch.id),
   policyId: uuid('policy_id').references(() => policy.id), // Current active policy
   coverType: PolicyCoverTypeEnum('cover_type').default('individual'),

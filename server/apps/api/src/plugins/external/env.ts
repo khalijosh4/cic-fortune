@@ -17,6 +17,10 @@ declare module 'fastify' {
       NODE_ENV: (typeof NodeEnv)[keyof typeof NodeEnv];
       ALLOWED_ORIGINS: string;
       JWT_SECRET: string;
+      MAILERSEND_API_TOKEN: string;
+      TWILIO_ACCOUNT_SID: string;
+      TWILIO_AUTH_TOKEN: string;
+      TWILIO_PHONE_NUMBER: string;
     };
   }
 }
@@ -46,7 +50,11 @@ const schema = Type.Object({
   PORT: Type.Number({ default: 3000 }),
   NODE_ENV: Type.Enum(NodeEnv, { default: NodeEnv.development }),
   JWT_SECRET: Type.String(),
-  ALLOWED_ORIGINS: Type.String({ default: 'http://localhost:5173' })
+  ALLOWED_ORIGINS: Type.String({ default: 'http://localhost:5173' }),
+  MAILERSEND_API_TOKEN: Type.String(),
+  TWILIO_ACCOUNT_SID: Type.String(),
+  TWILIO_AUTH_TOKEN: Type.String(),
+  TWILIO_PHONE_NUMBER: Type.String()
 });
 
 export const autoConfig: FastifyEnvOptions = {

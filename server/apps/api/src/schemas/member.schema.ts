@@ -9,6 +9,8 @@ export const MemberSchema = Type.Object({
   id: Type.String(),
   firstName: Type.String(),
   lastName: Type.String(),
+  email: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  phoneNumber: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   branchId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   policyId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   coverType: Type.Optional(Type.Union([Type.String(), Type.Null()])),
@@ -26,6 +28,8 @@ export const CreateMemberSchema = {
   body: Type.Object({
     firstName: Type.String(),
     lastName: Type.String(),
+    email: Type.Optional(Type.String()),
+    phoneNumber: Type.Optional(Type.String()),
     branchId: Type.Optional(Type.String()),
     policyId: Type.Optional(Type.String()),
     coverType: Type.Optional(Type.String()),
@@ -34,6 +38,7 @@ export const CreateMemberSchema = {
   }),
   response: {
     201: MemberSchema,
+    400: ErrorResponse,
     403: ErrorResponse,
     500: ErrorResponse,
   },
@@ -44,6 +49,8 @@ export const UpdateMemberSchema = {
   body: Type.Object({
     firstName: Type.Optional(Type.String()),
     lastName: Type.Optional(Type.String()),
+    email: Type.Optional(Type.String()),
+    phoneNumber: Type.Optional(Type.String()),
     branchId: Type.Optional(Type.String()),
     policyId: Type.Optional(Type.String()),
     coverType: Type.Optional(Type.String()),
