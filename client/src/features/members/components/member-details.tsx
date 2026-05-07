@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useMember, useUpdateMember, useCreateMember } from '@/hooks/use-members'
 import { useBranches } from '@/hooks/use-branches'
-import { usePolicies } from '@/hooks/use-policies'
+import { usePlans } from '@/hooks/use-plans'
 import { useAuthStore } from '@/stores/auth-store'
 import { Loader2 } from 'lucide-react'
 import { useEffect } from 'react'
@@ -26,7 +26,7 @@ const memberFormSchema = z.object({
   email: z.string().email('Invalid email address').optional().or(z.literal('')),
   phoneNumber: z.string().min(10, 'Phone number must be at least 10 digits').optional().or(z.literal('')),
   branchId: z.string().min(1, 'Branch is required'),
-  policyId: z.string().min(1, 'Policy is required'),
+  planId: z.string().min(1, 'Plan is required'),
   coverType: z.string().min(1, 'Cover type is required'),
   dependentsCount: z.coerce.number().min(0, 'Dependents count cannot be negative'),
   status: z.string().min(1, 'Status is required'),
@@ -38,7 +38,7 @@ interface MemberFormValues {
   email?: string
   phoneNumber?: string
   branchId: string
-  policyId: string
+  planId: string
   coverType: string
   dependentsCount: number
   status: string
@@ -52,7 +52,7 @@ export function MemberDetails({ id }: MemberDetailsProps) {
   const isNew = !id
   const { data: member, isLoading: memberLoading } = useMember(id || '')
   const { data: branchesData } = useBranches(100, 0)
-  const { data: policiesData } = usePolicies(100, 0)
+  const { data: plansData } = usePlans(100, 0)
   const updateMember = useUpdateMember(id || '')
   const createMember = useCreateMember()
   const authUser = useAuthStore((state) => state.auth.user)
@@ -66,7 +66,7 @@ export function MemberDetails({ id }: MemberDetailsProps) {
       email: '',
       phoneNumber: '',
       branchId: '',
-      policyId: '',
+      planId: '',
       coverType: '',
       dependentsCount: 0,
       status: 'active',
@@ -81,7 +81,7 @@ export function MemberDetails({ id }: MemberDetailsProps) {
         email: member.email || '',
         phoneNumber: member.phoneNumber || '',
         branchId: member.branchId || '',
-        policyId: member.policyId || '',
+        planId: member.planId || '',
         coverType: member.coverType || '',
         dependentsCount: member.dependentsCount || 0,
         status: member.status || 'active',
@@ -198,20 +198,20 @@ export function MemberDetails({ id }: MemberDetailsProps) {
               />
               <FormField
                 control={form.control}
-                name='policyId'
+                name='planId'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Policy</FormLabel>
+                    <FormLabel>Plan</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder='Select policy' />
+                          <SelectValue placeholder='Select plan' />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {policiesData?.data.map((policy) => (
-                          <SelectItem key={policy.id} value={policy.id}>
-                            {policy.name}
+                        {plansData?.data.map((plan) => (
+                          <SelectItem key={plan.id} value={plan.id}>
+                            {plan.name}
                           </SelectItem>
                         ))}
                       </SelectContent>

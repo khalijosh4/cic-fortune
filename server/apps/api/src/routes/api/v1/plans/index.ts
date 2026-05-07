@@ -7,7 +7,7 @@ import {
   CreatePlanSchema, 
   ListPlanSchema, 
   UpdatePlanSchema 
-} from '#/schemas/policy.schema.js';
+} from '#/schemas/plan.schema.js';
 
 const planRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/', { schema: ListPlanSchema }, async (request, reply) => {
@@ -28,7 +28,7 @@ const planRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   });
 
   fastify.post('/', { schema: CreatePlanSchema }, async (request, reply) => {
-    if (request.user.role !== 'admin' && request.user.role !== 'system_admin') {
+    if (!['admin', 'system_admin'].includes(request.user.role) && request.user.role !== 'system_admin') {
       return reply.forbidden('Only admins can create plans');
     }
 
@@ -44,7 +44,7 @@ const planRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   });
 
   fastify.put('/:id', { schema: UpdatePlanSchema }, async (request, reply) => {
-    if (request.user.role !== 'admin' && request.user.role !== 'system_admin') {
+    if (!['admin', 'system_admin'].includes(request.user.role) && request.user.role !== 'system_admin') {
       return reply.forbidden('Only admins can update plans');
     }
 
@@ -60,7 +60,7 @@ const planRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   });
 
   fastify.delete('/:id', async (request: any, reply) => {
-    if (request.user.role !== 'admin' && request.user.role !== 'system_admin') {
+    if (!['admin', 'system_admin'].includes(request.user.role) && request.user.role !== 'system_admin') {
       return reply.forbidden('Only admins can delete plans');
     }
 

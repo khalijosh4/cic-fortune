@@ -89,7 +89,7 @@ const claimRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
       }),
     }
   }, async (request, reply) => {
-    if (request.user.role !== 'admin') {
+    if (!['admin', 'system_admin'].includes(request.user.role)) {
       return reply.forbidden('Only admins can update bulk status');
     }
 
@@ -104,7 +104,7 @@ const claimRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
 
   fastify.post('/', { schema: CreateClaimSchema }, async (request, reply) => {
     // Hospitals or admins can submit claims
-    if (request.user.role !== 'admin' && request.user.role !== 'hospital') {
+    if (!['admin', 'system_admin'].includes(request.user.role) && request.user.role !== 'hospital') {
       return reply.forbidden('Only admins or hospitals can submit claims');
     }
 
@@ -147,7 +147,7 @@ const claimRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   });
 
   fastify.post('/:id/approve', { schema: ApproveClaimSchema }, async (request, reply) => {
-    if (request.user.role !== 'admin') {
+    if (!['admin', 'system_admin'].includes(request.user.role)) {
       return reply.forbidden('Only admins can approve claims');
     }
 
@@ -156,7 +156,7 @@ const claimRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   });
 
   fastify.post('/:id/reject', { schema: RejectClaimSchema }, async (request, reply) => {
-    if (request.user.role !== 'admin') {
+    if (!['admin', 'system_admin'].includes(request.user.role)) {
       return reply.forbidden('Only admins can reject claims');
     }
 
@@ -172,7 +172,7 @@ const claimRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   });
 
   fastify.put('/:id', { schema: UpdateClaimSchema }, async (request, reply) => {
-    if (request.user.role !== 'admin') {
+    if (!['admin', 'system_admin'].includes(request.user.role)) {
       return reply.forbidden('Only admins can update claims');
     }
 
@@ -188,7 +188,7 @@ const claimRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   });
 
   fastify.delete('/:id', async (request: any, reply) => {
-    if (request.user.role !== 'admin') {
+    if (!['admin', 'system_admin'].includes(request.user.role)) {
       return reply.forbidden('Only admins can delete claims');
     }
 

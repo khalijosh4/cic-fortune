@@ -54,7 +54,7 @@ export function MembersTable({ data, total, search, navigate }: DataTableProps) 
       { columnId: 'name', searchKey: 'name', type: 'string' },
       { columnId: 'status', searchKey: 'status', type: 'array' },
       { columnId: 'coverType', searchKey: 'coverType', type: 'array' },
-      { columnId: 'branchId', searchKey: 'branchId', type: 'array' },
+      { columnId: 'branchName', searchKey: 'branchId', type: 'array' },
       { columnId: 'premiumRate', searchKey: 'premiumRange', type: 'array' },
     ],
   })
@@ -129,7 +129,7 @@ export function MembersTable({ data, total, search, navigate }: DataTableProps) 
             ],
           },
           {
-            columnId: 'branchId',
+            columnId: 'branchName',
             title: 'Branch',
             options: branchOptions,
           },

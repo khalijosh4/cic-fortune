@@ -50,8 +50,8 @@ export const sidebarData: SidebarData = {
           icon: Hospital,
         },
         {
-          title: 'Policies',
-          url: '/policies',
+          title: 'Plans',
+          url: '/plans',
           icon: ShieldCheck,
         },
         {

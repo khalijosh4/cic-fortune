@@ -15,38 +15,38 @@ const branchRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/', { schema: ListBranchSchema }, async (request, reply) => {
     const { 
       limit = 10, offset = 0, location, branchName,
-      minPolicies, maxPolicies, 'policiesRange[]': policiesRange,
-      minActivePolicies, maxActivePolicies, 'activePoliciesRange[]': activePoliciesRange,
+      minPlans, maxPlans, 'plansRange[]': plansRange,
+      minActivePlans, maxActivePlans, 'activePlansRange[]': activePlansRange,
     } = request.query;
 
     const filters = getTerritoryFilters(request.user, branch);
     if (location) filters.push(sql`${branch.location} ILIKE ${`%${location}%`}`);
     if (branchName) filters.push(sql`${branch.name} ILIKE ${`%${branchName}%`}`);
     
-    if (policiesRange?.[0] !== undefined) filters.push(sql`${branchStats.totalPolicies} >= ${policiesRange[0]}`);
-    if (policiesRange?.[1] !== undefined) filters.push(sql`${branchStats.totalPolicies} <= ${policiesRange[1]}`);
-    if (minPolicies) filters.push(sql`${branchStats.totalPolicies} >= ${minPolicies}`);
-    if (maxPolicies) filters.push(sql`${branchStats.totalPolicies} <= ${maxPolicies}`);
+    if (plansRange?.[0] !== undefined) filters.push(sql`${branchStats.totalPlans} >= ${plansRange[0]}`);
+    if (plansRange?.[1] !== undefined) filters.push(sql`${branchStats.totalPlans} <= ${plansRange[1]}`);
+    if (minPlans) filters.push(sql`${branchStats.totalPlans} >= ${minPlans}`);
+    if (maxPlans) filters.push(sql`${branchStats.totalPlans} <= ${maxPlans}`);
     
-    if (activePoliciesRange?.[0] !== undefined) filters.push(sql`${branchStats.totalActivePolicies} >= ${activePoliciesRange[0]}`);
-    if (activePoliciesRange?.[1] !== undefined) filters.push(sql`${branchStats.totalActivePolicies} <= ${activePoliciesRange[1]}`);
-    if (minActivePolicies) filters.push(sql`${branchStats.totalActivePolicies} >= ${minActivePolicies}`);
-    if (maxActivePolicies) filters.push(sql`${branchStats.totalActivePolicies} <= ${maxActivePolicies}`);
+    if (activePlansRange?.[0] !== undefined) filters.push(sql`${branchStats.totalActivePlans} >= ${activePlansRange[0]}`);
+    if (activePlansRange?.[1] !== undefined) filters.push(sql`${branchStats.totalActivePlans} <= ${activePlansRange[1]}`);
+    if (minActivePlans) filters.push(sql`${branchStats.totalActivePlans} >= ${minActivePlans}`);
+    if (maxActivePlans) filters.push(sql`${branchStats.totalActivePlans} <= ${maxActivePlans}`);
 
     const whereClause = filters.length > 0 ? and(...filters) : undefined;
 
     const data = await db.select({
-      branchId: branchStats.branchId,
-      branchName: branchStats.branchName,
+      branchId: branchStats.id,
+      branchName: branchStats.name,
       totalMembers: branchStats.totalMembers,
-      totalPolicies: branchStats.totalPolicies,
-      totalActivePolicies: branchStats.totalActivePolicies,
+      totalPlans: branchStats.totalPlans,
+      totalActivePlans: branchStats.totalActivePlans,
       totalClaims: branchStats.totalClaims,
       location: branch.location,
       managerName: sql<string>`${schema.user.firstName} || ' ' || ${schema.user.lastName}`.as('manager_name'),
     })
     .from(branchStats)
-    .innerJoin(branch, eq(branchStats.branchId, branch.id))
+    .innerJoin(branch, eq(branchStats.id, branch.id))
     .innerJoin(schema.user, eq(branch.manager, schema.user.id))
     .where(whereClause)
     .limit(limit)
@@ -54,7 +54,7 @@ const branchRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
 
     const countResult = await db.select({ count: sql<number>`count(*)` })
       .from(branchStats)
-      .innerJoin(branch, eq(branchStats.branchId, branch.id))
+      .innerJoin(branch, eq(branchStats.id, branch.id))
       .where(whereClause);
     const count = countResult[0]?.count ?? 0;
 
@@ -63,7 +63,7 @@ const branchRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
 
   fastify.post('/', { schema: CreateBranchSchema }, async (request, reply) => {
     // Only admins should be able to create branches
-    if (request.user.role !== 'admin') {
+    if (!['admin', 'system_admin'].includes(request.user.role)) {
       return reply.forbidden('Only admins can create branches');
     }
 
@@ -84,7 +84,7 @@ const branchRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   });
 
   fastify.put('/:id', { schema: UpdateBranchSchema }, async (request, reply) => {
-    if (request.user.role !== 'admin') {
+    if (!['admin', 'system_admin'].includes(request.user.role)) {
       return reply.forbidden('Only admins can update branches');
     }
 
@@ -100,7 +100,7 @@ const branchRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   });
 
   fastify.delete('/:id', async (request: any, reply) => {
-    if (request.user.role !== 'admin') {
+    if (!['admin', 'system_admin'].includes(request.user.role)) {
       return reply.forbidden('Only admins can delete branches');
     }
 

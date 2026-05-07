@@ -46,7 +46,7 @@ export function SignUp() {
               href='/privacy'
               className='underline underline-offset-4 hover:text-primary'
             >
-              Privacy Policy
+              Privacy Plan
             </a>
             .
           </p>

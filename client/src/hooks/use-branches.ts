@@ -6,8 +6,8 @@ export interface Branch {
   branchId: string
   branchName: string
   totalMembers: number
-  totalPolicies: number
-  totalActivePolicies: number
+  totalPlans: number
+  totalActivePlans: number
   totalClaims: number
   location: string
   managerName: string

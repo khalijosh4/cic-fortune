@@ -22,6 +22,34 @@
       "when": 1778141956701,
       "tag": "0002_blue_quentin_quire",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1778146138527,
+      "tag": "0003_dear_katie_power",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1778147730646,
+      "tag": "0004_curious_molecule_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1778147861396,
+      "tag": "0005_noisy_sebastian_shaw",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1778148014140,
+      "tag": "0006_wealthy_daredevil",
+      "breakpoints": true
     }
   ]
 }

@@ -23,8 +23,8 @@ export const user: any = pgTable('user', {
   email: varchar('email', { length: 100 }).unique(),
   phoneNumber: varchar('phone_number', { length: 15 }),
   password: varchar('password', { length: 255 }).notNull(),
-  branchId: uuid('branch_id').references((): AnyPgColumn => branch.id, { onDelete: 'restrict', onUpdate: 'cascade' }),
-  hospitalId: uuid('hospital_id').references((): AnyPgColumn => hospital.id, { onDelete: 'restrict', onUpdate: 'cascade' }),
+  branchId: uuid('branch_id').references((): AnyPgColumn => branch.id, { onDelete: 'set null', onUpdate: 'cascade' }),
+  hospitalId: uuid('hospital_id').references((): AnyPgColumn => hospital.id, { onDelete: 'set null', onUpdate: 'cascade' }),
   role: RolesEnum('role').notNull().default('user'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date())
@@ -34,7 +34,7 @@ export const branch: any = pgTable('branch', {
   id: uuid('id').primaryKey().notNull().defaultRandom(),
   name: varchar('name', { length: 50 }).notNull(),
   location: varchar('location', { length: 255 }).notNull(),
-  manager: uuid('manager_id').notNull().references((): AnyPgColumn => user.id, { onDelete: 'restrict', onUpdate: 'cascade' }),
+  manager: uuid('manager_id').references((): AnyPgColumn => user.id, { onDelete: 'set null', onUpdate: 'cascade' }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date())
 });
@@ -75,8 +75,8 @@ export const member = pgTable('member', {
   lastName: varchar('last_name', { length: 50 }).notNull(),
   email: varchar('email', { length: 100 }),
   phoneNumber: varchar('phone_number', { length: 20 }),
-  branchId: uuid('branch_id').references(() => branch.id),
-  planId: uuid('plan_id').references(() => premiumRate.id), // Reference to the selected plan/rate
+  branchId: uuid('branch_id').references(() => branch.id, { onDelete: 'set null' }),
+  planId: uuid('plan_id').references(() => premiumRate.id, { onDelete: 'set null' }),
   coverType: PolicyCoverTypeEnum('cover_type').default('individual'),
   dependentsCount: integer('dependents_count').default(0),
   premiumRate: numeric('premium_rate', { precision: 12, scale: 2 }).notNull(),
@@ -157,12 +157,12 @@ export const auditLog = pgTable('audit_log', {
 export const branchStats = pgView('branch_stats').as((db) => {
   return db
     .select({
-      branchId: branch.id,
-      branchName: branch.name,
+      id: branch.id,
+      name: branch.name,
       totalMembers: sql<number>`count(${member.id})`.mapWith(Number).as('total_members'),
       totalActiveMembers: sql<number>`count(${member.id}) filter (where ${member.status} = 'active')`.mapWith(Number).as('total_active_members'),
-      totalPolicies: sql<number>`count(${member.id})`.mapWith(Number).as('total_policies'),
-      totalActivePolicies: sql<number>`count(${member.id}) filter (where ${member.status} = 'active')`.mapWith(Number).as('total_active_policies'),
+      totalPlans: sql<number>`count(${member.id})`.mapWith(Number).as('total_plans'),
+      totalActivePlans: sql<number>`count(${member.id}) filter (where ${member.status} = 'active')`.mapWith(Number).as('total_active_plans'),
       totalClaims: sql<number>`count(${claim.id})`.mapWith(Number).as('total_claims'),
     })
     .from(branch)

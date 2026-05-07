@@ -6,7 +6,7 @@ export interface Claim {
   id: string
   memberId?: string | null
   hospitalId?: string | null
-  policyId?: string | null
+  planId?: string | null
   amountClaimed: string
   amountApproved?: string | null
   status?: string | null

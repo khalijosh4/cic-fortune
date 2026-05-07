@@ -106,7 +106,7 @@ const userRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   });
 
   fastify.delete('/:id', async (request: any, reply) => {
-    if (request.user.role !== 'admin') {
+    if (!['admin', 'system_admin'].includes(request.user.role)) {
       return reply.forbidden('Only admins can delete users');
     }
 

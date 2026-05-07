@@ -4,16 +4,17 @@ import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { PolicyDetails } from '@/features/policies/components/policy-details'
+import { PlanDetails } from '@/features/plans/components/plan-details'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
 import { useNavigate } from '@tanstack/react-router'
 
-export const Route = createFileRoute('/_authenticated/policies/new')({
-  component: NewPolicyPage,
+export const Route = createFileRoute('/_authenticated/plans/$id')({
+  component: PlanPage,
 })
 
-function NewPolicyPage() {
+function PlanPage() {
+  const { id } = Route.useParams()
   const navigate = useNavigate()
 
   return (
@@ -29,19 +30,19 @@ function NewPolicyPage() {
           <Button
             variant='outline'
             size='icon'
-            onClick={() => navigate({ to: '/policies' })}
+            onClick={() => navigate({ to: '/plans' })}
           >
             <ArrowLeft className='h-4 w-4' />
           </Button>
           <div>
-            <h2 className='text-2xl font-bold tracking-tight'>New Policy</h2>
+            <h2 className='text-2xl font-bold tracking-tight'>Plan Details</h2>
             <p className='text-muted-foreground'>
-              Define a new insurance policy with specific coverage limits.
+              View and manage plan coverage and limits.
             </p>
           </div>
         </div>
 
-        <PolicyDetails />
+        <PlanDetails id={id} />
       </Main>
     </>
   )

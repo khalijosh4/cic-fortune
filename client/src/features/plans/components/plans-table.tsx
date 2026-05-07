@@ -22,18 +22,18 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { DataTablePagination, DataTableToolbar } from '@/components/data-table'
-import { Policy } from '@/hooks/use-policies'
-import { policiesColumns as columns } from './policies-columns'
+import { Plan } from '@/hooks/use-plans'
+import { plansColumns as columns } from './plans-columns'
 import { DataTableBulkActions } from './data-table-bulk-actions'
 
 type DataTableProps = {
-  data: Policy[]
+  data: Plan[]
   total: number
   search: Record<string, unknown>
   navigate: NavigateFn
 }
 
-export function PoliciesTable({ data, total, search, navigate }: DataTableProps) {
+export function PlansTable({ data, total, search, navigate }: DataTableProps) {
   const [rowSelection, setRowSelection] = useState({})
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [sorting, setSorting] = useState<SortingState>([])
@@ -50,12 +50,9 @@ export function PoliciesTable({ data, total, search, navigate }: DataTableProps)
     pagination: { defaultPage: 1, defaultPageSize: 20 },
     globalFilter: { enabled: false },
     columnFilters: [
-      { columnId: 'name', searchKey: 'name', type: 'string' },
-      { columnId: 'status', searchKey: 'status', type: 'array' },
-      { columnId: 'annualLimit', searchKey: 'annualRange', type: 'array' },
+      { columnId: 'planName', searchKey: 'planName', type: 'string' },
       { columnId: 'outpatientLimit', searchKey: 'outpatientRange', type: 'array' },
       { columnId: 'inpatientLimit', searchKey: 'inpatientRange', type: 'array' },
-      { columnId: 'maternityLimit', searchKey: 'maternityRange', type: 'array' },
     ],
   })
 
@@ -101,24 +98,12 @@ export function PoliciesTable({ data, total, search, navigate }: DataTableProps)
     >
       <DataTableToolbar
         table={table}
-        searchPlaceholder='Filter policies by name...'
-        searchKey='name'
-        filters={[
-          {
-            columnId: 'status',
-            title: 'Status',
-            options: [
-              { label: 'Active', value: 'active' },
-              { label: 'Expired', value: 'expired' },
-              { label: 'Pending', value: 'pending' },
-            ],
-          },
-        ]}
+        searchPlaceholder='Filter plans by name...'
+        searchKey='planName'
+        filters={[]}
         rangeFilters={[
-          { columnId: 'annualLimit', title: 'Annual Limit', ...getMinMax(data, d => d.annualLimit) },
-          { columnId: 'outpatientLimit', title: 'Outpatient', ...getMinMax(data, d => d.outpatientLimit) },
           { columnId: 'inpatientLimit', title: 'Inpatient', ...getMinMax(data, d => d.inpatientLimit) },
-          { columnId: 'maternityLimit', title: 'Maternity', ...getMinMax(data, d => d.maternityLimit) },
+          { columnId: 'outpatientLimit', title: 'Outpatient', ...getMinMax(data, d => d.outpatientLimit) },
         ]}
       />
       <div className='overflow-hidden rounded-md border'>

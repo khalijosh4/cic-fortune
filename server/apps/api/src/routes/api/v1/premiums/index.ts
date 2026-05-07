@@ -96,7 +96,7 @@ const premiumRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
       }),
     }
   }, async (request: any, reply) => {
-    if (request.user.role !== 'admin') {
+    if (!['admin', 'system_admin'].includes(request.user.role)) {
       return reply.forbidden('Only admins can update bulk status');
     }
 
@@ -112,7 +112,7 @@ const premiumRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   });
 
   fastify.post('/', { schema: CreatePremiumSchema }, async (request, reply) => {
-    if (request.user.role !== 'admin') {
+    if (!['admin', 'system_admin'].includes(request.user.role)) {
       return reply.forbidden('Only admins can generate premiums');
     }
 
@@ -150,7 +150,7 @@ const premiumRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   });
 
   fastify.put('/:id', { schema: UpdatePremiumSchema }, async (request, reply) => {
-    if (request.user.role !== 'admin') {
+    if (!['admin', 'system_admin'].includes(request.user.role)) {
       return reply.forbidden('Only admins can update premiums');
     }
 
@@ -166,7 +166,7 @@ const premiumRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   });
 
   fastify.delete('/:id', async (request: any, reply) => {
-    if (request.user.role !== 'admin') {
+    if (!['admin', 'system_admin'].includes(request.user.role)) {
       return reply.forbidden('Only admins can delete premiums');
     }
 

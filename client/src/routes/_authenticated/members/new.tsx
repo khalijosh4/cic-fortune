@@ -36,7 +36,7 @@ function NewMemberPage() {
           <div>
             <h2 className='text-2xl font-bold tracking-tight'>New Member</h2>
             <p className='text-muted-foreground'>
-              Enroll a new member into an insurance policy.
+              Enroll a new member into an insurance plan.
             </p>
           </div>
         </div>

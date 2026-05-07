@@ -53,7 +53,7 @@ export function AuditLogsTable({ data, total, search, navigate }: DataTableProps
       { columnId: 'action', searchKey: 'action', type: 'string' },
       { columnId: 'status', searchKey: 'status', type: 'array' },
       { columnId: 'module', searchKey: 'module', type: 'array' },
-      { columnId: 'userRole', searchKey: 'userRole', type: 'array' },
+      { columnId: 'user', searchKey: 'userRole', type: 'array' },
       { columnId: 'timestamp', searchKey: 'timestampRange', type: 'array' },
     ],
   })
@@ -118,12 +118,12 @@ export function AuditLogsTable({ data, total, search, navigate }: DataTableProps
               { label: 'Auth', value: 'auth' },
               { label: 'Members', value: 'members' },
               { label: 'Claims', value: 'claims' },
-              { label: 'Policies', value: 'policies' },
+              { label: 'Plans', value: 'plans' },
               { label: 'Users', value: 'users' },
             ],
           },
           {
-            columnId: 'userRole',
+            columnId: 'user',
             title: 'Role',
             options: [
               { label: 'Admin', value: 'admin' },

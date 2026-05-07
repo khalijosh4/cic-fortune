@@ -71,24 +71,24 @@ export const branchesColumns: ColumnDef<Branch>[] = [
     ),
   },
   {
-    accessorKey: 'totalPolicies',
+    accessorKey: 'totalPlans',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Policies' className='justify-center' />
+      <DataTableColumnHeader column={column} title='Plans' className='justify-center' />
     ),
     cell: ({ row }) => (
       <div className='flex justify-center items-center'>
-        <span>{row.getValue('totalPolicies')}</span>
+        <span>{row.getValue('totalPlans')}</span>
       </div>
     ),
   },
   {
-    accessorKey: 'totalActivePolicies',
+    accessorKey: 'totalActivePlans',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Active Policies' className='justify-center' />
+      <DataTableColumnHeader column={column} title='Active Plans' className='justify-center' />
     ),
     cell: ({ row }) => (
       <div className='flex justify-center items-center'>
-        <span className='text-green-600 font-semibold'>{row.getValue('totalActivePolicies')}</span>
+        <span className='text-green-600 font-semibold'>{row.getValue('totalActivePlans')}</span>
       </div>
     ),
   },

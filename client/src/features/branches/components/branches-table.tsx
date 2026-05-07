@@ -52,8 +52,8 @@ export function BranchesTable({ data, total, search, navigate }: DataTableProps)
     columnFilters: [
       { columnId: 'branchName', searchKey: 'branchName', type: 'string' },
       { columnId: 'location', searchKey: 'location', type: 'string' },
-      { columnId: 'totalPolicies', searchKey: 'policiesRange', type: 'array' },
-      { columnId: 'totalActivePolicies', searchKey: 'activePoliciesRange', type: 'array' },
+      { columnId: 'totalPlans', searchKey: 'plansRange', type: 'array' },
+      { columnId: 'totalActivePlans', searchKey: 'activePlansRange', type: 'array' },
     ],
   })
 
@@ -104,14 +104,14 @@ export function BranchesTable({ data, total, search, navigate }: DataTableProps)
         filters={[]}
         rangeFilters={[
           {
-            columnId: 'totalPolicies',
-            title: 'Policies',
-            ...getMinMax(data, d => d.totalPolicies)
+            columnId: 'totalPlans',
+            title: 'Plans',
+            ...getMinMax(data, d => d.totalPlans)
           },
           {
-            columnId: 'totalActivePolicies',
-            title: 'Active Policies',
-            ...getMinMax(data, d => d.totalActivePolicies)
+            columnId: 'totalActivePlans',
+            title: 'Active Plans',
+            ...getMinMax(data, d => d.totalActivePlans)
           }
         ]}
       />

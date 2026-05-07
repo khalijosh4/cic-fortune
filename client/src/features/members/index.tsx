@@ -34,7 +34,7 @@ export function Members() {
           <div>
             <h2 className='text-2xl font-bold tracking-tight'>Members</h2>
             <p className='text-muted-foreground'>
-              Manage policyholders and their coverage status.
+              Manage planholders and their coverage status.
             </p>
           </div>
           <Button className='space-x-1' onClick={() => navigate({ to: '/members/new' })}>

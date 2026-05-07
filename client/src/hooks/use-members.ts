@@ -9,7 +9,7 @@ export interface Member {
   email?: string | null
   phoneNumber?: string | null
   branchId?: string | null
-  policyId?: string | null
+  planId?: string | null
   coverType?: string | null
   dependentsCount?: number | null
   premiumRate: string

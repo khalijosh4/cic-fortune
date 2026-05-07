@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/tooltip'
 import { DataTableBulkActions as BulkActionsToolbar } from '@/components/data-table'
 import { ConfirmDialog } from '@/components/confirm-dialog'
-import { Policy, useDeletePolicy } from '@/hooks/use-policies'
+import { Plan, useDeletePlan } from '@/hooks/use-plans'
 
 type DataTableBulkActionsProps<TData> = {
   table: Table<TData>
@@ -30,12 +30,12 @@ export function DataTableBulkActions<TData>({
   const selectedRows = table.getFilteredSelectedRowModel().rows
 
   const handleBulkStatusChange = (status: string) => {
-    const selectedPolicies = selectedRows.map((row) => row.original as Policy)
+    const selectedPlans = selectedRows.map((row) => row.original as Plan)
     toast.promise(sleep(1000), {
       loading: 'Updating status...',
       success: () => {
         table.resetRowSelection()
-        return `Status updated to "${status}" for ${selectedPolicies.length} polic${selectedPolicies.length > 1 ? 'ies' : 'y'}.`
+        return `Status updated to "${status}" for ${selectedPlans.length} plan${selectedPlans.length > 1 ? 's' : ''}.`
       },
       error: 'Error updating status',
     })
@@ -43,23 +43,23 @@ export function DataTableBulkActions<TData>({
   }
 
   const handleBulkExport = () => {
-    const selectedPolicies = selectedRows.map((row) => row.original as Policy)
+    const selectedPlans = selectedRows.map((row) => row.original as Plan)
     toast.promise(sleep(1000), {
-      loading: 'Exporting policies...',
+      loading: 'Exporting plans...',
       success: () => {
         table.resetRowSelection()
-        return `Exported ${selectedPolicies.length} polic${selectedPolicies.length > 1 ? 'ies' : 'y'} to CSV.`
+        return `Exported ${selectedPlans.length} plan${selectedPlans.length > 1 ? 's' : ''} to CSV.`
       },
       error: 'Error exporting',
     })
     table.resetRowSelection()
   }
 
-  const deletePolicy = useDeletePolicy()
+  const deletePlan = useDeletePlan()
   const handleConfirmDelete = async () => {
-    const selectedPolicies = selectedRows.map((row) => row.original as Policy)
-    for (const p of selectedPolicies) {
-      await deletePolicy.mutateAsync(p.id)
+    const selectedPlans = selectedRows.map((row) => row.original as Plan)
+    for (const p of selectedPlans) {
+      await deletePlan.mutateAsync(p.id)
     }
     table.resetRowSelection()
     setShowDeleteDialog(false)
@@ -77,13 +77,13 @@ export function DataTableBulkActions<TData>({
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
         handleConfirm={handleConfirmDelete}
-        title='Delete Policies'
-        desc={`Are you sure you want to delete ${selectedRows.length} polic${selectedRows.length > 1 ? 'ies' : 'y'}? This action cannot be undone.`}
+        title='Delete Plans'
+        desc={`Are you sure you want to delete ${selectedRows.length} plan${selectedRows.length > 1 ? 's' : ''}? This action cannot be undone.`}
         confirmText='Delete'
         destructive
-        isLoading={deletePolicy.isPending}
+        isLoading={deletePlan.isPending}
       />
-      <BulkActionsToolbar table={table} entityName='policy'>
+      <BulkActionsToolbar table={table} entityName='plan'>
         <DropdownMenu>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -124,15 +124,15 @@ export function DataTableBulkActions<TData>({
               size='icon'
               onClick={() => handleBulkExport()}
               className='size-8'
-              aria-label='Export policies'
-              title='Export policies'
+              aria-label='Export plans'
+              title='Export plans'
             >
               <Download />
-              <span className='sr-only'>Export policies</span>
+              <span className='sr-only'>Export plans</span>
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Export policies</p>
+            <p>Export plans</p>
           </TooltipContent>
         </Tooltip>
 
@@ -143,15 +143,15 @@ export function DataTableBulkActions<TData>({
               size='icon'
               onClick={() => setShowDeleteDialog(true)}
               className='size-8'
-              aria-label='Delete selected policies'
-              title='Delete selected policies'
+              aria-label='Delete selected plans'
+              title='Delete selected plans'
             >
               <Trash2 />
-              <span className='sr-only'>Delete selected policies</span>
+              <span className='sr-only'>Delete selected plans</span>
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Delete selected policies</p>
+            <p>Delete selected plans</p>
           </TooltipContent>
         </Tooltip>
       </BulkActionsToolbar>

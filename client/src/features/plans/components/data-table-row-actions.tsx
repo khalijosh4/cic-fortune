@@ -12,16 +12,16 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { ConfirmDialog } from '@/components/confirm-dialog'
-import { type Policy, useDeletePolicy } from '@/hooks/use-policies'
+import { type Plan, useDeletePlan } from '@/hooks/use-plans'
 
 type DataTableRowActionsProps = {
-  row: Row<Policy>
+  row: Row<Plan>
 }
 
 export function DataTableRowActions({ row }: DataTableRowActionsProps) {
   const navigate = useNavigate()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const deletePolicy = useDeletePolicy()
+  const deletePlan = useDeletePlan()
   const id = row.original.id
 
   return (
@@ -30,14 +30,14 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
         handleConfirm={() => {
-          deletePolicy.mutate(id)
+          deletePlan.mutate(id)
           setShowDeleteDialog(false)
         }}
-        title='Delete Policy'
-        desc='Are you sure you want to delete this policy? This action cannot be undone.'
+        title='Delete Plan'
+        desc='Are you sure you want to delete this plan? This action cannot be undone.'
         confirmText='Delete'
         destructive
-        isLoading={deletePolicy.isPending}
+        isLoading={deletePlan.isPending}
       />
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
@@ -51,13 +51,13 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
         </DropdownMenuTrigger>
         <DropdownMenuContent align='end' className='w-40'>
           <DropdownMenuItem
-            onClick={() => navigate({ to: '/policies/$id', params: { id } })}
+            onClick={() => navigate({ to: '/plans/$id', params: { id } })}
           >
             <Eye className='mr-2 h-4 w-4' />
             View Details
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => navigate({ to: '/policies/$id', params: { id } })}
+            onClick={() => navigate({ to: '/plans/$id', params: { id } })}
           >
             <Edit className='mr-2 h-4 w-4' />
             Edit

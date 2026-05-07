@@ -26,7 +26,7 @@ import { Route as AuthenticatedUsersIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedTasksIndexRouteImport } from './routes/_authenticated/tasks/index'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
 import { Route as AuthenticatedPremiumsIndexRouteImport } from './routes/_authenticated/premiums/index'
-import { Route as AuthenticatedPoliciesIndexRouteImport } from './routes/_authenticated/policies/index'
+import { Route as AuthenticatedPlansIndexRouteImport } from './routes/_authenticated/plans/index'
 import { Route as AuthenticatedMembersIndexRouteImport } from './routes/_authenticated/members/index'
 import { Route as AuthenticatedHospitalsIndexRouteImport } from './routes/_authenticated/hospitals/index'
 import { Route as AuthenticatedHelpCenterIndexRouteImport } from './routes/_authenticated/help-center/index'
@@ -42,8 +42,8 @@ import { Route as AuthenticatedSettingsDisplayRouteImport } from './routes/_auth
 import { Route as AuthenticatedSettingsAppearanceRouteImport } from './routes/_authenticated/settings/appearance'
 import { Route as AuthenticatedSettingsAccountRouteImport } from './routes/_authenticated/settings/account'
 import { Route as AuthenticatedPremiumsIdRouteImport } from './routes/_authenticated/premiums/$id'
-import { Route as AuthenticatedPoliciesNewRouteImport } from './routes/_authenticated/policies/new'
-import { Route as AuthenticatedPoliciesIdRouteImport } from './routes/_authenticated/policies/$id'
+import { Route as AuthenticatedPlansNewRouteImport } from './routes/_authenticated/plans/new'
+import { Route as AuthenticatedPlansIdRouteImport } from './routes/_authenticated/plans/$id'
 import { Route as AuthenticatedMembersNewRouteImport } from './routes/_authenticated/members/new'
 import { Route as AuthenticatedMembersIdRouteImport } from './routes/_authenticated/members/$id'
 import { Route as AuthenticatedHospitalsNewRouteImport } from './routes/_authenticated/hospitals/new'
@@ -141,12 +141,11 @@ const AuthenticatedPremiumsIndexRoute =
     path: '/premiums/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPoliciesIndexRoute =
-  AuthenticatedPoliciesIndexRouteImport.update({
-    id: '/policies/',
-    path: '/policies/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
+const AuthenticatedPlansIndexRoute = AuthenticatedPlansIndexRouteImport.update({
+  id: '/plans/',
+  path: '/plans/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedMembersIndexRoute =
   AuthenticatedMembersIndexRouteImport.update({
     id: '/members/',
@@ -232,15 +231,14 @@ const AuthenticatedPremiumsIdRoute = AuthenticatedPremiumsIdRouteImport.update({
   path: '/premiums/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedPoliciesNewRoute =
-  AuthenticatedPoliciesNewRouteImport.update({
-    id: '/policies/new',
-    path: '/policies/new',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPoliciesIdRoute = AuthenticatedPoliciesIdRouteImport.update({
-  id: '/policies/$id',
-  path: '/policies/$id',
+const AuthenticatedPlansNewRoute = AuthenticatedPlansNewRouteImport.update({
+  id: '/plans/new',
+  path: '/plans/new',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPlansIdRoute = AuthenticatedPlansIdRouteImport.update({
+  id: '/plans/$id',
+  path: '/plans/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedMembersNewRoute = AuthenticatedMembersNewRouteImport.update({
@@ -316,8 +314,8 @@ export interface FileRoutesByFullPath {
   '/hospitals/new': typeof AuthenticatedHospitalsNewRoute
   '/members/$id': typeof AuthenticatedMembersIdRoute
   '/members/new': typeof AuthenticatedMembersNewRoute
-  '/policies/$id': typeof AuthenticatedPoliciesIdRoute
-  '/policies/new': typeof AuthenticatedPoliciesNewRoute
+  '/plans/$id': typeof AuthenticatedPlansIdRoute
+  '/plans/new': typeof AuthenticatedPlansNewRoute
   '/premiums/$id': typeof AuthenticatedPremiumsIdRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
@@ -333,7 +331,7 @@ export interface FileRoutesByFullPath {
   '/help-center/': typeof AuthenticatedHelpCenterIndexRoute
   '/hospitals/': typeof AuthenticatedHospitalsIndexRoute
   '/members/': typeof AuthenticatedMembersIndexRoute
-  '/policies/': typeof AuthenticatedPoliciesIndexRoute
+  '/plans/': typeof AuthenticatedPlansIndexRoute
   '/premiums/': typeof AuthenticatedPremiumsIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
   '/tasks/': typeof AuthenticatedTasksIndexRoute
@@ -360,8 +358,8 @@ export interface FileRoutesByTo {
   '/hospitals/new': typeof AuthenticatedHospitalsNewRoute
   '/members/$id': typeof AuthenticatedMembersIdRoute
   '/members/new': typeof AuthenticatedMembersNewRoute
-  '/policies/$id': typeof AuthenticatedPoliciesIdRoute
-  '/policies/new': typeof AuthenticatedPoliciesNewRoute
+  '/plans/$id': typeof AuthenticatedPlansIdRoute
+  '/plans/new': typeof AuthenticatedPlansNewRoute
   '/premiums/$id': typeof AuthenticatedPremiumsIdRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
@@ -377,7 +375,7 @@ export interface FileRoutesByTo {
   '/help-center': typeof AuthenticatedHelpCenterIndexRoute
   '/hospitals': typeof AuthenticatedHospitalsIndexRoute
   '/members': typeof AuthenticatedMembersIndexRoute
-  '/policies': typeof AuthenticatedPoliciesIndexRoute
+  '/plans': typeof AuthenticatedPlansIndexRoute
   '/premiums': typeof AuthenticatedPremiumsIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
   '/tasks': typeof AuthenticatedTasksIndexRoute
@@ -407,8 +405,8 @@ export interface FileRoutesById {
   '/_authenticated/hospitals/new': typeof AuthenticatedHospitalsNewRoute
   '/_authenticated/members/$id': typeof AuthenticatedMembersIdRoute
   '/_authenticated/members/new': typeof AuthenticatedMembersNewRoute
-  '/_authenticated/policies/$id': typeof AuthenticatedPoliciesIdRoute
-  '/_authenticated/policies/new': typeof AuthenticatedPoliciesNewRoute
+  '/_authenticated/plans/$id': typeof AuthenticatedPlansIdRoute
+  '/_authenticated/plans/new': typeof AuthenticatedPlansNewRoute
   '/_authenticated/premiums/$id': typeof AuthenticatedPremiumsIdRoute
   '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
@@ -424,7 +422,7 @@ export interface FileRoutesById {
   '/_authenticated/help-center/': typeof AuthenticatedHelpCenterIndexRoute
   '/_authenticated/hospitals/': typeof AuthenticatedHospitalsIndexRoute
   '/_authenticated/members/': typeof AuthenticatedMembersIndexRoute
-  '/_authenticated/policies/': typeof AuthenticatedPoliciesIndexRoute
+  '/_authenticated/plans/': typeof AuthenticatedPlansIndexRoute
   '/_authenticated/premiums/': typeof AuthenticatedPremiumsIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
   '/_authenticated/tasks/': typeof AuthenticatedTasksIndexRoute
@@ -454,8 +452,8 @@ export interface FileRouteTypes {
     | '/hospitals/new'
     | '/members/$id'
     | '/members/new'
-    | '/policies/$id'
-    | '/policies/new'
+    | '/plans/$id'
+    | '/plans/new'
     | '/premiums/$id'
     | '/settings/account'
     | '/settings/appearance'
@@ -471,7 +469,7 @@ export interface FileRouteTypes {
     | '/help-center/'
     | '/hospitals/'
     | '/members/'
-    | '/policies/'
+    | '/plans/'
     | '/premiums/'
     | '/settings/'
     | '/tasks/'
@@ -498,8 +496,8 @@ export interface FileRouteTypes {
     | '/hospitals/new'
     | '/members/$id'
     | '/members/new'
-    | '/policies/$id'
-    | '/policies/new'
+    | '/plans/$id'
+    | '/plans/new'
     | '/premiums/$id'
     | '/settings/account'
     | '/settings/appearance'
@@ -515,7 +513,7 @@ export interface FileRouteTypes {
     | '/help-center'
     | '/hospitals'
     | '/members'
-    | '/policies'
+    | '/plans'
     | '/premiums'
     | '/settings'
     | '/tasks'
@@ -544,8 +542,8 @@ export interface FileRouteTypes {
     | '/_authenticated/hospitals/new'
     | '/_authenticated/members/$id'
     | '/_authenticated/members/new'
-    | '/_authenticated/policies/$id'
-    | '/_authenticated/policies/new'
+    | '/_authenticated/plans/$id'
+    | '/_authenticated/plans/new'
     | '/_authenticated/premiums/$id'
     | '/_authenticated/settings/account'
     | '/_authenticated/settings/appearance'
@@ -561,7 +559,7 @@ export interface FileRouteTypes {
     | '/_authenticated/help-center/'
     | '/_authenticated/hospitals/'
     | '/_authenticated/members/'
-    | '/_authenticated/policies/'
+    | '/_authenticated/plans/'
     | '/_authenticated/premiums/'
     | '/_authenticated/settings/'
     | '/_authenticated/tasks/'
@@ -703,11 +701,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPremiumsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/policies/': {
-      id: '/_authenticated/policies/'
-      path: '/policies'
-      fullPath: '/policies/'
-      preLoaderRoute: typeof AuthenticatedPoliciesIndexRouteImport
+    '/_authenticated/plans/': {
+      id: '/_authenticated/plans/'
+      path: '/plans'
+      fullPath: '/plans/'
+      preLoaderRoute: typeof AuthenticatedPlansIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/members/': {
@@ -815,18 +813,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPremiumsIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/policies/new': {
-      id: '/_authenticated/policies/new'
-      path: '/policies/new'
-      fullPath: '/policies/new'
-      preLoaderRoute: typeof AuthenticatedPoliciesNewRouteImport
+    '/_authenticated/plans/new': {
+      id: '/_authenticated/plans/new'
+      path: '/plans/new'
+      fullPath: '/plans/new'
+      preLoaderRoute: typeof AuthenticatedPlansNewRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/policies/$id': {
-      id: '/_authenticated/policies/$id'
-      path: '/policies/$id'
-      fullPath: '/policies/$id'
-      preLoaderRoute: typeof AuthenticatedPoliciesIdRouteImport
+    '/_authenticated/plans/$id': {
+      id: '/_authenticated/plans/$id'
+      path: '/plans/$id'
+      fullPath: '/plans/$id'
+      preLoaderRoute: typeof AuthenticatedPlansIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/members/new': {
@@ -930,8 +928,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedHospitalsNewRoute: typeof AuthenticatedHospitalsNewRoute
   AuthenticatedMembersIdRoute: typeof AuthenticatedMembersIdRoute
   AuthenticatedMembersNewRoute: typeof AuthenticatedMembersNewRoute
-  AuthenticatedPoliciesIdRoute: typeof AuthenticatedPoliciesIdRoute
-  AuthenticatedPoliciesNewRoute: typeof AuthenticatedPoliciesNewRoute
+  AuthenticatedPlansIdRoute: typeof AuthenticatedPlansIdRoute
+  AuthenticatedPlansNewRoute: typeof AuthenticatedPlansNewRoute
   AuthenticatedPremiumsIdRoute: typeof AuthenticatedPremiumsIdRoute
   AuthenticatedUsersIdRoute: typeof AuthenticatedUsersIdRoute
   AuthenticatedUsersNewRoute: typeof AuthenticatedUsersNewRoute
@@ -943,7 +941,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedHelpCenterIndexRoute: typeof AuthenticatedHelpCenterIndexRoute
   AuthenticatedHospitalsIndexRoute: typeof AuthenticatedHospitalsIndexRoute
   AuthenticatedMembersIndexRoute: typeof AuthenticatedMembersIndexRoute
-  AuthenticatedPoliciesIndexRoute: typeof AuthenticatedPoliciesIndexRoute
+  AuthenticatedPlansIndexRoute: typeof AuthenticatedPlansIndexRoute
   AuthenticatedPremiumsIndexRoute: typeof AuthenticatedPremiumsIndexRoute
   AuthenticatedTasksIndexRoute: typeof AuthenticatedTasksIndexRoute
   AuthenticatedUsersIndexRoute: typeof AuthenticatedUsersIndexRoute
@@ -961,8 +959,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedHospitalsNewRoute: AuthenticatedHospitalsNewRoute,
   AuthenticatedMembersIdRoute: AuthenticatedMembersIdRoute,
   AuthenticatedMembersNewRoute: AuthenticatedMembersNewRoute,
-  AuthenticatedPoliciesIdRoute: AuthenticatedPoliciesIdRoute,
-  AuthenticatedPoliciesNewRoute: AuthenticatedPoliciesNewRoute,
+  AuthenticatedPlansIdRoute: AuthenticatedPlansIdRoute,
+  AuthenticatedPlansNewRoute: AuthenticatedPlansNewRoute,
   AuthenticatedPremiumsIdRoute: AuthenticatedPremiumsIdRoute,
   AuthenticatedUsersIdRoute: AuthenticatedUsersIdRoute,
   AuthenticatedUsersNewRoute: AuthenticatedUsersNewRoute,
@@ -974,7 +972,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedHelpCenterIndexRoute: AuthenticatedHelpCenterIndexRoute,
   AuthenticatedHospitalsIndexRoute: AuthenticatedHospitalsIndexRoute,
   AuthenticatedMembersIndexRoute: AuthenticatedMembersIndexRoute,
-  AuthenticatedPoliciesIndexRoute: AuthenticatedPoliciesIndexRoute,
+  AuthenticatedPlansIndexRoute: AuthenticatedPlansIndexRoute,
   AuthenticatedPremiumsIndexRoute: AuthenticatedPremiumsIndexRoute,
   AuthenticatedTasksIndexRoute: AuthenticatedTasksIndexRoute,
   AuthenticatedUsersIndexRoute: AuthenticatedUsersIndexRoute,
