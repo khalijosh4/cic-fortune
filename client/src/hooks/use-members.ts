@@ -6,6 +6,8 @@ export interface Member {
   id: string
   firstName: string
   lastName: string
+  email?: string | null
+  phoneNumber?: string | null
   branchId?: string | null
   policyId?: string | null
   coverType?: string | null
@@ -107,6 +109,25 @@ export function useCreateMember() {
     onError: (error: any) => {
       toast.error('Creation failed', {
         description: error.response?.data?.message || 'An error occurred while creating the member.',
+      })
+    },
+  })
+}
+
+export function useResendNotification() {
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const response = await api.post(`/members/${id}/resend-notification`)
+      return response.data
+    },
+    onSuccess: () => {
+      toast.success('Notification sent', {
+        description: 'The enrollment notification has been resent.',
+      })
+    },
+    onError: (error: any) => {
+      toast.error('Send failed', {
+        description: error.response?.data?.message || 'An error occurred while resending the notification.',
       })
     },
   })

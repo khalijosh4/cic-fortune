@@ -23,6 +23,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 const memberFormSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),
+  email: z.string().email('Invalid email address').optional().or(z.literal('')),
+  phoneNumber: z.string().min(10, 'Phone number must be at least 10 digits').optional().or(z.literal('')),
   branchId: z.string().min(1, 'Branch is required'),
   policyId: z.string().min(1, 'Policy is required'),
   coverType: z.string().min(1, 'Cover type is required'),
@@ -33,6 +35,8 @@ const memberFormSchema = z.object({
 interface MemberFormValues {
   firstName: string
   lastName: string
+  email?: string
+  phoneNumber?: string
   branchId: string
   policyId: string
   coverType: string
@@ -59,6 +63,8 @@ export function MemberDetails({ id }: MemberDetailsProps) {
     defaultValues: {
       firstName: '',
       lastName: '',
+      email: '',
+      phoneNumber: '',
       branchId: '',
       policyId: '',
       coverType: '',
@@ -72,6 +78,8 @@ export function MemberDetails({ id }: MemberDetailsProps) {
       form.reset({
         firstName: member.firstName || '',
         lastName: member.lastName || '',
+        email: member.email || '',
+        phoneNumber: member.phoneNumber || '',
         branchId: member.branchId || '',
         policyId: member.policyId || '',
         coverType: member.coverType || '',
@@ -127,6 +135,35 @@ export function MemberDetails({ id }: MemberDetailsProps) {
                     <FormLabel>Last Name</FormLabel>
                     <FormControl>
                       <Input placeholder='Enter last name' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+              <FormField
+                control={form.control}
+                name='email'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email Address</FormLabel>
+                    <FormControl>
+                      <Input placeholder='member@example.com' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='phoneNumber'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Phone Number</FormLabel>
+                    <FormControl>
+                      <Input placeholder='e.g. 0712345678' {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

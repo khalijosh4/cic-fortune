@@ -58,6 +58,22 @@ export const membersColumns: ColumnDef<Member>[] = [
     ),
   },
   {
+    id: 'contact',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Contact Info' />
+    ),
+    cell: ({ row }) => {
+      const email = row.original.email
+      const phone = row.original.phoneNumber
+      return (
+        <div className='flex flex-col text-xs'>
+          <span className='font-medium'>{phone || '—'}</span>
+          <span className='text-muted-foreground'>{email || '—'}</span>
+        </div>
+      )
+    },
+  },
+  {
     accessorKey: 'coverType',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Cover Type' />

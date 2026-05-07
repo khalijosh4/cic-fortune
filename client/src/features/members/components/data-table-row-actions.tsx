@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { DotsHorizontalIcon } from '@radix-ui/react-icons'
 import { type Row } from '@tanstack/react-table'
-import { Eye, Edit, Trash2 } from 'lucide-react'
+import { Eye, Edit, Trash2, Mail } from 'lucide-react'
 import { useNavigate } from '@tanstack/react-router'
 import { Button } from '@/components/ui/button'
 import {
@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { ConfirmDialog } from '@/components/confirm-dialog'
-import { type Member, useDeleteMember } from '@/hooks/use-members'
+import { type Member, useDeleteMember, useResendNotification } from '@/hooks/use-members'
 
 type DataTableRowActionsProps = {
   row: Row<Member>
@@ -22,6 +22,7 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
   const navigate = useNavigate()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const deleteMember = useDeleteMember()
+  const resendNotification = useResendNotification()
   const id = row.original.id
 
   return (
@@ -61,6 +62,13 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
           >
             <Edit className='mr-2 h-4 w-4' />
             Edit
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => resendNotification.mutate(id)}
+            disabled={resendNotification.isPending}
+          >
+            <Mail className='mr-2 h-4 w-4' />
+            {resendNotification.isPending ? 'Sending...' : 'Resend Welcome'}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem

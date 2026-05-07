@@ -129,28 +129,36 @@ const memberRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     } as any).returning() as any;
     const newMember = insertResult[0];
 
-    // Fetch branch name for the notification
+    // Fetch branch and policy names for the notification
     let branchName = 'Unknown Branch';
+    let policyName = 'Insurance Policy';
+
     if (newMember.branchId) {
       const [branchRecord] = await db.select({ name: schema.branch.name }).from(schema.branch).where(eq(schema.branch.id, newMember.branchId)).limit(1);
       if (branchRecord) branchName = branchRecord.name;
     }
 
+    if (newMember.policyId) {
+      const [policyRecord] = await db.select({ name: schema.policy.name }).from(schema.policy).where(eq(schema.policy.id, newMember.policyId)).limit(1);
+      if (policyRecord) policyName = policyRecord.name;
+    }
+
     const memberDetails = {
       ...newMember,
-      branchName
+      branchName,
+      policyName
     };
 
     // Send notifications asynchronously (don't block the response)
     if (newMember.email && fastify.config.MAILERSEND_API_TOKEN) {
       sendEnrollmentEmail(newMember.email, memberDetails, fastify.config.MAILERSEND_API_TOKEN).catch((err: any) => {
-        fastify.log.error(`Failed to send enrollment email to ${newMember.email}: ${err}`);
+        fastify.log.error({ err, email: newMember.email }, 'Failed to send enrollment email');
       });
     }
 
     if (newMember.phoneNumber && fastify.config.TWILIO_ACCOUNT_SID && fastify.config.TWILIO_AUTH_TOKEN && fastify.config.TWILIO_PHONE_NUMBER) {
       sendEnrollmentSms(newMember.phoneNumber, memberDetails, fastify.config.TWILIO_ACCOUNT_SID, fastify.config.TWILIO_AUTH_TOKEN, fastify.config.TWILIO_PHONE_NUMBER).catch((err: any) => {
-        fastify.log.error(`Failed to send enrollment sms to ${newMember.phoneNumber}: ${err}`);
+        fastify.log.error({ err, phone: newMember.phoneNumber }, 'Failed to send enrollment SMS');
       });
     }
 
@@ -209,6 +217,57 @@ const memberRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     
     const updated = updateResult[0];
     return reply.send(updated as any);
+  });
+
+  fastify.post('/:id/resend-notification', async (request: any, reply) => {
+    const [found] = await db.select().from(member).where(eq(member.id, request.params.id)).limit(1);
+    if (!found) return reply.notFound('Member not found');
+    
+    if (!hasAccess(request.user, found)) {
+      return reply.forbidden('Access denied to member outside your territory');
+    }
+
+    // Fetch branch and policy names
+    let branchName = 'Unknown Branch';
+    let policyName = 'Insurance Policy';
+
+    if (found.branchId) {
+      const [branchRecord] = await db.select({ name: schema.branch.name }).from(schema.branch).where(eq(schema.branch.id, found.branchId)).limit(1);
+      if (branchRecord) branchName = branchRecord.name;
+    }
+
+    if (found.policyId) {
+      const [policyRecord] = await db.select({ name: schema.policy.name }).from(schema.policy).where(eq(schema.policy.id, found.policyId)).limit(1);
+      if (policyRecord) policyName = policyRecord.name;
+    }
+
+    const memberDetails = {
+      ...found,
+      branchName,
+      policyName
+    };
+
+    let emailPromise: Promise<any> = Promise.resolve();
+    let smsPromise: Promise<any> = Promise.resolve();
+
+    if (found.email && fastify.config.MAILERSEND_API_TOKEN) {
+      emailPromise = sendEnrollmentEmail(found.email, memberDetails, fastify.config.MAILERSEND_API_TOKEN);
+    }
+
+    if (found.phoneNumber && fastify.config.TWILIO_ACCOUNT_SID && fastify.config.TWILIO_AUTH_TOKEN && fastify.config.TWILIO_PHONE_NUMBER) {
+      smsPromise = sendEnrollmentSms(found.phoneNumber, memberDetails, fastify.config.TWILIO_ACCOUNT_SID, fastify.config.TWILIO_AUTH_TOKEN, fastify.config.TWILIO_PHONE_NUMBER);
+    }
+
+    try {
+      await Promise.all([emailPromise, smsPromise]);
+      return reply.send({ message: 'Notifications resent successfully' });
+    } catch (err: any) {
+      fastify.log.error({ err, memberId: found.id }, 'Failed to resend notifications');
+      return reply.code(500).send({ 
+        error: 'Failed to resend notifications', 
+        message: err.message || 'An error occurred while sending notifications' 
+      });
+    }
   });
 
   fastify.delete('/:id', async (request: any, reply) => {
