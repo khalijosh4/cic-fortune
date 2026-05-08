@@ -81,3 +81,38 @@ export async function sendEnrollmentSms(
     to: formattedPhone,
   });
 }
+
+export async function sendWelcomeEmail(
+  toEmail: string,
+  user: { firstName: string; lastName: string; structuredId?: string | null; password?: string },
+  apiToken: string
+) {
+  const mailersend = new MailerSend({ apiKey: apiToken });
+  const { firstName, lastName, structuredId, password } = user;
+  const fullName = `${firstName} ${lastName}`;
+
+  const sentFrom = new Sender('cic-fortune@test-xkjn41m31594z781.mlsender.net', 'CIC Fortune');
+  const recipients = [new Recipient(toEmail, fullName)];
+
+  const emailParams = new EmailParams()
+    .setFrom(sentFrom)
+    .setTo(recipients)
+    .setReplyTo(sentFrom)
+    .setSubject('Welcome to CIC Fortune - Your Account Details')
+    .setHtml(`
+      <div style="font-family: sans-serif; padding: 20px; color: #333;">
+        <h2 style="color: #005a8c;">Welcome to CIC Fortune, ${firstName}!</h2>
+        <p>Your administrative account has been created successfully.</p>
+        <div style="background-color: #f4f4f4; padding: 15px; border-radius: 8px; margin: 20px 0;">
+          <p><strong>Login ID:</strong> ${structuredId || 'Use your email'}</p>
+          <p><strong>Temporary Password:</strong> ${password}</p>
+        </div>
+        <p>Please log in at <a href="https://cic-fortune.vercel.app">CIC Fortune Portal</a>. You will be prompted to change your password on your first login.</p>
+        <p>If you have any questions, please contact the system administrator.</p>
+        <p>Best regards,<br>The CIC Fortune Team</p>
+      </div>
+    `)
+    .setText(`Hello ${firstName}, welcome to CIC Fortune! Your Login ID is ${structuredId || toEmail} and your temporary password is ${password}. Please login and change your password.`);
+
+  return mailersend.email.send(emailParams);
+}

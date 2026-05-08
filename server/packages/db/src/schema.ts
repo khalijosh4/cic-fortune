@@ -1,5 +1,5 @@
 import { 
-  pgEnum, pgTable, uuid, varchar, numeric, pgView, timestamp, text, integer, type AnyPgColumn
+  pgEnum, pgTable, uuid, varchar, numeric, pgView, timestamp, text, integer, boolean, type AnyPgColumn
 } from 'drizzle-orm/pg-core';
 import { sql, eq } from 'drizzle-orm';
 import type { InferSelectModel } from 'drizzle-orm';
@@ -26,6 +26,8 @@ export const user: any = pgTable('user', {
   branchId: uuid('branch_id').references((): AnyPgColumn => branch.id, { onDelete: 'set null', onUpdate: 'cascade' }),
   hospitalId: uuid('hospital_id').references((): AnyPgColumn => hospital.id, { onDelete: 'set null', onUpdate: 'cascade' }),
   role: RolesEnum('role').notNull().default('user'),
+  structuredId: varchar('structured_id', { length: 50 }).unique(),
+  mustChangePassword: boolean('must_change_password').notNull().default(true),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date())
 });
@@ -35,6 +37,7 @@ export const branch: any = pgTable('branch', {
   name: varchar('name', { length: 50 }).notNull(),
   location: varchar('location', { length: 255 }).notNull(),
   manager: uuid('manager_id').references((): AnyPgColumn => user.id, { onDelete: 'set null', onUpdate: 'cascade' }),
+  structuredId: varchar('structured_id', { length: 50 }).unique(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date())
 });
@@ -75,8 +78,8 @@ export const member = pgTable('member', {
   lastName: varchar('last_name', { length: 50 }).notNull(),
   email: varchar('email', { length: 100 }),
   phoneNumber: varchar('phone_number', { length: 20 }),
-  branchId: uuid('branch_id').references(() => branch.id, { onDelete: 'set null' }),
-  planId: uuid('plan_id').references(() => premiumRate.id, { onDelete: 'set null' }),
+  branchId: uuid('branch_id').references(() => branch.id, { onDelete: 'set null', onUpdate: 'cascade' }),
+  planId: uuid('plan_id').references(() => premiumRate.id, { onDelete: 'set null', onUpdate: 'cascade' }),
   coverType: PolicyCoverTypeEnum('cover_type').default('individual'),
   dependentsCount: integer('dependents_count').default(0),
   premiumRate: numeric('premium_rate', { precision: 12, scale: 2 }).notNull(),
@@ -89,9 +92,9 @@ export const member = pgTable('member', {
 
 export const claim = pgTable('claim', {
   id: uuid('id').primaryKey().defaultRandom(),
-  memberId: uuid('member_id').references(() => member.id),
-  hospitalId: uuid('hospital_id').references(() => hospital.id),
-  planId: uuid('plan_id').references(() => premiumRate.id),
+  memberId: uuid('member_id').references(() => member.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+  hospitalId: uuid('hospital_id').references(() => hospital.id, { onDelete: 'set null', onUpdate: 'cascade' }),
+  planId: uuid('plan_id').references(() => premiumRate.id, { onDelete: 'set null', onUpdate: 'cascade' }),
   amountClaimed: numeric('amount_claimed', { precision: 15, scale: 2 }).notNull(),
   amountApproved: numeric('amount_approved', { precision: 15, scale: 2 }),
   status: ClaimStatusEnum('status').default('pending'),
@@ -109,7 +112,7 @@ export const hospital = pgTable('hospital', {
 
 export const premium = pgTable('premium', {
   id: uuid('id').primaryKey().defaultRandom(),
-  memberId: uuid('member_id').references(() => member.id),
+  memberId: uuid('member_id').references(() => member.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
   amountDue: numeric('amount_due', { precision: 12, scale: 2 }).notNull(),
   amountPaid: numeric('amount_paid', { precision: 12, scale: 2 }).default('0'),
   dueDate: timestamp('due_date').notNull(),
@@ -153,6 +156,9 @@ export const auditLog = pgTable('audit_log', {
   ipAddress: varchar('ip_address', { length: 45 }),
   status: varchar('status', { length: 20 }),
   type: varchar('type', { length: 20 }),
+  entityId: varchar('entity_id', { length: 50 }),
+  entityType: varchar('entity_type', { length: 50 }),
+  details: text('details'),
 });
 
 export const branchStats = pgView('branch_stats').as((db) => {

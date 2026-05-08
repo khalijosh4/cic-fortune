@@ -2,6 +2,7 @@ import { Type } from '@sinclair/typebox';
 
 export const UserSchema = Type.Object({
   id: Type.String(),
+  structuredId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   firstName: Type.String(),
   middleName: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   lastName: Type.String(),
@@ -21,7 +22,7 @@ export const CreateUserSchema = {
     middleName: Type.Optional(Type.String()),
     lastName: Type.String(),
     email: Type.String(),
-    password: Type.String(),
+    password: Type.Optional(Type.String()),
     phoneNumber: Type.Optional(Type.String()),
     role: Type.Optional(Type.String()),
     branchId: Type.Optional(Type.String()),

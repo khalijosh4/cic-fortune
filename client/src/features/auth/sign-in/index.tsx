@@ -2,8 +2,8 @@ import { useSearch } from '@tanstack/react-router'
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'

@@ -50,6 +50,13 @@
       "when": 1778148014140,
       "tag": "0006_wealthy_daredevil",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1778238578557,
+      "tag": "0007_lonely_hairball",
+      "breakpoints": true
     }
   ]
 }

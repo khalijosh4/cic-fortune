@@ -1,4 +1,4 @@
-import { Logo } from '@/assets/logo'
+//import { Logo } from '@/assets/logo'
 import { cn } from '@/lib/utils'
 import dashboardDark from './assets/dashboard-dark.png'
 import dashboardLight from './assets/dashboard-light.png'
@@ -10,7 +10,7 @@ export function SignIn2() {
       <div className='lg:p-8'>
         <div className='mx-auto flex w-full flex-col justify-center space-y-2 py-8 sm:w-120 sm:p-8'>
           <div className='mb-4 flex items-center justify-center'>
-            <Logo className='me-2' />
+            <img src="/images/logo.webp" alt="Fortune Sacco" className='me-2' />
             <h1 className='text-xl font-medium'>Fortune Sacco</h1>
           </div>
         </div>
@@ -23,6 +23,7 @@ export function SignIn2() {
             </p>
           </div>
           <UserAuthForm />
+          {/*
           <p className='px-8 text-center text-sm text-muted-foreground'>
             By clicking sign in, you agree to our{' '}
             <a
@@ -40,6 +41,7 @@ export function SignIn2() {
             </a>
             .
           </p>
+          */}
         </div>
       </div>
 

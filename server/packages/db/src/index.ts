@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-config({ path: resolve(__dirname, '../../apps/api/.env') });
+config({ path: resolve(__dirname, '../../../apps/api/.env') });
 
 import { drizzle } from 'drizzle-orm/node-postgres';
 import pg from 'pg';

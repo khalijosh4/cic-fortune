@@ -117,8 +117,7 @@ const auditLogRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
       entityId, 
       entityType, 
       details, 
-      status,
-      user 
+      status
     } = request.body as any;
     const newLog = await db.insert(auditLog).values({
       module,

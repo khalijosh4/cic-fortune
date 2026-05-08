@@ -1,6 +1,6 @@
 import { db, schema } from '@fastify-forge/db';
 const { user } = schema;
-import { eq } from 'drizzle-orm';
+import { eq, or } from 'drizzle-orm';
 import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import bcrypt from 'bcryptjs';
 
@@ -8,9 +8,11 @@ import { LoginSchema, RegisterSchema } from '#/schemas/auth.schema.js';
 
 const authRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.post('/login', { schema: LoginSchema }, async (request, reply) => {
-    const { email, password } = request.body;
+    const { identifier, password } = request.body;
 
-    const findResult = await db.select().from(user).where(eq(user.email, email)).limit(1);
+    const findResult = await db.select().from(user)
+      .where(or(eq(user.email, identifier), eq(user.structuredId, identifier)))
+      .limit(1);
     const foundUser = findResult[0];
 
     if (!foundUser) {

@@ -21,7 +21,7 @@ import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/password-input'
 
 const formSchema = z.object({
-  email: z.string().min(1, 'Please enter your email.').email('Invalid email address.'),
+  identifier: z.string().min(1, 'Please enter your login ID or email.'),
   password: z
     .string()
     .min(1, 'Please enter your password.')
@@ -44,7 +44,7 @@ export function UserAuthForm({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: '',
+      identifier: '',
       password: '',
     },
   })
@@ -81,12 +81,12 @@ export function UserAuthForm({
       >
         <FormField
           control={form.control}
-          name='email'
+          name='identifier'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>Login ID or Email</FormLabel>
               <FormControl>
-                <Input placeholder='admin@fortunesacco.co.ke' {...field} />
+                <Input placeholder='HDB-2026-001' {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -118,17 +118,11 @@ export function UserAuthForm({
 
         <div className='mt-4 space-y-2'>
           <p className='text-xs text-muted-foreground font-medium uppercase text-center'>
-            Demo Accounts (Click to Autofill)
+            Demo Account (Click to Autofill)
           </p>
           <div className='flex flex-wrap gap-2 justify-center'>
             {[
-              'admin',
-              'system_admin',
-              'hr',
-              'ceo',
-              'branch_manager',
-              'claims_officer',
-              'hospital',
+              'admin'
             ].map((role) => (
               <Button
                 key={role}
@@ -138,7 +132,7 @@ export function UserAuthForm({
                 className='text-[10px] h-7 px-2 capitalize'
                 onClick={() => {
                   form.setValue(
-                    'email',
+                    'identifier',
                     `${role.toLowerCase().replace('_', '.')}@fortunesacco.co.ke`
                   )
                   form.setValue('password', 'Admin@2024')

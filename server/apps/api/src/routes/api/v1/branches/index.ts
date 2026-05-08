@@ -10,6 +10,7 @@ import {
   UpdateBranchSchema 
 } from '#/schemas/branch.schema.js';
 import { getTerritoryFilters, hasAccess } from '#/utils/tebac.util.js';
+import { generateStructuredBranchId } from '#/utils/id-generator.util.js';
 
 const branchRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/stats', async (request, reply) => {
@@ -88,7 +89,14 @@ const branchRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
       return reply.forbidden('Only admins can create branches');
     }
 
-    const insertResult = await db.insert(branch).values(request.body as any).returning() as any;
+    const { name } = request.body;
+    const structuredId = await generateStructuredBranchId(name);
+
+    const insertResult = await db.insert(branch).values({
+      ...request.body,
+      structuredId,
+    } as any).returning() as any;
+    
     const newBranch = insertResult[0];
     return reply.code(201).send(newBranch as any);
   });

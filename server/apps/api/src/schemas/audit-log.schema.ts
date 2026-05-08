@@ -11,6 +11,9 @@ export const AuditLogSchema = Type.Object({
   ipAddress: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   status: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   type: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  entityId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  entityType: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  details: Type.Optional(Type.Union([Type.String(), Type.Null()])),
 });
 
 export const ListAuditLogSchema = {

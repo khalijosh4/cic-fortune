@@ -2,7 +2,7 @@ import { Type } from '@sinclair/typebox';
 
 export const LoginSchema = {
   body: Type.Object({
-    email: Type.String({ format: 'email' }),
+    identifier: Type.String(),
     password: Type.String(),
   }),
   response: {
