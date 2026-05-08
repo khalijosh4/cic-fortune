@@ -21,6 +21,7 @@ declare module 'fastify' {
       TWILIO_ACCOUNT_SID: string;
       TWILIO_AUTH_TOKEN: string;
       TWILIO_PHONE_NUMBER: string;
+      DB_AUTO_RESET: boolean;
     };
   }
 }
@@ -54,7 +55,8 @@ const schema = Type.Object({
   MAILERSEND_API_TOKEN: Type.String(),
   TWILIO_ACCOUNT_SID: Type.String(),
   TWILIO_AUTH_TOKEN: Type.String(),
-  TWILIO_PHONE_NUMBER: Type.String()
+  TWILIO_PHONE_NUMBER: Type.String(),
+  DB_AUTO_RESET: Type.Boolean({ default: false }),
 });
 
 export const autoConfig: FastifyEnvOptions = {
