@@ -12,6 +12,7 @@ export const LoginSchema = {
         id: Type.String(),
         firstName: Type.String(),
         lastName: Type.String(),
+        email: Type.String(),
         role: Type.String(),
         mustChangePassword: Type.Boolean(),
       }),
