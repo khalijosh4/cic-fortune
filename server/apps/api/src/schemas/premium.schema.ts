@@ -7,6 +7,7 @@ export const PremiumSchema = Type.Object({
   amountPaid: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   dueDate: Type.String(), // timestamp as ISO string
   paymentMethod: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  createdAt: Type.Optional(Type.Union([Type.String(), Type.Null()])) 
 });
 
 export const CreatePremiumSchema = {

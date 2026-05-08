@@ -108,6 +108,33 @@ const auditLogRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
 
     return reply.send(found as any);
   });
+
+  fastify.post('/', async (request, reply) => {
+    const { 
+      module, 
+      type, 
+      action, 
+      entityId, 
+      entityType, 
+      details, 
+      status,
+      user 
+    } = request.body as any;
+    const newLog = await db.insert(auditLog).values({
+      module,
+      type,
+      action,
+      entityId,
+      entityType,
+      details,
+      status,
+      userEmail: request.user.email,
+      userRole: request.user.role,
+      branchName: request.user.branchName,
+      timestamp: new Date(),
+    }).returning();
+    return reply.code(201).send(newLog[0] as any);
+  });
 };
 
 export default auditLogRoutes;

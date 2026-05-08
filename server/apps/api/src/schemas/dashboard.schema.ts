@@ -8,7 +8,8 @@ export const DashboardStatsSchema = Type.Object({
   premiumsTrend: Type.Number(),
   membersTrend: Type.Number(),
   claimsTrend: Type.Number(),
-  pendingTrend: Type.Number()
+  pendingTrend: Type.Number(),
+  createdAt: Type.Optional(Type.Union([Type.String(), Type.Null()]))
 });
 
 export const RecentClaimSchema = Type.Object({
@@ -20,11 +21,18 @@ export const RecentClaimSchema = Type.Object({
   diagnosis: Type.String()
 });
 
+export const ChartDataSchema = Type.Object({
+  month: Type.String(),
+  claims: Type.Number(),
+  premiums: Type.Number()
+});
+
 export const DashboardResponseSchema = {
   response: {
     200: Type.Object({
       stats: DashboardStatsSchema,
-      recentClaims: Type.Array(RecentClaimSchema)
+      recentClaims: Type.Array(RecentClaimSchema),
+      chartData: Type.Array(ChartDataSchema)
     })
   }
 };

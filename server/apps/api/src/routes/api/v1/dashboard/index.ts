@@ -31,6 +31,17 @@ const dashboardRoute: FastifyPluginAsyncTypebox = async (app) => {
         .from(schema.claim)
         .where(eq(schema.claim.status, 'pending'));
 
+      // 1.5 Get raw data for charts
+      const allClaims = await db.select({ 
+        amountClaimed: schema.claim.amountClaimed, 
+        createdAt: schema.claim.createdAt 
+      }).from(schema.claim);
+
+      const allPremiums = await db.select({ 
+        amountPaid: schema.premium.amountPaid, 
+        createdAt: schema.premium.dueDate 
+      }).from(schema.premium);
+
       // 2. Get Recent Claims
       const recent = await db
         .select({
@@ -64,7 +75,8 @@ const dashboardRoute: FastifyPluginAsyncTypebox = async (app) => {
           amount: Number(r.amount),
           status: r.status ?? 'unknown',
           diagnosis: r.diagnosis ?? 'N/A'
-        }))
+        })),
+        chartData: generateChartData(allClaims, allPremiums)
       };
     } catch (err) {
       app.log.error(err);
@@ -72,5 +84,27 @@ const dashboardRoute: FastifyPluginAsyncTypebox = async (app) => {
     }
   });
 };
+
+function generateChartData(claims: any[], premiums: any[]) {
+  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const now = new Date();
+  const result = [];
+  
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const monthName = months[d.getMonth()];
+    
+    const monthClaims = claims
+      .filter(c => c.createdAt && new Date(c.createdAt).getMonth() === d.getMonth() && new Date(c.createdAt).getFullYear() === d.getFullYear())
+      .reduce((sum, c) => sum + Number(c.amountClaimed || 0), 0);
+      
+    const monthPremiums = premiums
+      .filter(p => p.createdAt && new Date(p.createdAt).getMonth() === d.getMonth() && new Date(p.createdAt).getFullYear() === d.getFullYear())
+      .reduce((sum, p) => sum + Number(p.amountPaid || 0), 0);
+      
+    result.push({ month: monthName, claims: monthClaims, premiums: monthPremiums });
+  }
+  return result;
+}
 
 export default dashboardRoute;

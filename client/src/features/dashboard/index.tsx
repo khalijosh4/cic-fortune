@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
@@ -46,9 +45,6 @@ export function Dashboard() {
               Overview of Fortune Sacco performance.
             </p>
           </div>
-          <div className='flex items-center space-x-2'>
-            <Button>Download</Button>
-          </div>
         </div>
         {isLoading ? (
           <div className='flex h-[calc(100svh-12rem)] w-full items-center justify-center'>
@@ -69,10 +65,10 @@ export function Dashboard() {
               <TabsList>
                 <TabsTrigger value='overview'>Overview</TabsTrigger>
                 <TabsTrigger value='analytics'>Analytics</TabsTrigger>
-                <TabsTrigger value='reports'>
+                <TabsTrigger value='reports' disabled>
                   Reports
                 </TabsTrigger>
-                <TabsTrigger value='notifications'>
+                <TabsTrigger value='notifications' disabled>
                   Notifications
                 </TabsTrigger>
               </TabsList>

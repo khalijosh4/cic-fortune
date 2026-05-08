@@ -20,6 +20,11 @@ export interface DashboardData {
     status: string
     diagnosis: string
   }[]
+  chartData: {
+    month: string
+    claims: number
+    premiums: number
+  }[]
 }
 
 export function useDashboard() {

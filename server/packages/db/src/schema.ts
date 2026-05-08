@@ -114,6 +114,7 @@ export const premium = pgTable('premium', {
   amountPaid: numeric('amount_paid', { precision: 12, scale: 2 }).default('0'),
   dueDate: timestamp('due_date').notNull(),
   paymentMethod: PaymentMethodEnum('payment_method'),
+  createdAt: timestamp('created_at').defaultNow(),
 });
 
 export const premiumRate = pgTable('premium_rate', {
