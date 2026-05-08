@@ -9,7 +9,7 @@ export interface User {
   lastName: string
   email?: string | null
   phoneNumber?: string | null
-  role: 'admin' | 'user' | 'hospital'
+  role: 'admin' | 'user' | 'hospital' | 'hr' | 'ceo' | 'branch_manager' | 'claims_officer' | 'system_admin'
   branchId?: string | null
   hospitalId?: string | null
   createdAt?: string | null

@@ -89,7 +89,7 @@ const branchRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
       return reply.forbidden('Only admins can create branches');
     }
 
-    const { name } = request.body;
+    const { name, manager: managerId } = request.body as any;
     const structuredId = await generateStructuredBranchId(name);
 
     const insertResult = await db.insert(branch).values({
@@ -98,6 +98,21 @@ const branchRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     } as any).returning() as any;
     
     const newBranch = insertResult[0];
+
+    // If a manager was assigned during creation, update the user's details
+    if (managerId && newBranch) {
+      const { generateStructuredUserId } = await import('#/utils/id-generator.util.js');
+      const newUserStructuredId = await generateStructuredUserId(newBranch.id);
+      
+      await db.update(schema.user)
+        .set({
+          branchId: newBranch.id,
+          role: 'branch_manager',
+          structuredId: newUserStructuredId,
+        } as any)
+        .where(eq(schema.user.id, managerId));
+    }
+
     return reply.code(201).send(newBranch as any);
   });
 
@@ -117,14 +132,30 @@ const branchRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
       return reply.forbidden('Only admins can update branches');
     }
 
+    const { manager: newManagerId } = request.body as any;
+
     const updateResult = await db.update(branch)
       .set(request.body as any)
       .where(eq(branch.id, request.params.id))
       .returning() as any;
     
     const updatedBranch = updateResult[0];
-    
     if (!updatedBranch) return reply.notFound('Branch not found');
+
+    // If a manager was assigned/changed, update the user's details
+    if (newManagerId) {
+      const { generateStructuredUserId } = await import('#/utils/id-generator.util.js');
+      const newStructuredId = await generateStructuredUserId(request.params.id);
+      
+      await db.update(schema.user)
+        .set({
+          branchId: request.params.id,
+          role: 'branch_manager',
+          structuredId: newStructuredId,
+        } as any)
+        .where(eq(schema.user.id, newManagerId));
+    }
+
     return reply.send(updatedBranch as any);
   });
 
