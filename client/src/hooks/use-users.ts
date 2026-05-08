@@ -104,3 +104,14 @@ export function useDeleteUser() {
     },
   })
 }
+export function useAvailableManagers(currentManagerId?: string) {
+  return useQuery<User[]>({
+    queryKey: ['users', 'available-managers', currentManagerId],
+    queryFn: async () => {
+      const response = await api.get('/users/available-managers', {
+        params: { currentManagerId }
+      })
+      return response.data
+    },
+  })
+}

@@ -66,6 +66,30 @@ const userRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     return reply.send({ data: data as any, total: Number(count) });
   });
 
+  fastify.get('/available-managers', async (request, reply) => {
+    const { currentManagerId } = request.query as any;
+
+    // Find users who are not currently managing any other branch
+    const managers = await db.select({
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      role: user.role,
+      branchId: user.branchId,
+    })
+    .from(user)
+    .leftJoin(schema.branch, eq(user.id, schema.branch.manager))
+    .where(
+      or(
+        sql`${schema.branch.id} IS NULL`, // Not a manager
+        currentManagerId ? eq(user.id, currentManagerId) : sql`FALSE` // Or is the current manager
+      )
+    );
+
+    return reply.send(managers as any);
+  });
+
   fastify.post('/', { schema: CreateUserSchema }, async (request, reply) => {
     const { password: providedPassword, branchId, ...rest } = request.body;
 

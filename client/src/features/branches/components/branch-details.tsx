@@ -13,6 +13,8 @@ import {
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useBranch, useUpdateBranch, useCreateBranch } from '@/hooks/use-branches'
+import { useAvailableManagers } from '@/hooks/use-users'
+import { SelectDropdown } from '@/components/select-dropdown'
 import { Loader2 } from 'lucide-react'
 import { useEffect } from 'react'
 
@@ -31,6 +33,7 @@ interface BranchDetailsProps {
 export function BranchDetails({ id }: BranchDetailsProps) {
   const isNew = !id
   const { data: branch, isLoading } = useBranch(id || '')
+  const { data: availableManagers, isLoading: isLoadingManagers } = useAvailableManagers(branch?.manager || undefined)
   const updateBranch = useUpdateBranch(id || '')
   const createBranch = useCreateBranch()
 
@@ -54,10 +57,14 @@ export function BranchDetails({ id }: BranchDetailsProps) {
   }, [branch, form])
 
   function onSubmit(data: BranchFormValues) {
+    const payload = {
+      ...data,
+      manager: data.manager === 'none' ? null : data.manager,
+    }
     if (isNew) {
-      createBranch.mutate(data)
+      createBranch.mutate(payload as any)
     } else {
-      updateBranch.mutate(data)
+      updateBranch.mutate(payload as any)
     }
   }
 
@@ -116,9 +123,18 @@ export function BranchDetails({ id }: BranchDetailsProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Branch Manager</FormLabel>
-                    <FormControl>
-                      <Input placeholder='Select or enter manager name' {...field} />
-                    </FormControl>
+                    <SelectDropdown
+                      defaultValue={field.value}
+                      onValueChange={field.onChange}
+                      placeholder={isLoadingManagers ? 'Loading managers...' : 'Select a manager'}
+                      items={[
+                        { label: 'None (Unassigned)', value: 'none' },
+                        ...(availableManagers?.map((m) => ({
+                          label: `${m.firstName} ${m.lastName} (${m.email})`,
+                          value: m.id,
+                        })) || []),
+                      ]}
+                    />
                     <FormMessage />
                   </FormItem>
                 )}
