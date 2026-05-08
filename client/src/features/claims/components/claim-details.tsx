@@ -75,82 +75,109 @@ export function ClaimDetails({ id }: ClaimDetailsProps) {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-              <FormField
-                control={form.control}
-                name='amountClaimed'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Amount Claimed (KES)</FormLabel>
-                    <FormControl>
-                      <Input placeholder='Enter amount claimed' {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name='status'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Status</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
+            {/* Section: Financial Details */}
+            <div className='space-y-4'>
+              <div className='flex items-center gap-2 pb-2 border-b'>
+                <div className='size-2 rounded-full bg-primary' />
+                <h3 className='text-sm font-semibold uppercase tracking-tight text-muted-foreground'>
+                  Financial Details
+                </h3>
+              </div>
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                <FormField
+                  control={form.control}
+                  name='amountClaimed'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Amount Claimed (KES)</FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder='Select status' />
-                        </SelectTrigger>
+                        <Input placeholder='Enter amount claimed' {...field} />
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value='pending'>Pending</SelectItem>
-                        <SelectItem value='approved'>Approved</SelectItem>
-                        <SelectItem value='rejected'>Rejected</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name='amountApproved'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Amount Approved (KES)</FormLabel>
+                      <FormControl>
+                        <Input placeholder='Enter amount approved' {...field} value={field.value || ''} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
 
-            <FormField
-              control={form.control}
-              name='amountApproved'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Amount Approved (KES)</FormLabel>
-                  <FormControl>
-                    <Input placeholder='Enter amount approved' {...field} value={field.value || ''} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* Section: Status & Diagnosis */}
+            <div className='space-y-4'>
+              <div className='flex items-center gap-2 pb-2 border-b'>
+                <div className='size-2 rounded-full bg-primary' />
+                <h3 className='text-sm font-semibold uppercase tracking-tight text-muted-foreground'>
+                  Claim Status & Medical Info
+                </h3>
+              </div>
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                <FormField
+                  control={form.control}
+                  name='status'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Claim Status</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder='Select status' />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value='pending'>Pending Review</SelectItem>
+                          <SelectItem value='approved'>Approved</SelectItem>
+                          <SelectItem value='rejected'>Rejected</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className='hidden md:block' /> {/* Spacer */}
+                <div className='md:col-span-2'>
+                  <FormField
+                    control={form.control}
+                    name='diagnosis'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Diagnosis / Treatment Description</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder='Provide detailed medical diagnosis or treatment notes...' 
+                            className='min-h-[120px] resize-none'
+                            {...field} 
+                            value={field.value || ''} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+            </div>
 
-            <FormField
-              control={form.control}
-              name='diagnosis'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Diagnosis / Description</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder='Enter diagnosis' {...field} value={field.value || ''} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className='flex justify-end'>
-              <Button type='submit' disabled={updateClaim.isPending}>
+            <div className='flex justify-end pt-6 border-t'>
+              <Button type='submit' className='min-w-[150px]' disabled={updateClaim.isPending}>
                 {updateClaim.isPending ? (
                   <>
                     <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                     Saving...
                   </>
                 ) : (
-                  'Save Changes'
+                  'Update Claim'
                 )}
               </Button>
             </div>

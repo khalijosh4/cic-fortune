@@ -4,7 +4,7 @@ export const BranchSchema = Type.Object({
   id: Type.String(),
   name: Type.String(),
   location: Type.String(),
-  manager: Type.String(),
+  manager: Type.Optional(Type.String()),
   createdAt: Type.Optional(Type.String()),
   updatedAt: Type.Optional(Type.String()),
 });
@@ -13,7 +13,7 @@ export const CreateBranchSchema = {
   body: Type.Object({
     name: Type.String(),
     location: Type.String(),
-    manager: Type.String(),
+    manager: Type.Optional(Type.String()),
   }),
   response: {
     201: BranchSchema,

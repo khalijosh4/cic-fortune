@@ -69,14 +69,14 @@ const branchRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     })
     .from(branchStats)
     .innerJoin(branch, eq(branchStats.id, branch.id))
-    .innerJoin(schema.user, eq(branch.manager, schema.user.id))
+    .leftJoin(schema.user, eq(branch.manager, schema.user.id))
     .where(whereClause)
     .limit(limit)
     .offset(offset);
 
     const countResult = await db.select({ count: sql<number>`count(*)` })
       .from(branchStats)
-      .innerJoin(branch, eq(branchStats.id, branch.id))
+      .leftJoin(branch, eq(branchStats.id, branch.id))
       .where(whereClause);
     const count = countResult[0]?.count ?? 0;
 

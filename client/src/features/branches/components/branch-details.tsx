@@ -19,7 +19,7 @@ import { useEffect } from 'react'
 const branchFormSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   location: z.string().min(1, 'Location is required'),
-  manager: z.string().min(1, 'Manager is required'),
+  manager: z.string().optional(),
 })
 
 type BranchFormValues = z.infer<typeof branchFormSchema>
@@ -76,48 +76,57 @@ export function BranchDetails({ id }: BranchDetailsProps) {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-            <FormField
-              control={form.control}
-              name='name'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Branch Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder='Enter branch name' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='location'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Location</FormLabel>
-                  <FormControl>
-                    <Input placeholder='Enter location' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='manager'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Manager</FormLabel>
-                  <FormControl>
-                    <Input placeholder='Enter manager name' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className='flex justify-end'>
-              <Button type='submit' disabled={updateBranch.isPending || createBranch.isPending}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
+            <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+              <FormField
+                control={form.control}
+                name='name'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Branch Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder='e.g. Headquarters' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='location'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Location</FormLabel>
+                    <FormControl>
+                      <Input placeholder='e.g. Nairobi, Kenya' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className='rounded-lg bg-muted/50 p-4'>
+              <h3 className='mb-4 text-sm font-medium text-muted-foreground uppercase tracking-wider'>
+                Administration (Optional)
+              </h3>
+              <FormField
+                control={form.control}
+                name='manager'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Branch Manager</FormLabel>
+                    <FormControl>
+                      <Input placeholder='Select or enter manager name' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className='flex justify-end pt-4 border-t'>
+              <Button type='submit' className='min-w-[120px]' disabled={updateBranch.isPending || createBranch.isPending}>
                 {updateBranch.isPending || createBranch.isPending ? (
                   <>
                     <Loader2 className='mr-2 h-4 w-4 animate-spin' />
