@@ -40,7 +40,7 @@ export function DataTableBulkActions<TData>({
   const handleConfirmDelete = async () => {
     const selectedBranches = selectedRows.map((row) => row.original as Branch)
     for (const b of selectedBranches) {
-      await deleteBranch.mutateAsync(b.branchId)
+      await deleteBranch.mutateAsync(b.id)
     }
     table.resetRowSelection()
     setShowDeleteDialog(false)

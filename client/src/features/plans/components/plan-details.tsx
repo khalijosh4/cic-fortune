@@ -115,19 +115,29 @@ export function PlanDetails({ id }: PlanDetailsProps) {
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
             <div className='space-y-4'>
               <h3 className='text-lg font-semibold'>General Information</h3>
-              <FormField
-                control={form.control}
-                name='planName'
-                render={({ field }) => (
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                {!isNew && (
                   <FormItem>
-                    <FormLabel>Plan Name</FormLabel>
+                    <FormLabel>Plan ID</FormLabel>
                     <FormControl>
-                      <Input placeholder='e.g. Gold Executive' {...field} />
+                      <Input value={plan?.id || ''} disabled className='bg-muted font-mono' />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
-              />
+                <FormField
+                  control={form.control}
+                  name='planName'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Plan Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder='e.g. Gold Executive' {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
 
             <div className='space-y-4 pt-4 border-t'>

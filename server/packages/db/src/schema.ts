@@ -16,28 +16,26 @@ export const PaymentMethodEnum = pgEnum('PaymentMethod', ['']);
 // 2. Tables 
 // Note: We use arrow functions in .references() to handle the hoisting/circularity
 export const user: any = pgTable('user', {
-  id: uuid('id').primaryKey().notNull().defaultRandom(),
+  id: varchar('id', { length: 50 }).primaryKey(),
   firstName: varchar('first_name', { length: 50 }).notNull(),
   middleName: varchar('middle_name', { length: 50 }),
   lastName: varchar('last_name', { length: 50 }).notNull(),
   email: varchar('email', { length: 100 }).unique(),
-  phoneNumber: varchar('phone_number', { length: 15 }),
+  phoneNumber: varchar('phone_number', { length: 15 }).unique(),
   password: varchar('password', { length: 255 }).notNull(),
-  branchId: uuid('branch_id').references((): AnyPgColumn => branch.id, { onDelete: 'set null', onUpdate: 'cascade' }),
-  hospitalId: uuid('hospital_id').references((): AnyPgColumn => hospital.id, { onDelete: 'set null', onUpdate: 'cascade' }),
+  branchId: varchar('branch_id', { length: 50 }).references((): AnyPgColumn => branch.id, { onDelete: 'set null', onUpdate: 'cascade' }),
+  hospitalId: varchar('hospital_id', { length: 50 }).references((): AnyPgColumn => hospital.id, { onDelete: 'set null', onUpdate: 'cascade' }),
   role: RolesEnum('role').notNull().default('user'),
-  structuredId: varchar('structured_id', { length: 50 }).unique(),
   mustChangePassword: boolean('must_change_password').notNull().default(true),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date())
 });
 
 export const branch: any = pgTable('branch', {
-  id: uuid('id').primaryKey().notNull().defaultRandom(),
+  id: varchar('id', { length: 50 }).primaryKey(),
   name: varchar('name', { length: 50 }).notNull(),
   location: varchar('location', { length: 255 }).notNull(),
-  manager: uuid('manager_id').references((): AnyPgColumn => user.id, { onDelete: 'set null', onUpdate: 'cascade' }),
-  structuredId: varchar('structured_id', { length: 50 }).unique(),
+  manager: varchar('manager_id', { length: 50 }).references((): AnyPgColumn => user.id, { onDelete: 'set null', onUpdate: 'cascade' }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date())
 });
@@ -73,13 +71,13 @@ export const member: any = pgTable('member', {
 */
 
 export const member = pgTable('member', {
-  id: uuid('id').primaryKey().defaultRandom(),
+  id: varchar('id', { length: 50 }).primaryKey(),
   firstName: varchar('first_name', { length: 50 }).notNull(),
   lastName: varchar('last_name', { length: 50 }).notNull(),
   email: varchar('email', { length: 100 }),
   phoneNumber: varchar('phone_number', { length: 20 }),
-  branchId: uuid('branch_id').references(() => branch.id, { onDelete: 'set null', onUpdate: 'cascade' }),
-  planId: uuid('plan_id').references(() => premiumRate.id, { onDelete: 'set null', onUpdate: 'cascade' }),
+  branchId: varchar('branch_id', { length: 50 }).references(() => branch.id, { onDelete: 'set null', onUpdate: 'cascade' }),
+  planId: varchar('plan_id', { length: 50 }).references(() => premiumRate.id, { onDelete: 'set null', onUpdate: 'cascade' }),
   coverType: PolicyCoverTypeEnum('cover_type').default('individual'),
   dependentsCount: integer('dependents_count').default(0),
   premiumRate: numeric('premium_rate', { precision: 12, scale: 2 }).notNull(),
@@ -91,10 +89,10 @@ export const member = pgTable('member', {
 });
 
 export const claim = pgTable('claim', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  memberId: uuid('member_id').references(() => member.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
-  hospitalId: uuid('hospital_id').references(() => hospital.id, { onDelete: 'set null', onUpdate: 'cascade' }),
-  planId: uuid('plan_id').references(() => premiumRate.id, { onDelete: 'set null', onUpdate: 'cascade' }),
+  id: varchar('id', { length: 50 }).primaryKey(),
+  memberId: varchar('member_id', { length: 50 }).references(() => member.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+  hospitalId: varchar('hospital_id', { length: 50 }).references(() => hospital.id, { onDelete: 'set null', onUpdate: 'cascade' }),
+  planId: varchar('plan_id', { length: 50 }).references(() => premiumRate.id, { onDelete: 'set null', onUpdate: 'cascade' }),
   amountClaimed: numeric('amount_claimed', { precision: 15, scale: 2 }).notNull(),
   amountApproved: numeric('amount_approved', { precision: 15, scale: 2 }),
   status: ClaimStatusEnum('status').default('pending'),
@@ -103,7 +101,7 @@ export const claim = pgTable('claim', {
 });
 
 export const hospital = pgTable('hospital', {
-  id: uuid('id').primaryKey().defaultRandom(),
+  id: varchar('id', { length: 50 }).primaryKey(),
   name: varchar('name', { length: 100 }).notNull(),
   location: text('location'),
   type: HospitalTypeEnum('type').default('public'),
@@ -111,8 +109,8 @@ export const hospital = pgTable('hospital', {
 });
 
 export const premium = pgTable('premium', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  memberId: uuid('member_id').references(() => member.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+  id: varchar('id', { length: 50 }).primaryKey(),
+  memberId: varchar('member_id', { length: 50 }).references(() => member.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
   amountDue: numeric('amount_due', { precision: 12, scale: 2 }).notNull(),
   amountPaid: numeric('amount_paid', { precision: 12, scale: 2 }).default('0'),
   dueDate: timestamp('due_date').notNull(),
@@ -121,7 +119,7 @@ export const premium = pgTable('premium', {
 });
 
 export const premiumRate = pgTable('premium_rate', {
-  id: uuid('id').primaryKey().defaultRandom(),
+  id: varchar('id', { length: 50 }).primaryKey(),
   planName: varchar('plan_name', { length: 100 }).notNull(),
   // Benefit Limits (from charts)
   inpatientLimit: numeric('inpatient_limit', { precision: 15, scale: 2 }).notNull(),

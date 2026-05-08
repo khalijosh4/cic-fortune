@@ -148,7 +148,13 @@ const claimRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
       payload.hospitalId = request.user.hospitalId!;
     }
 
-    const insertResult = await db.insert(claim).values(payload as any).returning() as any;
+    const { generateStructuredClaimId } = await import('#/utils/id-generator.util.js');
+    const id = await generateStructuredClaimId();
+
+    const insertResult = await db.insert(claim).values({
+      ...payload,
+      id,
+    } as any).returning() as any;
     const newClaim = insertResult[0];
 
     // Evaluate limits automatically

@@ -37,6 +37,17 @@ export const membersColumns: ColumnDef<Member>[] = [
     enableHiding: false,
   },
   {
+    accessorKey: 'id',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='ID' />
+    ),
+    cell: ({ row }) => (
+      <div className='w-[100px] font-mono text-xs uppercase'>
+        {row.getValue('id') || '—'}
+      </div>
+    ),
+  },
+  {
     id: 'name',
     accessorFn: (row) => `${row.firstName} ${row.lastName}`,
     header: ({ column }) => (

@@ -48,7 +48,13 @@ const planRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
       return reply.forbidden('Only admins can create plans');
     }
 
-    const insertResult = await db.insert(premiumRate).values(request.body as any).returning() as any;
+    const { generateStructuredPlanId } = await import('#/utils/id-generator.util.js');
+    const id = await generateStructuredPlanId((request.body as any).planName);
+
+    const insertResult = await db.insert(premiumRate).values({
+      ...(request.body as any),
+      id,
+    } as any).returning() as any;
     const newPlan = insertResult[0];
     return reply.code(201).send(newPlan as any);
   });

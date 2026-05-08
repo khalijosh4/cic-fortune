@@ -9,8 +9,12 @@ export class PremiumService {
 
     const amountDue = memberData.premiumRate;
 
+    const { generateStructuredPremiumId } = await import('../utils/id-generator.util.js');
+    const id = await generateStructuredPremiumId();
+
     const newPremiumResult = await db.insert(premium).values({
       memberId,
+      id,
       amountDue,
       dueDate,
       amountPaid: '0',

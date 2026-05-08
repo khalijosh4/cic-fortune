@@ -11,7 +11,7 @@ const authRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     const { identifier, password } = request.body;
 
     const findResult = await db.select().from(user)
-      .where(or(eq(user.email, identifier), eq(user.structuredId, identifier)))
+      .where(or(eq(user.email, identifier), eq(user.id, identifier)))
       .limit(1);
     const foundUser = findResult[0];
 

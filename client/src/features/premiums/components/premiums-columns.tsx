@@ -34,11 +34,11 @@ export const premiumsColumns: ColumnDef<Premium>[] = [
   {
     accessorKey: 'id',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Payment ID' />
+      <DataTableColumnHeader column={column} title='ID' />
     ),
     cell: ({ row }) => (
-      <div className='w-[80px] font-medium'>
-        {String(row.getValue('id')).slice(0, 8)}
+      <div className='w-[100px] font-mono text-xs uppercase'>
+        {row.getValue('id') || '—'}
       </div>
     ),
     enableSorting: false,

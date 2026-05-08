@@ -55,14 +55,14 @@ export const ListBranchSchema = {
   response: {
     200: Type.Object({
       data: Type.Array(Type.Object({
-        branchId: Type.String(),
-        branchName: Type.String(),
+        id: Type.String(),
+        name: Type.String(),
         totalMembers: Type.Number(),
         totalPlans: Type.Number(),
         totalActivePlans: Type.Number(),
         totalClaims: Type.Number(),
         location: Type.String(),
-        managerName: Type.String(),
+        managerName: Type.Optional(Type.Union([Type.String(), Type.Null()])),
       })),
       total: Type.Number(),
     }),

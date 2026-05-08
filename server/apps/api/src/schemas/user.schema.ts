@@ -2,7 +2,6 @@ import { Type } from '@sinclair/typebox';
 
 export const UserSchema = Type.Object({
   id: Type.String(),
-  structuredId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   firstName: Type.String(),
   middleName: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   lastName: Type.String(),

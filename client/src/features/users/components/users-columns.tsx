@@ -37,6 +37,17 @@ export const usersColumns: ColumnDef<User>[] = [
     enableHiding: false,
   },
   {
+    accessorKey: 'id',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='ID' />
+    ),
+    cell: ({ row }) => (
+      <div className='w-[100px] font-mono text-xs uppercase'>
+        {row.getValue('id') || '—'}
+      </div>
+    ),
+  },
+  {
     id: 'fullName',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Name' />

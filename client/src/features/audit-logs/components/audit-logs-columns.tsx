@@ -36,6 +36,17 @@ export const auditLogsColumns: ColumnDef<AuditLog>[] = [
     enableHiding: false,
   },
   {
+    accessorKey: 'id',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='ID' />
+    ),
+    cell: ({ row }) => (
+      <div className='w-[80px] font-mono text-[10px] uppercase'>
+        {row.original.id.substring(0, 8)}
+      </div>
+    ),
+  },
+  {
     accessorKey: 'timestamp',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Timestamp' />

@@ -84,11 +84,11 @@ export async function sendEnrollmentSms(
 
 export async function sendWelcomeEmail(
   toEmail: string,
-  user: { firstName: string; lastName: string; structuredId?: string | null; password?: string },
+  user: { firstName: string; lastName: string; id?: string | null; password?: string },
   apiToken: string
 ) {
   const mailersend = new MailerSend({ apiKey: apiToken });
-  const { firstName, lastName, structuredId, password } = user;
+  const { firstName, lastName, id, password } = user;
   const fullName = `${firstName} ${lastName}`;
 
   const sentFrom = new Sender('cic-fortune@test-xkjn41m31594z781.mlsender.net', 'CIC Fortune');
@@ -104,7 +104,7 @@ export async function sendWelcomeEmail(
         <h2 style="color: #005a8c;">Welcome to CIC Fortune, ${firstName}!</h2>
         <p>Your administrative account has been created successfully.</p>
         <div style="background-color: #f4f4f4; padding: 15px; border-radius: 8px; margin: 20px 0;">
-          <p><strong>Login ID:</strong> ${structuredId || 'Use your email'}</p>
+          <p><strong>Login ID:</strong> ${id || 'Use your email'}</p>
           <p><strong>Temporary Password:</strong> ${password}</p>
         </div>
         <p>Please log in at <a href="https://cic-fortune.vercel.app">CIC Fortune Portal</a>. You will be prompted to change your password on your first login.</p>
@@ -112,7 +112,54 @@ export async function sendWelcomeEmail(
         <p>Best regards,<br>The CIC Fortune Team</p>
       </div>
     `)
-    .setText(`Hello ${firstName}, welcome to CIC Fortune! Your Login ID is ${structuredId || toEmail} and your temporary password is ${password}. Please login and change your password.`);
+    .setText(`Hello ${firstName}, welcome to CIC Fortune! Your Login ID is ${id || toEmail} and your temporary password is ${password}. Please login and change your password.`);
+
+  return mailersend.email.send(emailParams);
+}
+
+export async function sendTransferEmail(
+  toEmail: string,
+  details: { 
+    firstName: string; 
+    lastName: string; 
+    id: string; 
+    branchName: string;
+  },
+  apiToken: string
+) {
+  const mailersend = new MailerSend({ apiKey: apiToken });
+  const { firstName, lastName, id, branchName } = details;
+  const fullName = `${firstName} ${lastName}`;
+
+  const sentFrom = new Sender('cic-fortune@test-xkjn41m31594z781.mlsender.net', 'CIC Fortune');
+  const recipients = [new Recipient(toEmail, fullName)];
+
+  const emailParams = new EmailParams()
+    .setFrom(sentFrom)
+    .setTo(recipients)
+    .setReplyTo(sentFrom)
+    .setSubject('Branch Transfer Notification - CIC Fortune')
+    .setHtml(`
+      <div style="font-family: sans-serif; padding: 20px; color: #333;">
+        <h2 style="color: #005a8c;">Branch Transfer Update</h2>
+        <p>Hello ${firstName},</p>
+        <p>This is to inform you that you have been transferred to a new branch and promoted/assigned as a <strong>Branch Manager</strong>.</p>
+        <div style="background-color: #f4f4f4; padding: 15px; border-radius: 8px; margin: 20px 0;">
+          <p><strong>New Branch:</strong> ${branchName}</p>
+          <p><strong>New User ID:</strong> ${id}</p>
+          <p><strong>Role:</strong> Branch Manager</p>
+        </div>
+        <p><strong>Instructions:</strong></p>
+        <ol>
+          <li>Please use your new <strong>User ID</strong> for future logins if you use ID-based login.</li>
+          <li>Your existing password remains the same unless you were recently created.</li>
+          <li>You now have administrative access to manage operations at the <strong>${branchName}</strong> branch.</li>
+        </ol>
+        <p>If you believe this transfer is an error, please contact the HR department or System Administrator immediately.</p>
+        <p>Best regards,<br>The CIC Fortune Team</p>
+      </div>
+    `)
+    .setText(`Hello ${firstName}, you have been transferred to the ${branchName} branch as a Branch Manager. Your new User ID is ${id}. Please use this for your future interactions with the system.`);
 
   return mailersend.email.send(emailParams);
 }

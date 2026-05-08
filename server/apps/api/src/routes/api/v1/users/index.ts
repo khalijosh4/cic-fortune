@@ -103,17 +103,16 @@ const userRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     const password = providedPassword || generateTemporaryPassword();
     const hashedPassword = await bcrypt.hash(password, 10);
     
-    // Generate structured ID if branch is provided
-    let structuredId = null;
-    if (branchId) {
-      structuredId = await generateStructuredUserId(branchId);
-    }
+    // Generate structured ID for primary key
+    const id = branchId 
+      ? await generateStructuredUserId(branchId) 
+      : `ADM-${new Date().getFullYear()}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
 
     const insertResult = await db.insert(user).values({
       ...rest,
+      id,
       branchId,
       password: hashedPassword,
-      structuredId,
       mustChangePassword: true,
     } as any).returning() as any;
     
@@ -127,7 +126,7 @@ const userRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
           { 
             firstName: newUser.firstName, 
             lastName: newUser.lastName, 
-            structuredId: newUser.structuredId, 
+            id: newUser.id, 
             password: password 
           },
           process.env.MAILERSEND_API_TOKEN!
@@ -163,7 +162,7 @@ const userRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
 
     // Re-generate structured ID if branchId is changing
     if (updates.branchId && updates.branchId !== existing.branchId) {
-      updates.structuredId = await generateStructuredUserId(updates.branchId);
+      updates.id = await generateStructuredUserId(updates.branchId);
     }
 
     const updateResult = await db.update(user)

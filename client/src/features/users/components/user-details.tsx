@@ -18,6 +18,7 @@ import { useHospitals } from '@/hooks/use-hospitals'
 import { Loader2 } from 'lucide-react'
 import { useEffect } from 'react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { roles } from '../data/data'
 
 const userFormSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
@@ -25,7 +26,7 @@ const userFormSchema = z.object({
   lastName: z.string().min(1, 'Last name is required'),
   email: z.string().email('Invalid email address'),
   phoneNumber: z.string().min(1, 'Phone number is required'),
-  role: z.enum(['admin', 'user', 'hospital']),
+  role: z.enum(['admin', 'user', 'hospital', 'hr', 'ceo', 'branch_manager', 'claims_officer', 'system_admin']),
   branchId: z.string().optional().nullable(),
   hospitalId: z.string().optional().nullable(),
   password: z.string().min(6, 'Password must be at least 6 characters').optional(),
@@ -101,7 +102,15 @@ export function UserDetails({ id }: UserDetailsProps) {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+            <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
+              {!isNew && (
+                <FormItem>
+                  <FormLabel>User ID</FormLabel>
+                  <FormControl>
+                    <Input value={user?.id || ''} disabled className='bg-muted font-mono' />
+                  </FormControl>
+                </FormItem>
+              )}
               <FormField
                 control={form.control}
                 name='firstName'
@@ -201,9 +210,11 @@ export function UserDetails({ id }: UserDetailsProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value='admin'>Admin</SelectItem>
-                      <SelectItem value='user'>Staff</SelectItem>
-                      <SelectItem value='hospital'>Hospital Staff</SelectItem>
+                      {roles.map((role) => (
+                        <SelectItem key={role.value} value={role.value}>
+                          {role.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -226,8 +237,8 @@ export function UserDetails({ id }: UserDetailsProps) {
                       </FormControl>
                       <SelectContent>
                         {branchesData?.data.map((branch) => (
-                          <SelectItem key={branch.branchId} value={branch.branchId}>
-                            {branch.branchName}
+                          <SelectItem key={branch.id} value={branch.id}>
+                            {branch.name}
                           </SelectItem>
                         ))}
                       </SelectContent>

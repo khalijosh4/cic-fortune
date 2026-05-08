@@ -141,8 +141,12 @@ const memberRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
 
     payload.premiumRate = premiumRate.toString();
 
+    const { generateStructuredMemberId } = await import('#/utils/id-generator.util.js');
+    const id = await generateStructuredMemberId(payload.branchId);
+
     const insertResult = await db.insert(member).values({
       ...payload,
+      id,
       usedAnnualLimit: '0',
       usedOutpatientLimit: '0',
       usedInpatientLimit: '0',

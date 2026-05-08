@@ -3,8 +3,8 @@ import api from '@/lib/api'
 import { toast } from 'sonner'
 
 export interface Branch {
-  branchId: string
-  branchName: string
+  id: string
+  name: string
   totalMembers: number
   totalPlans: number
   totalActivePlans: number

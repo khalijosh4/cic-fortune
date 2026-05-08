@@ -75,7 +75,13 @@ export function PremiumDetails({ id }: PremiumDetailsProps) {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+              <FormItem>
+                <FormLabel>Premium ID</FormLabel>
+                <FormControl>
+                  <Input value={premium?.id || ''} disabled className='bg-muted font-mono' />
+                </FormControl>
+              </FormItem>
               <FormField
                 control={form.control}
                 name='amountDue'

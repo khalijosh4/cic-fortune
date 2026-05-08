@@ -89,34 +89,42 @@ export function BranchDetails({ id }: BranchDetailsProps) {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
-              <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
-                <FormField
-                  control={form.control}
-                  name='name'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Branch Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder='e.g. Headquarters' {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name='location'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Location</FormLabel>
-                      <FormControl>
-                        <Input placeholder='e.g. Nairobi, Kenya' {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              <div className='grid grid-cols-1 gap-6 md:grid-cols-3'>
+              {!isNew && (
+                <FormItem>
+                  <FormLabel>Branch ID</FormLabel>
+                  <FormControl>
+                    <Input value={branch?.id || ''} disabled className='bg-muted font-mono' />
+                  </FormControl>
+                </FormItem>
+              )}
+              <FormField
+                control={form.control}
+                name='name'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Branch Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder='e.g. Headquarters' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='location'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Location</FormLabel>
+                    <FormControl>
+                      <Input placeholder='e.g. Nairobi, Kenya' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
               <div className='rounded-lg bg-muted/50 p-4'>
                 <h3 className='mb-4 text-sm font-medium text-muted-foreground uppercase tracking-wider'>

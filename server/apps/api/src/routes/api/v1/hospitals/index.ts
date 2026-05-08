@@ -52,7 +52,13 @@ const hospitalRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
       return reply.forbidden('Only admins can add hospitals');
     }
 
-    const insertResult = await db.insert(hospital).values(request.body as any).returning() as any;
+    const { generateStructuredHospitalId } = await import('#/utils/id-generator.util.js');
+    const id = await generateStructuredHospitalId((request.body as any).name);
+
+    const insertResult = await db.insert(hospital).values({
+      ...(request.body as any),
+      id,
+    } as any).returning() as any;
     const newHospital = insertResult[0];
     return reply.code(201).send(newHospital as any);
   });

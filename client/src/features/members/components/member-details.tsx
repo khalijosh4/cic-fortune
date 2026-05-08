@@ -121,34 +121,42 @@ export function MemberDetails({ id }: MemberDetailsProps) {
                   Personal Details
                 </h3>
               </div>
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                <FormField
-                  control={form.control}
-                  name='firstName'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>First Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder='Enter first name' {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name='lastName'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Last Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder='Enter last name' {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+              {!isNew && (
+                <FormItem>
+                  <FormLabel>Member ID</FormLabel>
+                  <FormControl>
+                    <Input value={member?.id || ''} disabled className='bg-muted font-mono' />
+                  </FormControl>
+                </FormItem>
+              )}
+              <FormField
+                control={form.control}
+                name='firstName'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>First Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder='Enter first name' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='lastName'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Last Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder='Enter last name' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             </div>
 
             {/* Section: Contact Information */}
@@ -212,8 +220,8 @@ export function MemberDetails({ id }: MemberDetailsProps) {
                         </FormControl>
                         <SelectContent>
                           {branchesData?.data.map((branch) => (
-                            <SelectItem key={branch.branchId} value={branch.branchId}>
-                              {branch.branchName}
+                            <SelectItem key={branch.id} value={branch.id}>
+                              {branch.name}
                             </SelectItem>
                           ))}
                         </SelectContent>

@@ -31,6 +31,17 @@ export const branchesColumns: ColumnDef<Branch>[] = [
     enableHiding: false,
   },
   {
+    accessorKey: 'id',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='ID' />
+    ),
+    cell: ({ row }) => (
+      <div className='w-[80px] font-mono text-xs uppercase'>
+        {row.getValue('id') || '—'}
+      </div>
+    ),
+  },
+  {
     accessorKey: 'branchName',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Branch Name' />

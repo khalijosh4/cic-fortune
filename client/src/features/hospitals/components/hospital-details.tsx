@@ -80,19 +80,29 @@ export function HospitalDetails({ id }: HospitalDetailsProps) {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-            <FormField
-              control={form.control}
-              name='name'
-              render={({ field }) => (
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+              {!isNew && (
                 <FormItem>
-                  <FormLabel>Hospital Name</FormLabel>
+                  <FormLabel>Hospital ID</FormLabel>
                   <FormControl>
-                    <Input placeholder='Enter hospital name' {...field} />
+                    <Input value={hospital?.id || ''} disabled className='bg-muted font-mono' />
                   </FormControl>
-                  <FormMessage />
                 </FormItem>
               )}
-            />
+              <FormField
+                control={form.control}
+                name='name'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Hospital Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder='Enter hospital name' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             <FormField
               control={form.control}
               name='location'

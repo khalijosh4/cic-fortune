@@ -11,6 +11,7 @@ import {
 } from '#/schemas/branch.schema.js';
 import { getTerritoryFilters, hasAccess } from '#/utils/tebac.util.js';
 import { generateStructuredBranchId } from '#/utils/id-generator.util.js';
+import { sendTransferEmail } from '#/utils/notification.util.js';
 
 const branchRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/stats', async (request, reply) => {
@@ -58,8 +59,8 @@ const branchRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     const whereClause = filters.length > 0 ? and(...filters) : undefined;
 
     const data = await db.select({
-      branchId: branchStats.id,
-      branchName: branchStats.name,
+      id: branchStats.id,
+      name: branchStats.name,
       totalMembers: branchStats.totalMembers,
       totalPlans: branchStats.totalPlans,
       totalActivePlans: branchStats.totalActivePlans,
@@ -90,11 +91,11 @@ const branchRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     }
 
     const { name, manager: managerId } = request.body as any;
-    const structuredId = await generateStructuredBranchId(name);
+    const id = await generateStructuredBranchId(name);
 
     const insertResult = await db.insert(branch).values({
       ...request.body,
-      structuredId,
+      id,
     } as any).returning() as any;
     
     const newBranch = insertResult[0];
@@ -106,11 +107,26 @@ const branchRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
       
       await db.update(schema.user)
         .set({
+          id: newUserStructuredId,
           branchId: newBranch.id,
           role: 'branch_manager',
-          structuredId: newUserStructuredId,
         } as any)
         .where(eq(schema.user.id, managerId));
+
+      // Send Transfer Email
+      if (fastify.config.MAILERSEND_API_TOKEN) {
+        const [userData] = await db.select().from(schema.user).where(eq(schema.user.id, managerId)).limit(1);
+        if (userData && userData.email) {
+          sendTransferEmail(userData.email, {
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            id: newUserStructuredId,
+            branchName: newBranch.name,
+          }, fastify.config.MAILERSEND_API_TOKEN).catch(err => {
+            fastify.log.error({ err, userId: managerId }, 'Failed to send transfer email during branch creation');
+          });
+        }
+      }
     }
 
     return reply.code(201).send(newBranch as any);
@@ -149,11 +165,26 @@ const branchRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
       
       await db.update(schema.user)
         .set({
+          id: newStructuredId,
           branchId: request.params.id,
           role: 'branch_manager',
-          structuredId: newStructuredId,
         } as any)
         .where(eq(schema.user.id, newManagerId));
+
+      // Send Transfer Email
+      if (fastify.config.MAILERSEND_API_TOKEN) {
+        const [userData] = await db.select().from(schema.user).where(eq(schema.user.id, newManagerId)).limit(1);
+        if (userData && userData.email) {
+          sendTransferEmail(userData.email, {
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            id: newStructuredId,
+            branchName: updatedBranch.name,
+          }, fastify.config.MAILERSEND_API_TOKEN).catch(err => {
+            fastify.log.error({ err, userId: newManagerId }, 'Failed to send transfer email during branch update');
+          });
+        }
+      }
     }
 
     return reply.send(updatedBranch as any);

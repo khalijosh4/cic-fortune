@@ -94,8 +94,8 @@ export function MembersTable({ data, total, search, navigate }: DataTableProps) 
 
   const { data: branchesData } = useBranches(100, 0)
   const branchOptions = branchesData?.data.map(b => ({
-    label: b.branchName,
-    value: b.branchId
+    label: b.name,
+    value: b.id
   })) || []
 
   return (

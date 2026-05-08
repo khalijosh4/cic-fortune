@@ -1,9 +1,7 @@
 import { db, schema } from './index.js';
 import bcrypt from 'bcryptjs';
-//import { v5 as uuidv5 } from 'uuid';
 import { eq } from 'drizzle-orm';
 import { faker } from '@faker-js/faker';
-
 
 // Constants for counts
 const BRANCH_COUNT = 15;
@@ -28,30 +26,26 @@ async function seed() {
     const hashedPassword = await bcrypt.hash('Admin@2024', 10);
     const adminEmail = 'admin@fortunesacco.co.ke';
     
-    const [existingAdmin] = await db.select().from(schema.user).where(eq(schema.user.email, adminEmail)).limit(1);
+    const adminId = 'SYS-ADMIN-001';
+    await db.insert(schema.user).values({
+      id: adminId,
+      firstName: 'System',
+      lastName: 'Administrator',
+      email: adminEmail,
+      password: hashedPassword,
+      role: 'admin',
+    } as any);
     
-    let adminId: string;
-    if (existingAdmin) {
-      adminId = existingAdmin.id;
-      console.log('Admin already exists, using ID:', adminId);
-    } else {
-      adminId = faker.string.uuid();
-      await db.insert(schema.user).values({
-        id: adminId,
-        firstName: 'System',
-        lastName: 'Administrator',
-        email: adminEmail,
-        password: hashedPassword,
-        role: 'admin',
-      } as any);
-      console.log('Created new admin with ID:', adminId);
-    }
+    const [insertedAdmin] = await db.select().from(schema.user).where(eq(schema.user.id, adminId)).limit(1);
+    console.log('Admin in DB:', insertedAdmin?.id);
+    
+    console.log('Created/Verified admin with ID:', adminId);
 
     // 2. Seed Hospitals
     console.log('Seeding hospitals...');
     let hospitalIds: string[] = [];
-    for (let i = 0; i < HOSPITAL_COUNT; i++) {
-      const hId = faker.string.uuid();
+    for (let i = 1; i <= HOSPITAL_COUNT; i++) {
+      const hId = `HSP-GEN-${i.toString().padStart(3, '0')}`;
       const insertRes: any = await db.insert(schema.hospital).values({
         id: hId,
         name: faker.company.name() + ' Hospital',
@@ -70,12 +64,15 @@ async function seed() {
     // 3. Seed Branches
     console.log('Seeding branches...');
     let branchIds: string[] = [];
+    const branchNames = ['Nairobi', 'Mombasa', 'Kisumu', 'Nakuru', 'Eldoret', 'Thika', 'Nyeri', 'Meru', 'Embu', 'Kakamega', 'Kericho', 'Machakos', 'Garissa', 'Kitale', 'Malindi'];
     for (let i = 0; i < BRANCH_COUNT; i++) {
-      const bId = faker.string.uuid();
-      // Temporarily use admin as manager, we'll update later
+      const bName = branchNames[i] || faker.location.city();
+      const bCode = bName.substring(0, 3).toUpperCase();
+      const bId = `BR-${bCode}-${(i + 1).toString().padStart(3, '0')}`;
+      
       const insertRes: any = await db.insert(schema.branch).values({
         id: bId,
-        name: (faker.location.city() + ' Branch').slice(0, 50),
+        name: bName + ' Branch',
         location: faker.location.streetAddress().slice(0, 255),
         manager: adminId, 
       } as any).onConflictDoNothing().returning();
@@ -90,28 +87,31 @@ async function seed() {
     // 3.5 Seed Specific Role Users for Testing
     console.log('Seeding specific role users...');
     const roles = ['admin', 'user', 'hospital', 'hr', 'ceo', 'branch_manager', 'claims_officer', 'system_admin'];
-    for (const role of roles) {
+    for (let i = 0; i < roles.length; i++) {
+      const role = roles[i];
       const email = `${role.toLowerCase().replace('_', '.')}@fortunesacco.co.ke`;
-      const [existing] = await db.select().from(schema.user).where(eq(schema.user.email, email)).limit(1);
-      if (!existing) {
-        await db.insert(schema.user).values({
-          id: faker.string.uuid(),
-          firstName: role.split('_').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' '),
-          lastName: 'User',
-          email,
-          password: hashedPassword,
-          role,
-          branchId: faker.helpers.arrayElement(branchIds), 
-        } as any).onConflictDoNothing();
-        console.log(`Created or updated ${role} user: ${email}`);
-      }
+      const uId = `USR-${role.substring(0, 3).toUpperCase()}-${(i + 1).toString().padStart(3, '0')}`;
+      
+      await db.insert(schema.user).values({
+        id: uId,
+        firstName: role.split('_').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' '),
+        lastName: 'User',
+        email,
+        password: hashedPassword,
+        role,
+        branchId: faker.helpers.arrayElement(branchIds), 
+      } as any).onConflictDoNothing();
+      console.log(`Created or updated ${role} user: ${email}`);
     }
 
     // 4. Seed Users (Employees)
     console.log('Seeding users...');
     let userIds: string[] = [adminId];
-    for (let i = 0; i < USER_COUNT; i++) {
-      const uId = faker.string.uuid();
+    for (let i = 1; i <= USER_COUNT; i++) {
+      const branchId = faker.helpers.arrayElement(branchIds);
+      const branchCode = branchId.split('-')[1];
+      const uId = `${branchCode}-2026-${i.toString().padStart(3, '0')}`;
+      
       const firstName = faker.person.firstName();
       const lastName = faker.person.lastName();
       const insertRes: any = await db.insert(schema.user).values({
@@ -120,28 +120,21 @@ async function seed() {
         lastName: lastName.slice(0, 50),
         email: faker.internet.email({ firstName, lastName }).toLowerCase().slice(0, 100),
         phoneNumber: faker.phone.number().slice(0, 15),
-        password: hashedPassword, // Reuse same password for simplicity in dev
+        password: hashedPassword,
         role: faker.helpers.arrayElement(['admin', 'user', 'hr', 'ceo', 'branch_manager', 'claims_officer', 'system_admin']),
-        branchId: faker.helpers.arrayElement(branchIds),
+        branchId,
       } as any).onConflictDoNothing().returning();
       const res = insertRes?.[0];
       if (res) userIds.push(res.id);
     }
-    if (userIds.length <= 1) { // only adminId
+    if (userIds.length <= 1) { 
       const allUsers = await db.select({ id: schema.user.id }).from(schema.user);
       userIds = allUsers.map(u => u.id);
     }
 
-    // Update branch managers randomly
-    for (const bId of branchIds) {
-      await db.update(schema.branch)
-        .set({ manager: faker.helpers.arrayElement(userIds) })
-        .where(eq(schema.branch.id, bId));
-    }
-
-    // 4.5 Seed Premium Rates
+    // 4.5 Seed Premium Rates (Plans)
     console.log('Seeding premium rates...');
-    const planId = faker.string.uuid();
+    const planId = 'PLN-OPT-III';
     await db.insert(schema.premiumRate).values({
       id: planId,
       planName: 'Option III',
@@ -170,8 +163,11 @@ async function seed() {
     // 6. Seed Members (Customers)
     console.log('Seeding members...');
     let memberIds: string[] = [];
-    for (let i = 0; i < MEMBER_COUNT; i++) {
-      const mId = faker.string.uuid();
+    for (let i = 1; i <= MEMBER_COUNT; i++) {
+      const branchId = faker.helpers.arrayElement(branchIds);
+      const branchCode = branchId.split('-')[1];
+      const mId = `MEM-${branchCode}-2026-${i.toString().padStart(3, '0')}`;
+      
       const dependentsCount = faker.number.int({ min: 0, max: 8 });
       let calculatedPremium = 9989;
       if (dependentsCount === 1) calculatedPremium = 14460;
@@ -185,7 +181,7 @@ async function seed() {
         id: mId,
         firstName: faker.person.firstName(),
         lastName: faker.person.lastName(),
-        branchId: faker.helpers.arrayElement(branchIds),
+        branchId,
         planId: faker.helpers.arrayElement(planIds),
         coverType: faker.helpers.arrayElement(['family', 'individual', 'corporate group']),
         dependentsCount,
@@ -203,14 +199,15 @@ async function seed() {
 
     // 7. Seed Claims
     console.log('Seeding claims...');
-    for (let i = 0; i < CLAIM_COUNT; i++) {
+    for (let i = 1; i <= CLAIM_COUNT; i++) {
       const mId = faker.helpers.arrayElement(memberIds);
       const hId = faker.helpers.arrayElement(hospitalIds);
       const amount = faker.number.int({ min: 500, max: 50000 });
       const status = faker.helpers.arrayElement(['approved', 'pending', 'rejected']);
+      const cId = `CLM-2026-${i.toString().padStart(3, '0')}`;
       
       await db.insert(schema.claim).values({
-        id: faker.string.uuid(),
+        id: cId,
         memberId: mId,
         hospitalId: hId,
         planId: faker.helpers.arrayElement(planIds),
@@ -224,27 +221,27 @@ async function seed() {
 
     // 8. Seed Premiums
     console.log('Seeding premiums...');
-    for (let i = 0; i < PREMIUM_COUNT; i++) {
+    for (let i = 1; i <= PREMIUM_COUNT; i++) {
       const mId = faker.helpers.arrayElement(memberIds);
       const amount = faker.number.int({ min: 2000, max: 20000 });
       const paid = faker.helpers.arrayElement([amount, amount, 0, amount * 0.5]);
+      const pId = `PMT-2026-${i.toString().padStart(3, '0')}`;
       
       await db.insert(schema.premium).values({
-        id: faker.string.uuid(),
+        id: pId,
         memberId: mId,
         amountDue: amount.toString(),
         amountPaid: paid.toString(),
         dueDate: faker.date.future(),
-        paymentMethod: '', // Default as per enum
+        paymentMethod: '', 
       } as any).onConflictDoNothing();
     }
 
     // 9. Seed Audit Logs
     console.log('Seeding audit logs...');
     for (let i = 0; i < AUDIT_LOG_COUNT; i++) {
-      // We don't have a direct link in schema, but we can use faker to fill text fields
       await db.insert(schema.auditLog).values({
-        id: faker.string.uuid(),
+        id: faker.string.uuid(), // Audit log can stay UUID as it's not a business ID
         userEmail: faker.internet.email().toLowerCase(),
         userRole: faker.helpers.arrayElement(['admin', 'user', 'hr', 'ceo', 'branch_manager', 'claims_officer', 'system_admin']),
         branchName: faker.location.city() + ' Branch',

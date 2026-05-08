@@ -21,6 +21,7 @@ export function AuditLogDetails({ id }: AuditLogDetailsProps) {
   if (!log) return <div>Log entry not found.</div>
 
   const detailRows = [
+    { label: 'Log ID', value: <span className='font-mono'>{log.id}</span> },
     { label: 'Action', value: log.action },
     { label: 'Module', value: <span className='capitalize'>{log.module}</span> },
     { label: 'Status', value: (

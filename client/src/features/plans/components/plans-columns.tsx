@@ -35,6 +35,17 @@ export const plansColumns: ColumnDef<Plan>[] = [
     enableHiding: false,
   },
   {
+    accessorKey: 'id',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='ID' />
+    ),
+    cell: ({ row }) => (
+      <div className='w-[80px] font-mono text-xs uppercase'>
+        {row.original.id.substring(0, 8)}
+      </div>
+    ),
+  },
+  {
     accessorKey: 'planName',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Plan Name' />

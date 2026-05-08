@@ -22,7 +22,7 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
   const navigate = useNavigate()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const deleteBranch = useDeleteBranch()
-  const id = row.original.branchId 
+  const id = row.original.id 
 
   return (
     <>
