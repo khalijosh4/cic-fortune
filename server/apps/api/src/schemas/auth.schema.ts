@@ -13,6 +13,7 @@ export const LoginSchema = {
         firstName: Type.String(),
         lastName: Type.String(),
         role: Type.String(),
+        mustChangePassword: Type.Boolean(),
       }),
     }),
     401: Type.Object({

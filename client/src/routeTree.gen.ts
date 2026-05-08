@@ -37,10 +37,8 @@ import { Route as AuthenticatedAuditLogsIndexRouteImport } from './routes/_authe
 import { Route as AuthenticatedAppsIndexRouteImport } from './routes/_authenticated/apps/index'
 import { Route as AuthenticatedUsersNewRouteImport } from './routes/_authenticated/users/new'
 import { Route as AuthenticatedUsersIdRouteImport } from './routes/_authenticated/users/$id'
-import { Route as AuthenticatedSettingsNotificationsRouteImport } from './routes/_authenticated/settings/notifications'
-import { Route as AuthenticatedSettingsDisplayRouteImport } from './routes/_authenticated/settings/display'
+import { Route as AuthenticatedSettingsSecurityRouteImport } from './routes/_authenticated/settings/security'
 import { Route as AuthenticatedSettingsAppearanceRouteImport } from './routes/_authenticated/settings/appearance'
-import { Route as AuthenticatedSettingsAccountRouteImport } from './routes/_authenticated/settings/account'
 import { Route as AuthenticatedPremiumsIdRouteImport } from './routes/_authenticated/premiums/$id'
 import { Route as AuthenticatedPlansNewRouteImport } from './routes/_authenticated/plans/new'
 import { Route as AuthenticatedPlansIdRouteImport } from './routes/_authenticated/plans/$id'
@@ -202,28 +200,16 @@ const AuthenticatedUsersIdRoute = AuthenticatedUsersIdRouteImport.update({
   path: '/users/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedSettingsNotificationsRoute =
-  AuthenticatedSettingsNotificationsRouteImport.update({
-    id: '/notifications',
-    path: '/notifications',
-    getParentRoute: () => AuthenticatedSettingsRouteRoute,
-  } as any)
-const AuthenticatedSettingsDisplayRoute =
-  AuthenticatedSettingsDisplayRouteImport.update({
-    id: '/display',
-    path: '/display',
+const AuthenticatedSettingsSecurityRoute =
+  AuthenticatedSettingsSecurityRouteImport.update({
+    id: '/security',
+    path: '/security',
     getParentRoute: () => AuthenticatedSettingsRouteRoute,
   } as any)
 const AuthenticatedSettingsAppearanceRoute =
   AuthenticatedSettingsAppearanceRouteImport.update({
     id: '/appearance',
     path: '/appearance',
-    getParentRoute: () => AuthenticatedSettingsRouteRoute,
-  } as any)
-const AuthenticatedSettingsAccountRoute =
-  AuthenticatedSettingsAccountRouteImport.update({
-    id: '/account',
-    path: '/account',
     getParentRoute: () => AuthenticatedSettingsRouteRoute,
   } as any)
 const AuthenticatedPremiumsIdRoute = AuthenticatedPremiumsIdRouteImport.update({
@@ -317,10 +303,8 @@ export interface FileRoutesByFullPath {
   '/plans/$id': typeof AuthenticatedPlansIdRoute
   '/plans/new': typeof AuthenticatedPlansNewRoute
   '/premiums/$id': typeof AuthenticatedPremiumsIdRoute
-  '/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
-  '/settings/display': typeof AuthenticatedSettingsDisplayRoute
-  '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
+  '/settings/security': typeof AuthenticatedSettingsSecurityRoute
   '/users/$id': typeof AuthenticatedUsersIdRoute
   '/users/new': typeof AuthenticatedUsersNewRoute
   '/apps/': typeof AuthenticatedAppsIndexRoute
@@ -361,10 +345,8 @@ export interface FileRoutesByTo {
   '/plans/$id': typeof AuthenticatedPlansIdRoute
   '/plans/new': typeof AuthenticatedPlansNewRoute
   '/premiums/$id': typeof AuthenticatedPremiumsIdRoute
-  '/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
-  '/settings/display': typeof AuthenticatedSettingsDisplayRoute
-  '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
+  '/settings/security': typeof AuthenticatedSettingsSecurityRoute
   '/users/$id': typeof AuthenticatedUsersIdRoute
   '/users/new': typeof AuthenticatedUsersNewRoute
   '/apps': typeof AuthenticatedAppsIndexRoute
@@ -408,10 +390,8 @@ export interface FileRoutesById {
   '/_authenticated/plans/$id': typeof AuthenticatedPlansIdRoute
   '/_authenticated/plans/new': typeof AuthenticatedPlansNewRoute
   '/_authenticated/premiums/$id': typeof AuthenticatedPremiumsIdRoute
-  '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
-  '/_authenticated/settings/display': typeof AuthenticatedSettingsDisplayRoute
-  '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
+  '/_authenticated/settings/security': typeof AuthenticatedSettingsSecurityRoute
   '/_authenticated/users/$id': typeof AuthenticatedUsersIdRoute
   '/_authenticated/users/new': typeof AuthenticatedUsersNewRoute
   '/_authenticated/apps/': typeof AuthenticatedAppsIndexRoute
@@ -455,10 +435,8 @@ export interface FileRouteTypes {
     | '/plans/$id'
     | '/plans/new'
     | '/premiums/$id'
-    | '/settings/account'
     | '/settings/appearance'
-    | '/settings/display'
-    | '/settings/notifications'
+    | '/settings/security'
     | '/users/$id'
     | '/users/new'
     | '/apps/'
@@ -499,10 +477,8 @@ export interface FileRouteTypes {
     | '/plans/$id'
     | '/plans/new'
     | '/premiums/$id'
-    | '/settings/account'
     | '/settings/appearance'
-    | '/settings/display'
-    | '/settings/notifications'
+    | '/settings/security'
     | '/users/$id'
     | '/users/new'
     | '/apps'
@@ -545,10 +521,8 @@ export interface FileRouteTypes {
     | '/_authenticated/plans/$id'
     | '/_authenticated/plans/new'
     | '/_authenticated/premiums/$id'
-    | '/_authenticated/settings/account'
     | '/_authenticated/settings/appearance'
-    | '/_authenticated/settings/display'
-    | '/_authenticated/settings/notifications'
+    | '/_authenticated/settings/security'
     | '/_authenticated/users/$id'
     | '/_authenticated/users/new'
     | '/_authenticated/apps/'
@@ -778,18 +752,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUsersIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/settings/notifications': {
-      id: '/_authenticated/settings/notifications'
-      path: '/notifications'
-      fullPath: '/settings/notifications'
-      preLoaderRoute: typeof AuthenticatedSettingsNotificationsRouteImport
-      parentRoute: typeof AuthenticatedSettingsRouteRoute
-    }
-    '/_authenticated/settings/display': {
-      id: '/_authenticated/settings/display'
-      path: '/display'
-      fullPath: '/settings/display'
-      preLoaderRoute: typeof AuthenticatedSettingsDisplayRouteImport
+    '/_authenticated/settings/security': {
+      id: '/_authenticated/settings/security'
+      path: '/security'
+      fullPath: '/settings/security'
+      preLoaderRoute: typeof AuthenticatedSettingsSecurityRouteImport
       parentRoute: typeof AuthenticatedSettingsRouteRoute
     }
     '/_authenticated/settings/appearance': {
@@ -797,13 +764,6 @@ declare module '@tanstack/react-router' {
       path: '/appearance'
       fullPath: '/settings/appearance'
       preLoaderRoute: typeof AuthenticatedSettingsAppearanceRouteImport
-      parentRoute: typeof AuthenticatedSettingsRouteRoute
-    }
-    '/_authenticated/settings/account': {
-      id: '/_authenticated/settings/account'
-      path: '/account'
-      fullPath: '/settings/account'
-      preLoaderRoute: typeof AuthenticatedSettingsAccountRouteImport
       parentRoute: typeof AuthenticatedSettingsRouteRoute
     }
     '/_authenticated/premiums/$id': {
@@ -894,20 +854,15 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedSettingsRouteRouteChildren {
-  AuthenticatedSettingsAccountRoute: typeof AuthenticatedSettingsAccountRoute
   AuthenticatedSettingsAppearanceRoute: typeof AuthenticatedSettingsAppearanceRoute
-  AuthenticatedSettingsDisplayRoute: typeof AuthenticatedSettingsDisplayRoute
-  AuthenticatedSettingsNotificationsRoute: typeof AuthenticatedSettingsNotificationsRoute
+  AuthenticatedSettingsSecurityRoute: typeof AuthenticatedSettingsSecurityRoute
   AuthenticatedSettingsIndexRoute: typeof AuthenticatedSettingsIndexRoute
 }
 
 const AuthenticatedSettingsRouteRouteChildren: AuthenticatedSettingsRouteRouteChildren =
   {
-    AuthenticatedSettingsAccountRoute: AuthenticatedSettingsAccountRoute,
     AuthenticatedSettingsAppearanceRoute: AuthenticatedSettingsAppearanceRoute,
-    AuthenticatedSettingsDisplayRoute: AuthenticatedSettingsDisplayRoute,
-    AuthenticatedSettingsNotificationsRoute:
-      AuthenticatedSettingsNotificationsRoute,
+    AuthenticatedSettingsSecurityRoute: AuthenticatedSettingsSecurityRoute,
     AuthenticatedSettingsIndexRoute: AuthenticatedSettingsIndexRoute,
   }
 

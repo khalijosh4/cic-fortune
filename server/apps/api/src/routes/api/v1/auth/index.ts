@@ -39,6 +39,7 @@ const authRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
         firstName: foundUser.firstName,
         lastName: foundUser.lastName,
         role: foundUser.role,
+        mustChangePassword: foundUser.mustChangePassword,
       },
     });
   });

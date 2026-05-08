@@ -9,6 +9,7 @@ interface AuthUser {
   lastName: string
   email: string
   role: string
+  mustChangePassword: boolean
 }
 
 interface AuthState {

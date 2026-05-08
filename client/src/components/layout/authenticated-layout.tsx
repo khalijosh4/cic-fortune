@@ -6,6 +6,9 @@ import { SearchProvider } from '@/context/search-provider'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/components/layout/app-sidebar'
 import { SkipToMain } from '@/components/skip-to-main'
+import { useAuthStore } from '@/stores/auth-store'
+import { useEffect } from 'react'
+import { useNavigate, useRouter } from '@tanstack/react-router'
 
 type AuthenticatedLayoutProps = {
   children?: React.ReactNode
@@ -13,6 +16,16 @@ type AuthenticatedLayoutProps = {
 
 export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
   const defaultOpen = getCookie('sidebar_state') !== 'false'
+  const user = useAuthStore((state) => state.auth.user)
+  const navigate = useNavigate()
+  const { history } = useRouter()
+
+  useEffect(() => {
+    if (user?.mustChangePassword && history.location.pathname !== '/settings/security') {
+      navigate({ to: '/settings/security' })
+    }
+  }, [user, history.location.pathname, navigate])
+
   return (
     <SearchProvider>
       <LayoutProvider>

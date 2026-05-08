@@ -98,12 +98,23 @@ type UserActionDialogProps = {
   onOpenChange: (open: boolean) => void
 }
 
+const generatePassword = () => {
+  const length = 12
+  const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*'
+  let retVal = ''
+  for (let i = 0, n = charset.length; i < length; ++i) {
+    retVal += charset.charAt(Math.floor(Math.random() * n))
+  }
+  return retVal
+}
+
 export function UsersActionDialog({
   currentRow,
   open,
   onOpenChange,
 }: UserActionDialogProps) {
   const isEdit = !!currentRow
+  const defaultPassword = isEdit ? '' : generatePassword()
   const form = useForm<UserForm>({
     resolver: zodResolver(formSchema),
     defaultValues: isEdit
@@ -118,8 +129,8 @@ export function UsersActionDialog({
           email: '',
           role: '',
           phoneNumber: '',
-          password: '',
-          confirmPassword: '',
+          password: defaultPassword,
+          confirmPassword: defaultPassword,
           isEdit,
         },
   })
