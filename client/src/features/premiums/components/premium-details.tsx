@@ -10,6 +10,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
+import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { usePremium, useUpdatePremium } from '@/hooks/use-premiums'
@@ -74,83 +75,99 @@ export function PremiumDetails({ id }: PremiumDetailsProps) {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-              <FormItem>
-                <FormLabel>Premium ID</FormLabel>
-                <FormControl>
-                  <Input value={premium?.id || ''} disabled className='bg-muted font-mono' />
-                </FormControl>
-              </FormItem>
-              <FormField
-                control={form.control}
-                name='amountDue'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Amount Due (KES)</FormLabel>
-                    <FormControl>
-                      <Input placeholder='Enter amount due' {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name='amountPaid'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Amount Paid (KES)</FormLabel>
-                    <FormControl>
-                      <Input placeholder='Enter amount paid' {...field} value={field.value || ''} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-              <FormField
-                control={form.control}
-                name='dueDate'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Due Date</FormLabel>
-                    <FormControl>
-                      <Input type='date' {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name='paymentMethod'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Payment Method</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
+            <div className='space-y-4'>
+              <div className='flex items-center gap-2 pb-2 border-b'>
+                <div className='size-2 rounded-full bg-primary' />
+                <h3 className='text-sm font-semibold uppercase tracking-tight text-muted-foreground'>
+                  Payment Information
+                </h3>
+              </div>
+              <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+                <FormItem>
+                  <Label className='text-sm font-medium text-muted-foreground'>Premium ID</Label>
+                  <FormControl>
+                    <Input value={premium?.id || ''} disabled className='bg-muted font-mono' />
+                  </FormControl>
+                </FormItem>
+                <FormField
+                  control={form.control}
+                  name='amountDue'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Amount Due (KES)</FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder='Select payment method' />
-                        </SelectTrigger>
+                        <Input type='number' placeholder='Enter amount due' {...field} />
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value='mpesa'>M-Pesa</SelectItem>
-                        <SelectItem value='bank'>Bank Transfer</SelectItem>
-                        <SelectItem value='cash'>Cash</SelectItem>
-                        <SelectItem value='check'>Check</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name='amountPaid'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Amount Paid (KES)</FormLabel>
+                      <FormControl>
+                        <Input type='number' placeholder='Enter amount paid' {...field} value={field.value || ''} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
 
-            <div className='flex justify-end'>
-              <Button type='submit' disabled={updatePremium.isPending}>
+            <div className='space-y-4'>
+              <div className='flex items-center gap-2 pb-2 border-b'>
+                <div className='size-2 rounded-full bg-primary' />
+                <h3 className='text-sm font-semibold uppercase tracking-tight text-muted-foreground'>
+                  Schedule & Method
+                </h3>
+              </div>
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                <FormField
+                  control={form.control}
+                  name='dueDate'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Due Date</FormLabel>
+                      <FormControl>
+                        <Input type='date' {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name='paymentMethod'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Payment Method</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder='Select payment method' />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value='mpesa'>M-Pesa</SelectItem>
+                          <SelectItem value='bank'>Bank Transfer</SelectItem>
+                          <SelectItem value='cash'>Cash</SelectItem>
+                          <SelectItem value='check'>Check</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            <div className='flex justify-end pt-6 border-t'>
+              <Button type='submit' className='min-w-[150px]' disabled={updatePremium.isPending}>
                 {updatePremium.isPending ? (
                   <>
                     <Loader2 className='mr-2 h-4 w-4 animate-spin' />

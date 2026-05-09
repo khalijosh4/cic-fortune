@@ -4,6 +4,7 @@ import { schema } from '@fastify-forge/db';
 export type UserPayload = {
   id: string;
   role: string;
+  permissions?: string[];
   branchId?: string;
   hospitalId?: string;
 };

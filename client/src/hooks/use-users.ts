@@ -15,6 +15,7 @@ export interface User {
   createdAt?: string | null
   updatedAt?: string | null
   branchName?: string | null
+  permissions?: string[]
 }
 
 interface UsersResponse {
@@ -104,6 +105,27 @@ export function useDeleteUser() {
     },
   })
 }
+export function useTransferUser() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, branchId }: { id: string; branchId: string }) => {
+      const response = await api.post(`/users/${id}/transfer`, { branchId })
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] })
+      toast.success('User transferred', {
+        description: 'The user has been transferred to the new branch successfully.',
+      })
+    },
+    onError: (error: any) => {
+      toast.error('Transfer failed', {
+        description: error.response?.data?.message || 'An error occurred during transfer.',
+      })
+    },
+  })
+}
+
 export function useAvailableManagers(currentManagerId?: string) {
   return useQuery<User[]>({
     queryKey: ['users', 'available-managers', currentManagerId],

@@ -1,5 +1,5 @@
 import { 
-  pgEnum, pgTable, uuid, varchar, numeric, pgView, timestamp, text, integer, boolean, type AnyPgColumn
+  pgEnum, pgTable, uuid, varchar, numeric, pgView, timestamp, text, integer, boolean, primaryKey, type AnyPgColumn
 } from 'drizzle-orm/pg-core';
 import { sql, eq } from 'drizzle-orm';
 import type { InferSelectModel } from 'drizzle-orm';
@@ -15,6 +15,22 @@ export const PaymentMethodEnum = pgEnum('PaymentMethod', ['']);
 
 // 2. Tables 
 // Note: We use arrow functions in .references() to handle the hoisting/circularity
+
+export const permission = pgTable('permission', {
+  id: varchar('id', { length: 50 }).primaryKey(),
+  name: varchar('name', { length: 100 }).notNull().unique(),
+  description: text('description'),
+  resource: varchar('resource', { length: 50 }).notNull(),
+  action: varchar('action', { length: 50 }).notNull(),
+});
+
+export const userPermission = pgTable('user_permission', {
+  userId: varchar('user_id', { length: 50 }).notNull().references((): AnyPgColumn => user.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+  permissionId: varchar('permission_id', { length: 50 }).notNull().references((): AnyPgColumn => permission.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.userId, t.permissionId] }),
+}));
+
 export const user: any = pgTable('user', {
   id: varchar('id', { length: 50 }).primaryKey(),
   firstName: varchar('first_name', { length: 50 }).notNull(),
@@ -141,6 +157,8 @@ export const premiumRate = pgTable('premium_rate', {
 
 // 3. Types (Moved here to ensure 'user' table is fully defined)
 export type User = InferSelectModel<typeof user>;
+export type Permission = InferSelectModel<typeof permission>;
+export type UserPermission = InferSelectModel<typeof userPermission>;
 
 // 4. Views (Moved to bottom to fix TS7022 Circular Initializer errors)
 export const auditLog = pgTable('audit_log', {

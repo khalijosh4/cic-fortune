@@ -26,6 +26,7 @@ export const CreateUserSchema = {
     role: Type.Optional(Type.String()),
     branchId: Type.Optional(Type.String()),
     hospitalId: Type.Optional(Type.String()),
+    permissionIds: Type.Optional(Type.Array(Type.String())),
   }),
   response: {
     201: UserSchema,
@@ -43,9 +44,23 @@ export const UpdateUserSchema = {
     role: Type.Optional(Type.String()),
     branchId: Type.Optional(Type.String()),
     hospitalId: Type.Optional(Type.String()),
+    permissionIds: Type.Optional(Type.Array(Type.String())),
   }),
   response: {
     200: UserSchema,
+  },
+};
+
+export const TransferUserSchema = {
+  params: Type.Object({ id: Type.String() }),
+  body: Type.Object({
+    branchId: Type.String(),
+  }),
+  response: {
+    200: Type.Object({
+      message: Type.String(),
+      user: UserSchema,
+    }),
   },
 };
 

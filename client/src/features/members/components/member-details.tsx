@@ -10,6 +10,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
+import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useMember, useUpdateMember, useCreateMember } from '@/hooks/use-members'
@@ -124,7 +125,7 @@ export function MemberDetails({ id }: MemberDetailsProps) {
               <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
               {!isNew && (
                 <FormItem>
-                  <FormLabel>Member ID</FormLabel>
+                  <Label className='text-sm font-medium text-muted-foreground'>Member ID</Label>
                   <FormControl>
                     <Input value={member?.id || ''} disabled className='bg-muted font-mono' />
                   </FormControl>

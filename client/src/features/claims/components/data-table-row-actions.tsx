@@ -25,7 +25,7 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const deleteClaim = useDeleteClaim()
   const { auth } = useAuthStore()
-  const permissions = getFeatureFlags(auth.user?.role as any, 'claims')
+  const permissions = getFeatureFlags(auth.user?.permissions, 'claims')
   const id = row.original.id
 
   return (

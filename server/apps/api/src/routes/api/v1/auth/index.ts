@@ -1,10 +1,10 @@
 import { db, schema } from '@fastify-forge/db';
-const { user } = schema;
-import { or, sql } from 'drizzle-orm';
+const { user, userPermission, permission } = schema;
+import { or, sql, eq } from 'drizzle-orm';
 import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import bcrypt from 'bcryptjs';
 
-import { LoginSchema, RegisterSchema } from '#/schemas/auth.schema.js';
+import { LoginSchema, RegisterSchema, ChangePasswordSchema } from '#/schemas/auth.schema.js';
 
 const authRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.post('/login', { schema: LoginSchema }, async (request, reply) => {
@@ -28,12 +28,20 @@ const authRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
       return reply.code(401).send({ message: 'Invalid credentials' });
     }
 
+    // Fetch user permissions
+    const userPerms = await db.select({ name: permission.name })
+      .from(permission)
+      .innerJoin(userPermission, eq(userPermission.permissionId, permission.id))
+      .where(eq(userPermission.userId, foundUser.id));
+    const permissionNames = userPerms.map(p => p.name);
+
     const token = fastify.jwt.sign({ 
       id: foundUser.id, 
-      role: foundUser.role, 
+      role: foundUser.role,
+      permissions: permissionNames,
       hospitalId: foundUser.hospitalId ?? undefined, 
       branchId: foundUser.branchId ?? undefined 
-    });
+    } as any);
 
     return reply.send({
       token,
@@ -46,8 +54,27 @@ const authRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
         mustChangePassword: foundUser.mustChangePassword,
         branchId: foundUser.branchId,
         hospitalId: foundUser.hospitalId,
+        permissions: permissionNames,
       },
     });
+  });
+
+  fastify.post('/change-password', { schema: ChangePasswordSchema }, async (request, reply) => {
+    const { currentPassword, newPassword } = request.body;
+    const userId = (request.user as any).id;
+
+    const [foundUser] = await db.select().from(user).where(eq(user.id, userId)).limit(1);
+    if (!foundUser) return reply.unauthorized('User not found');
+
+    const isValid = await bcrypt.compare(currentPassword, foundUser.password);
+    if (!isValid) return reply.code(401).send({ message: 'Current password is incorrect' });
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await db.update(user)
+      .set({ password: hashedPassword, mustChangePassword: false })
+      .where(eq(user.id, userId));
+
+    return reply.send({ message: 'Password updated successfully' });
   });
 
   fastify.post('/register', { schema: RegisterSchema }, async (request, reply) => {

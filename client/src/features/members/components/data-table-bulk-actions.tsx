@@ -29,7 +29,7 @@ export function DataTableBulkActions<TData>({
   table,
 }: DataTableBulkActionsProps<TData>) {
   const { auth } = useAuthStore()
-  const permissions = getFeatureFlags(auth.user?.role as any, 'members')
+  const permissions = getFeatureFlags(auth.user?.permissions, 'members')
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const selectedRows = table.getFilteredSelectedRowModel().rows
 

@@ -13,6 +13,7 @@ interface AuthUser {
   mustChangePassword: boolean
   branchId?: string | null
   hospitalId?: string | null
+  permissions?: string[]
 }
 
 interface AuthState {

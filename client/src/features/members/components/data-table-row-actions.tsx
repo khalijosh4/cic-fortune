@@ -26,7 +26,7 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
   const deleteMember = useDeleteMember()
   const resendNotification = useResendNotification()
   const { auth } = useAuthStore()
-  const permissions = getFeatureFlags(auth.user?.role as any, 'members')
+  const permissions = getFeatureFlags(auth.user?.permissions, 'members')
   const id = row.original.id
 
   return (

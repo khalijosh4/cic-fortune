@@ -17,7 +17,26 @@ export const LoginSchema = {
         mustChangePassword: Type.Boolean(),
         branchId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
         hospitalId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+        permissions: Type.Optional(Type.Array(Type.String())),
       }),
+    }),
+    401: Type.Object({
+      message: Type.String(),
+    }),
+  },
+};
+
+export const ChangePasswordSchema = {
+  body: Type.Object({
+    currentPassword: Type.String(),
+    newPassword: Type.String(),
+  }),
+  response: {
+    200: Type.Object({
+      message: Type.String(),
+    }),
+    400: Type.Object({
+      message: Type.String(),
     }),
     401: Type.Object({
       message: Type.String(),

@@ -10,16 +10,28 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
+import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useHospital, useUpdateHospital, useCreateHospital } from '@/hooks/use-hospitals'
 import { Loader2 } from 'lucide-react'
 import { useEffect } from 'react'
 
+const hospitalTypes = [
+  { value: 'private', label: 'Private Hospital' },
+  { value: 'county', label: 'County Hospital' },
+  { value: 'teaching', label: 'Teaching & Referral' },
+  { value: 'clinic', label: 'Clinic' },
+  { value: 'specialist', label: 'Specialist Hospital' },
+  { value: 'referral', label: 'Referral Hospital' },
+  { value: 'public', label: 'Public Hospital' },
+]
+
 const hospitalFormSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
+  name: z.string().min(1, 'Hospital name is required'),
   location: z.string().min(1, 'Location is required'),
-  type: z.string().min(1, 'Type is required'),
+  type: z.string().min(1, 'Hospital type is required'),
   claimLimit: z.string().min(1, 'Claim limit is required'),
 })
 
@@ -79,71 +91,102 @@ export function HospitalDetails({ id }: HospitalDetailsProps) {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-              {!isNew && (
-                <FormItem>
-                  <FormLabel>Hospital ID</FormLabel>
-                  <FormControl>
-                    <Input value={hospital?.id || ''} disabled className='bg-muted font-mono' />
-                  </FormControl>
-                </FormItem>
-              )}
-              <FormField
-                control={form.control}
-                name='name'
-                render={({ field }) => (
+          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
+            <div className='space-y-4'>
+              <div className='flex items-center gap-2 pb-2 border-b'>
+                <div className='size-2 rounded-full bg-primary' />
+                <h3 className='text-sm font-semibold uppercase tracking-tight text-muted-foreground'>
+                  General Information
+                </h3>
+              </div>
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                {!isNew && (
                   <FormItem>
-                    <FormLabel>Hospital Name</FormLabel>
+                    <Label className='text-sm font-medium text-muted-foreground'>Hospital ID</Label>
                     <FormControl>
-                      <Input placeholder='Enter hospital name' {...field} />
+                      <Input value={hospital?.id || ''} disabled className='bg-muted font-mono' />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
-              />
+                <FormField
+                  control={form.control}
+                  name='name'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Hospital Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder='e.g. Kenyatta National Hospital' {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name='location'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Location</FormLabel>
+                      <FormControl>
+                        <Input placeholder='e.g. Nairobi, Kenya' {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
-            <FormField
-              control={form.control}
-              name='location'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Location</FormLabel>
-                  <FormControl>
-                    <Input placeholder='Enter location' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='type'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Type</FormLabel>
-                  <FormControl>
-                    <Input placeholder='Enter hospital type' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='claimLimit'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Claim Limit</FormLabel>
-                  <FormControl>
-                    <Input placeholder='Enter claim limit' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-             <div className='flex justify-end'>
-              <Button type='submit' disabled={updateHospital.isPending || createHospital.isPending}>
+
+            <div className='space-y-4'>
+              <div className='flex items-center gap-2 pb-2 border-b'>
+                <div className='size-2 rounded-full bg-primary' />
+                <h3 className='text-sm font-semibold uppercase tracking-tight text-muted-foreground'>
+                  Service Configuration
+                </h3>
+              </div>
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                <FormField
+                  control={form.control}
+                  name='type'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Hospital Type</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder='Select type' />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {hospitalTypes.map((t) => (
+                            <SelectItem key={t.value} value={t.value}>
+                              {t.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name='claimLimit'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Claim Limit (KES)</FormLabel>
+                      <FormControl>
+                        <Input type='number' placeholder='e.g. 1000000' {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            <div className='flex justify-end pt-6 border-t'>
+              <Button type='submit' className='min-w-[150px]' disabled={updateHospital.isPending || createHospital.isPending}>
                 {updateHospital.isPending || createHospital.isPending ? (
                   <>
                     <Loader2 className='mr-2 h-4 w-4 animate-spin' />

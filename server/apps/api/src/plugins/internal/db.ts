@@ -55,6 +55,48 @@ async function dbPlugin(fastify: FastifyInstance) {
         mustChangePassword: false,
       } as any);
 
+      // Seed default permissions
+      const permissions = [
+        { id: 'members-create', name: 'members.create', description: 'Create new members', resource: 'members', action: 'create' },
+        { id: 'members-read', name: 'members.read', description: 'View members', resource: 'members', action: 'read' },
+        { id: 'members-update', name: 'members.update', description: 'Edit members', resource: 'members', action: 'update' },
+        { id: 'members-delete', name: 'members.delete', description: 'Delete members', resource: 'members', action: 'delete' },
+        { id: 'claims-create', name: 'claims.create', description: 'Create new claims', resource: 'claims', action: 'create' },
+        { id: 'claims-read', name: 'claims.read', description: 'View claims', resource: 'claims', action: 'read' },
+        { id: 'claims-update', name: 'claims.update', description: 'Edit claims', resource: 'claims', action: 'update' },
+        { id: 'claims-delete', name: 'claims.delete', description: 'Delete claims', resource: 'claims', action: 'delete' },
+        { id: 'premiums-read', name: 'premiums.read', description: 'View premiums', resource: 'premiums', action: 'read' },
+        { id: 'premiums-update', name: 'premiums.update', description: 'Edit premiums', resource: 'premiums', action: 'update' },
+        { id: 'premiums-delete', name: 'premiums.delete', description: 'Delete premiums', resource: 'premiums', action: 'delete' },
+        { id: 'users-create', name: 'users.create', description: 'Create new users', resource: 'users', action: 'create' },
+        { id: 'users-read', name: 'users.read', description: 'View users', resource: 'users', action: 'read' },
+        { id: 'users-update', name: 'users.update', description: 'Edit users', resource: 'users', action: 'update' },
+        { id: 'users-delete', name: 'users.delete', description: 'Delete users', resource: 'users', action: 'delete' },
+        { id: 'users-transfer', name: 'users.transfer', description: 'Transfer users between branches', resource: 'users', action: 'transfer' },
+        { id: 'branches-create', name: 'branches.create', description: 'Create new branches', resource: 'branches', action: 'create' },
+        { id: 'branches-read', name: 'branches.read', description: 'View branches', resource: 'branches', action: 'read' },
+        { id: 'branches-update', name: 'branches.update', description: 'Edit branches', resource: 'branches', action: 'update' },
+        { id: 'branches-delete', name: 'branches.delete', description: 'Delete branches', resource: 'branches', action: 'delete' },
+        { id: 'hospitals-create', name: 'hospitals.create', description: 'Create new hospitals', resource: 'hospitals', action: 'create' },
+        { id: 'hospitals-read', name: 'hospitals.read', description: 'View hospitals', resource: 'hospitals', action: 'read' },
+        { id: 'hospitals-update', name: 'hospitals.update', description: 'Edit hospitals', resource: 'hospitals', action: 'update' },
+        { id: 'hospitals-delete', name: 'hospitals.delete', description: 'Delete hospitals', resource: 'hospitals', action: 'delete' },
+        { id: 'plans-create', name: 'plans.create', description: 'Create new plans', resource: 'plans', action: 'create' },
+        { id: 'plans-read', name: 'plans.read', description: 'View plans', resource: 'plans', action: 'read' },
+        { id: 'plans-update', name: 'plans.update', description: 'Edit plans', resource: 'plans', action: 'update' },
+        { id: 'plans-delete', name: 'plans.delete', description: 'Delete plans', resource: 'plans', action: 'delete' },
+        { id: 'audit-logs-read', name: 'audit-logs.read', description: 'View audit logs', resource: 'audit-logs', action: 'read' },
+        { id: 'dashboard-read', name: 'dashboard.read', description: 'View dashboard', resource: 'dashboard', action: 'read' },
+      ];
+      for (const p of permissions) {
+        await db.insert(schema.permission).values(p).onConflictDoNothing();
+      }
+
+      // Assign all permissions to admin user
+      for (const p of permissions) {
+        await db.insert(schema.userPermission).values({ userId: 'SYS-ADMIN-001', permissionId: p.id }).onConflictDoNothing();
+      }
+
       fastify.log.info('✅ DB_AUTO_RESET complete. Admin: admin@fortunesacco.co.ke / Admin@2024');
     } catch (err) {
       // Log failure but do NOT crash — server continues booting with existing DB state

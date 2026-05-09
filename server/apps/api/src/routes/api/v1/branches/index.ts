@@ -85,9 +85,9 @@ const branchRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   });
 
   fastify.post('/', { schema: CreateBranchSchema }, async (request, reply) => {
-    // Only admins should be able to create branches
-    if (!['admin', 'system_admin'].includes(request.user.role)) {
-      return reply.forbidden('Only admins can create branches');
+    const user = request.user as any;
+    if (!user.permissions?.includes('branches.create')) {
+      return reply.forbidden('You do not have permission to create branches');
     }
 
     const { name, manager: managerId } = request.body as any;
@@ -144,8 +144,9 @@ const branchRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   });
 
   fastify.put('/:id', { schema: UpdateBranchSchema }, async (request, reply) => {
-    if (!['admin', 'system_admin'].includes(request.user.role)) {
-      return reply.forbidden('Only admins can update branches');
+    const user = request.user as any;
+    if (!user.permissions?.includes('branches.update')) {
+      return reply.forbidden('You do not have permission to update branches');
     }
 
     const { manager: newManagerId } = request.body as any;
@@ -191,8 +192,9 @@ const branchRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   });
 
   fastify.delete('/:id', async (request: any, reply) => {
-    if (!['admin', 'system_admin'].includes(request.user.role)) {
-      return reply.forbidden('Only admins can delete branches');
+    const user = request.user as any;
+    if (!user.permissions?.includes('branches.delete')) {
+      return reply.forbidden('You do not have permission to delete branches');
     }
 
     const deleteResult = await db.delete(branch)

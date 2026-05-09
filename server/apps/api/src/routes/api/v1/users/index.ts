@@ -3,16 +3,17 @@ import { eq, sql, and, inArray, or } from 'drizzle-orm';
 import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import bcrypt from 'bcryptjs';
 
-const { user } = schema;
+const { user, userPermission } = schema;
 
 import { 
   CreateUserSchema, 
   ListUserSchema, 
-  UpdateUserSchema 
+  UpdateUserSchema,
+  TransferUserSchema,
 } from '#/schemas/user.schema.js';
 import { getTerritoryFilters, hasAccess } from '#/utils/tebac.util.js';
 import { generateStructuredUserId, generateTemporaryPassword } from '#/utils/id-generator.util.js';
-import { sendWelcomeEmail } from '#/utils/notification.util.js';
+import { sendWelcomeEmail, sendTransferEmail } from '#/utils/notification.util.js';
 
 const userRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/', { schema: ListUserSchema }, async (request, reply) => {
@@ -91,7 +92,7 @@ const userRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   });
 
   fastify.post('/', { schema: CreateUserSchema }, async (request, reply) => {
-    const { password: providedPassword, branchId, hospitalId, ...rest } = request.body;
+    const { password: providedPassword, branchId, hospitalId, permissionIds, ...rest } = request.body;
     const newRole = rest.role || 'user';
 
     // Territory-based enforcement: branch managers can only create users for their branch
@@ -136,6 +137,13 @@ const userRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
         .where(eq(schema.branch.id, normalizedBranchId));
     }
 
+    // Save assigned permissions
+    if (permissionIds && permissionIds.length > 0) {
+      await db.insert(userPermission).values(
+        permissionIds.map(permissionId => ({ userId: id, permissionId }))
+      );
+    }
+
     // Trigger welcome email
     if (newUser.email) {
       try {
@@ -164,8 +172,13 @@ const userRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     if (!hasAccess(request.user, found)) {
       return reply.forbidden('Access denied to user outside your territory');
     }
-    
-    return reply.send(found as any);
+
+    const userPerms = await db.select({ name: schema.permission.name })
+      .from(schema.permission)
+      .innerJoin(userPermission, eq(userPermission.permissionId, schema.permission.id))
+      .where(eq(userPermission.userId, request.params.id));
+
+    return reply.send({ ...found, permissions: userPerms.map(p => p.name) } as any);
   });
 
   fastify.put('/:id', { schema: UpdateUserSchema }, async (request, reply) => {
@@ -176,7 +189,13 @@ const userRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
       return reply.forbidden('Cannot edit user outside your territory');
     }
 
-    const updates: any = { ...request.body };
+    const { permissionIds, ...bodyFields } = request.body as any;
+    const updates: any = { ...bodyFields };
+
+    // Normalize empty strings to null to avoid FK violation
+    if (updates.branchId !== undefined) updates.branchId = updates.branchId || null;
+    if (updates.hospitalId !== undefined) updates.hospitalId = updates.hospitalId || null;
+
     const newRole = updates.role || existing.role;
 
     // Branch managers must have a branchId
@@ -196,6 +215,17 @@ const userRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
       .returning() as any;
     
     const updated = updateResult[0];
+
+    // Save permissions (use the new ID if it was regenerated)
+    const effectiveUserId = updates.id || request.params.id;
+    if (permissionIds) {
+      await db.delete(userPermission).where(eq(userPermission.userId, effectiveUserId));
+      if (permissionIds.length > 0) {
+        await db.insert(userPermission).values(
+          permissionIds.map((permissionId: string) => ({ userId: effectiveUserId, permissionId }))
+        );
+      }
+    }
 
     // Handle branch manager assignment changes
     if (newRole === 'branch_manager' && effectiveBranchId) {
@@ -221,9 +251,71 @@ const userRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     return reply.send(updated as any);
   });
 
+  fastify.post('/:id/transfer', { schema: TransferUserSchema }, async (request, reply) => {
+    const reqUser = request.user as any;
+    if (!reqUser.permissions?.includes('users.transfer')) {
+      return reply.forbidden('You do not have permission to transfer users');
+    }
+
+    const [existing] = await db.select().from(user).where(eq(user.id, request.params.id)).limit(1);
+    if (!existing) return reply.notFound('User not found');
+
+    const { branchId: newBranchId } = request.body;
+
+    // Get branch info
+    const [branchInfo] = await db.select({ name: schema.branch.name })
+      .from(schema.branch)
+      .where(eq(schema.branch.id, newBranchId))
+      .limit(1);
+    if (!branchInfo) return reply.notFound('Destination branch not found');
+
+    // Clear old branch manager assignment if applicable
+    if (existing.branchId) {
+      await db.update(schema.branch)
+        .set({ manager: null })
+        .where(eq(schema.branch.manager, existing.id));
+    }
+
+    // Generate new structured ID for new branch
+    const newId = await generateStructuredUserId(newBranchId);
+
+    // Update user
+    const [updated] = await db.update(user)
+      .set({
+        branchId: newBranchId,
+        id: newId,
+      } as any)
+      .where(eq(user.id, request.params.id))
+      .returning() as any;
+
+    // Update user_permission FK references (the old user ID is now cascade-updated)
+    // The cascade onUpdate should handle ID changes in user_permission
+
+    // Send transfer email
+    if (updated.email) {
+      try {
+        await sendTransferEmail(
+          updated.email,
+          {
+            firstName: updated.firstName,
+            lastName: updated.lastName,
+            id: newId,
+            branchName: branchInfo.name,
+          },
+          process.env.MAILERSEND_API_TOKEN!
+        );
+      } catch (error) {
+        fastify.log.error(error, 'Failed to send transfer email');
+      }
+    }
+
+    return reply.send({ message: 'User transferred successfully', user: updated as any });
+  });
+
   fastify.delete('/:id', async (request: any, reply) => {
-    if (!['admin', 'system_admin'].includes(request.user.role)) {
-      return reply.forbidden('Only admins can delete users');
+    const reqUser = request.user as any;
+    if (!reqUser.permissions?.includes('users.delete')) {
+      return reply.forbidden('You do not have permission to delete users');
     }
 
     const deleteResult = await db.delete(user)

@@ -10,6 +10,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
+import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { usePlan, useUpdatePlan, useCreatePlan } from '@/hooks/use-plans'
@@ -117,12 +118,12 @@ export function PlanDetails({ id }: PlanDetailsProps) {
               <h3 className='text-lg font-semibold'>General Information</h3>
               <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                 {!isNew && (
-                  <FormItem>
-                    <FormLabel>Plan ID</FormLabel>
-                    <FormControl>
-                      <Input value={plan?.id || ''} disabled className='bg-muted font-mono' />
-                    </FormControl>
-                  </FormItem>
+                <FormItem>
+                  <Label className='text-sm font-medium text-muted-foreground'>Plan ID</Label>
+                  <FormControl>
+                    <Input value={plan?.id || ''} disabled className='bg-muted font-mono' />
+                  </FormControl>
+                </FormItem>
                 )}
                 <FormField
                   control={form.control}

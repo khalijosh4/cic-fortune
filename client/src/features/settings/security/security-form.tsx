@@ -16,6 +16,8 @@ import { useAuthStore } from '@/stores/auth-store'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { ShieldAlert } from 'lucide-react'
 import { toast } from 'sonner'
+import { useState } from 'react'
+import api from '@/lib/api'
 
 const securityFormSchema = z.object({
   currentPassword: z.string().min(1, 'Current password is required.'),
@@ -33,8 +35,9 @@ const securityFormSchema = z.object({
 type SecurityFormValues = z.infer<typeof securityFormSchema>
 
 export function SecurityForm() {
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const user = useAuthStore((state) => state.auth.user)
-  
+
   const form = useForm<SecurityFormValues>({
     resolver: zodResolver(securityFormSchema),
     defaultValues: {
@@ -44,17 +47,29 @@ export function SecurityForm() {
     },
   })
 
-  function onSubmit(data: SecurityFormValues) {
-    // In a real app, you would call an API here
-    console.log('Password change requested:', data)
-    toast.success('Password updated successfully!')
-    
-    // Simulate updating the user state to clear the flag
-    if (user?.mustChangePassword) {
-      useAuthStore.getState().auth.setUser({
-        ...user,
-        mustChangePassword: false
+  async function onSubmit(data: SecurityFormValues) {
+    setIsSubmitting(true)
+    try {
+      await api.post('/auth/change-password', {
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword,
       })
+
+      toast.success('Password updated successfully!')
+
+      if (user?.mustChangePassword) {
+        useAuthStore.getState().auth.setUser({
+          ...user,
+          mustChangePassword: false,
+        })
+      }
+
+      form.reset()
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Failed to update password'
+      toast.error(message)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -85,7 +100,7 @@ export function SecurityForm() {
               </FormItem>
             )}
           />
-          
+
           <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
             <FormField
               control={form.control}
@@ -118,8 +133,8 @@ export function SecurityForm() {
             />
           </div>
 
-          <Button type='submit' className='min-w-[150px]'>
-            Update Password
+          <Button type='submit' disabled={isSubmitting} className='min-w-[150px]'>
+            {isSubmitting ? 'Updating...' : 'Update Password'}
           </Button>
         </form>
       </Form>

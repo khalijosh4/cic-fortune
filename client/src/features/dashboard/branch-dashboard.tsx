@@ -20,7 +20,6 @@ export function BranchDashboard() {
   const stats = data?.stats
   const recentClaims = data?.recentClaims || []
   const recentMembers = data?.recentMembers || []
-  const chartData = data?.chartData || []
 
   if (isLoading) {
     return (

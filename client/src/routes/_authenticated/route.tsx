@@ -1,7 +1,7 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout'
 import { useAuthStore } from '@/stores/auth-store'
-import { isRouteAllowed, type Role } from '@/lib/permissions'
+import { isRouteAllowed } from '@/lib/permissions'
 
 export const Route = createFileRoute('/_authenticated')({
   beforeLoad: ({ location }) => {
@@ -23,7 +23,7 @@ export const Route = createFileRoute('/_authenticated')({
     }
 
     const path = location.pathname
-    if (!isRouteAllowed(user.role as Role, path)) {
+    if (!isRouteAllowed(user.permissions, user.role, path)) {
       throw redirect({
         to: '/403',
       })

@@ -8,7 +8,7 @@ import {
 import { useDashboard } from '@/hooks/use-dashboard'
 import { GeneralError } from '@/features/errors/general-error'
 import { RecentSales } from './components/recent-sales'
-import { FileText, CheckCircle, XCircle, Clock } from 'lucide-react'
+import { FileText, CheckCircle, Clock } from 'lucide-react'
 
 export function ClaimsDashboard() {
   const { data, isLoading, error } = useDashboard()

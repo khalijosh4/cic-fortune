@@ -18,7 +18,7 @@ export function Users() {
   const search = route.useSearch()
   const navigate = route.useNavigate()
   const { auth } = useAuthStore()
-  const permissions = getFeatureFlags(auth.user?.role as any, 'users')
+  const permissions = getFeatureFlags(auth.user?.permissions, 'users')
 
   const page = search.page || 1
   const pageSize = search.pageSize || 20

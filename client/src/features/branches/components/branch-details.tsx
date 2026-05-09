@@ -10,6 +10,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
+import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useBranch, useUpdateBranch, useCreateBranch } from '@/hooks/use-branches'
@@ -92,7 +93,7 @@ export function BranchDetails({ id }: BranchDetailsProps) {
               <div className='grid grid-cols-1 gap-6 md:grid-cols-3'>
               {!isNew && (
                 <FormItem>
-                  <FormLabel>Branch ID</FormLabel>
+                  <Label className='text-sm font-medium text-muted-foreground'>Branch ID</Label>
                   <FormControl>
                     <Input value={branch?.id || ''} disabled className='bg-muted font-mono' />
                   </FormControl>

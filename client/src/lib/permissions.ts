@@ -8,168 +8,6 @@ export type Role =
   | 'hospital'
   | 'user'
 
-export interface FeatureFlags {
-  canCreate: boolean
-  canEdit: boolean
-  canDelete: boolean
-}
-
-export type Resource =
-  | 'branches'
-  | 'members'
-  | 'claims'
-  | 'hospitals'
-  | 'plans'
-  | 'premiums'
-  | 'users'
-  | 'audit-logs'
-  | 'tasks'
-
-const GLOBAL_ROLES: Role[] = ['admin', 'system_admin', 'ceo', 'hr']
-const BRANCH_ROLES: Role[] = ['branch_manager', 'claims_officer', 'user']
-
-const ROUTE_PERMISSIONS: Record<Role, string[]> = {
-  system_admin: ['*'],
-  admin: ['*'],
-  ceo: ['*'],
-  hr: ['*'],
-  branch_manager: [
-    '/',
-    '/members',
-    '/members/*',
-    '/claims',
-    '/claims/*',
-    '/premiums',
-    '/premiums/*',
-    '/settings',
-    '/settings/*',
-    '/tasks',
-    '/chats',
-    '/help-center',
-  ],
-  claims_officer: [
-    '/',
-    '/members',
-    '/members/*',
-    '/claims',
-    '/claims/*',
-    '/premiums',
-    '/premiums/*',
-    '/settings',
-    '/settings/*',
-    '/tasks',
-    '/help-center',
-  ],
-  hospital: [
-    '/',
-    '/claims',
-    '/claims/*',
-    '/settings',
-    '/settings/*',
-    '/help-center',
-  ],
-  user: [
-    '/',
-    '/settings',
-    '/settings/*',
-    '/tasks',
-    '/help-center',
-  ],
-}
-
-const FEATURE_FLAGS: Record<Resource, Record<Role, FeatureFlags>> = {
-  branches: {
-    system_admin: { canCreate: true, canEdit: true, canDelete: true },
-    admin: { canCreate: true, canEdit: true, canDelete: true },
-    ceo: { canCreate: false, canEdit: false, canDelete: false },
-    hr: { canCreate: false, canEdit: false, canDelete: false },
-    branch_manager: { canCreate: false, canEdit: false, canDelete: false },
-    claims_officer: { canCreate: false, canEdit: false, canDelete: false },
-    hospital: { canCreate: false, canEdit: false, canDelete: false },
-    user: { canCreate: false, canEdit: false, canDelete: false },
-  },
-  members: {
-    system_admin: { canCreate: true, canEdit: true, canDelete: true },
-    admin: { canCreate: true, canEdit: true, canDelete: true },
-    ceo: { canCreate: false, canEdit: false, canDelete: false },
-    hr: { canCreate: false, canEdit: false, canDelete: false },
-    branch_manager: { canCreate: true, canEdit: true, canDelete: false },
-    claims_officer: { canCreate: false, canEdit: true, canDelete: false },
-    hospital: { canCreate: false, canEdit: false, canDelete: false },
-    user: { canCreate: false, canEdit: false, canDelete: false },
-  },
-  claims: {
-    system_admin: { canCreate: true, canEdit: true, canDelete: true },
-    admin: { canCreate: true, canEdit: true, canDelete: true },
-    ceo: { canCreate: false, canEdit: false, canDelete: false },
-    hr: { canCreate: false, canEdit: false, canDelete: false },
-    branch_manager: { canCreate: false, canEdit: false, canDelete: false },
-    claims_officer: { canCreate: false, canEdit: true, canDelete: false },
-    hospital: { canCreate: true, canEdit: false, canDelete: false },
-    user: { canCreate: false, canEdit: false, canDelete: false },
-  },
-  hospitals: {
-    system_admin: { canCreate: true, canEdit: true, canDelete: true },
-    admin: { canCreate: true, canEdit: true, canDelete: true },
-    ceo: { canCreate: false, canEdit: false, canDelete: false },
-    hr: { canCreate: false, canEdit: false, canDelete: false },
-    branch_manager: { canCreate: false, canEdit: false, canDelete: false },
-    claims_officer: { canCreate: false, canEdit: false, canDelete: false },
-    hospital: { canCreate: false, canEdit: false, canDelete: false },
-    user: { canCreate: false, canEdit: false, canDelete: false },
-  },
-  plans: {
-    system_admin: { canCreate: true, canEdit: true, canDelete: true },
-    admin: { canCreate: true, canEdit: true, canDelete: true },
-    ceo: { canCreate: false, canEdit: false, canDelete: false },
-    hr: { canCreate: false, canEdit: false, canDelete: false },
-    branch_manager: { canCreate: false, canEdit: false, canDelete: false },
-    claims_officer: { canCreate: false, canEdit: false, canDelete: false },
-    hospital: { canCreate: false, canEdit: false, canDelete: false },
-    user: { canCreate: false, canEdit: false, canDelete: false },
-  },
-  premiums: {
-    system_admin: { canCreate: true, canEdit: true, canDelete: true },
-    admin: { canCreate: true, canEdit: true, canDelete: true },
-    ceo: { canCreate: false, canEdit: false, canDelete: false },
-    hr: { canCreate: false, canEdit: false, canDelete: false },
-    branch_manager: { canCreate: false, canEdit: false, canDelete: false },
-    claims_officer: { canCreate: false, canEdit: false, canDelete: false },
-    hospital: { canCreate: false, canEdit: false, canDelete: false },
-    user: { canCreate: false, canEdit: false, canDelete: false },
-  },
-  users: {
-    system_admin: { canCreate: true, canEdit: true, canDelete: true },
-    admin: { canCreate: true, canEdit: true, canDelete: true },
-    ceo: { canCreate: false, canEdit: false, canDelete: false },
-    hr: { canCreate: false, canEdit: true, canDelete: false },
-    branch_manager: { canCreate: true, canEdit: true, canDelete: false },
-    claims_officer: { canCreate: false, canEdit: false, canDelete: false },
-    hospital: { canCreate: false, canEdit: false, canDelete: false },
-    user: { canCreate: false, canEdit: false, canDelete: false },
-  },
-  'audit-logs': {
-    system_admin: { canCreate: true, canEdit: false, canDelete: false },
-    admin: { canCreate: true, canEdit: false, canDelete: false },
-    ceo: { canCreate: true, canEdit: false, canDelete: false },
-    hr: { canCreate: false, canEdit: false, canDelete: false },
-    branch_manager: { canCreate: false, canEdit: false, canDelete: false },
-    claims_officer: { canCreate: false, canEdit: false, canDelete: false },
-    hospital: { canCreate: false, canEdit: false, canDelete: false },
-    user: { canCreate: false, canEdit: false, canDelete: false },
-  },
-  tasks: {
-    system_admin: { canCreate: true, canEdit: true, canDelete: true },
-    admin: { canCreate: true, canEdit: true, canDelete: true },
-    ceo: { canCreate: true, canEdit: true, canDelete: true },
-    hr: { canCreate: true, canEdit: true, canDelete: true },
-    branch_manager: { canCreate: true, canEdit: true, canDelete: true },
-    claims_officer: { canCreate: true, canEdit: true, canDelete: true },
-    hospital: { canCreate: true, canEdit: true, canDelete: true },
-    user: { canCreate: true, canEdit: true, canDelete: true },
-  },
-}
-
 export type DashboardVariant = 'global' | 'branch' | 'claims' | 'hospital' | 'user'
 
 const DASHBOARD_VARIANT: Record<Role, DashboardVariant> = {
@@ -183,29 +21,90 @@ const DASHBOARD_VARIANT: Record<Role, DashboardVariant> = {
   user: 'user',
 }
 
-export function isRouteAllowed(role: Role | null | undefined, path: string): boolean {
-  if (!role) return false
-
-  const allowedPatterns = ROUTE_PERMISSIONS[role]
-  if (!allowedPatterns) return false
-  if (allowedPatterns.includes('*')) return true
-
-  return allowedPatterns.some((pattern) => {
-    if (pattern.endsWith('/*')) {
-      const base = pattern.slice(0, -2)
-      return path === base || path.startsWith(base + '/')
-    }
-    return path === pattern
-  })
+const ROUTE_TO_PERMISSION: Record<string, string> = {
+  '/': 'dashboard.read',
+  '/dashboard': 'dashboard.read',
+  '/members': 'members.read',
+  '/claims': 'claims.read',
+  '/premiums': 'premiums.read',
+  '/users': 'users.read',
+  '/branches': 'branches.read',
+  '/hospitals': 'hospitals.read',
+  '/plans': 'plans.read',
+  '/audit-logs': 'audit-logs.read',
 }
 
-export function getFeatureFlags(role: Role | null | undefined, resource: Resource): FeatureFlags {
-  if (!role) return { canCreate: false, canEdit: false, canDelete: false }
+const GLOBAL_ROLES: Role[] = ['admin', 'system_admin', 'ceo', 'hr']
+const BRANCH_ROLES: Role[] = ['branch_manager', 'claims_officer', 'user']
 
-  const resourceFlags = FEATURE_FLAGS[resource]
-  if (!resourceFlags) return { canCreate: false, canEdit: false, canDelete: false }
+export function hasPermission(
+  permissions: string[] | undefined | null,
+  permission: string
+): boolean {
+  if (!permissions) return false
+  return permissions.includes(permission)
+}
 
-  return resourceFlags[role] ?? { canCreate: false, canEdit: false, canDelete: false }
+export function hasAnyPermission(
+  permissions: string[] | undefined | null,
+  required: string[]
+): boolean {
+  if (!permissions) return false
+  return required.some((p) => permissions.includes(p))
+}
+
+export function hasAllPermissions(
+  permissions: string[] | undefined | null,
+  required: string[]
+): boolean {
+  if (!permissions) return false
+  return required.every((p) => permissions.includes(p))
+}
+
+export function isRouteAllowed(
+  permissions: string[] | undefined | null,
+  role: string | undefined | null,
+  path: string
+): boolean {
+  if (!role) return false
+
+  if (
+    path === '/settings' ||
+    path.startsWith('/settings/') ||
+    path === '/help-center' ||
+    path === '/tasks'
+  ) {
+    return true
+  }
+
+  const requiredPermission = ROUTE_TO_PERMISSION[path]
+  if (!requiredPermission) {
+    const parentPath = '/' + path.split('/').filter(Boolean)[0]
+    const parentPerm = ROUTE_TO_PERMISSION[parentPath]
+    if (parentPerm) return hasPermission(permissions, parentPerm)
+    return false
+  }
+
+  return hasPermission(permissions, requiredPermission)
+}
+
+export function getRouteRequiredPermission(path: string): string | null {
+  if (path === '/settings' || path.startsWith('/settings/') || path === '/help-center' || path === '/tasks') return null
+  const perm = ROUTE_TO_PERMISSION[path]
+  if (perm) return perm
+  const parentPath = '/' + path.split('/').filter(Boolean)[0]
+  return ROUTE_TO_PERMISSION[parentPath] || null
+}
+
+export function getFeatureFlags(
+  permissions: string[] | undefined | null,
+  resource: string
+): { canCreate: boolean; canEdit: boolean; canDelete: boolean } {
+  return {
+    canCreate: hasPermission(permissions, `${resource}.create`),
+    canEdit: hasPermission(permissions, `${resource}.update`),
+    canDelete: hasPermission(permissions, `${resource}.delete`),
+  }
 }
 
 export function getDashboardVariant(role: Role | null | undefined): DashboardVariant {
@@ -222,5 +121,3 @@ export function isBranchRole(role: Role | null | undefined): boolean {
   if (!role) return false
   return BRANCH_ROLES.includes(role as Role)
 }
-
-export { ROUTE_PERMISSIONS }

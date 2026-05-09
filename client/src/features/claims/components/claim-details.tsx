@@ -10,6 +10,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
+import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -86,7 +87,7 @@ export function ClaimDetails({ id }: ClaimDetailsProps) {
               </div>
               <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
                 <FormItem>
-                  <FormLabel>Claim ID</FormLabel>
+                  <Label className='text-sm font-medium text-muted-foreground'>Claim ID</Label>
                   <FormControl>
                     <Input value={claim?.id || ''} disabled className='bg-muted font-mono' />
                   </FormControl>

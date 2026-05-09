@@ -3,7 +3,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 interface Claim {
   id: string
   member: string
-  email: string
+  email?: string
   amount: number
   status: string
   diagnosis: string

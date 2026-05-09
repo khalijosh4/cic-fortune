@@ -8,7 +8,7 @@ import {
 import { useHospitalDashboard } from '@/hooks/use-dashboard'
 import { GeneralError } from '@/features/errors/general-error'
 import { RecentSales } from './components/recent-sales'
-import { Hospital, FileText, CheckCircle, XCircle, Clock, Gauge } from 'lucide-react'
+import { Hospital, FileText, CheckCircle, Clock, Gauge } from 'lucide-react'
 
 export function HospitalDashboard() {
   const { data, isLoading, error } = useHospitalDashboard()
