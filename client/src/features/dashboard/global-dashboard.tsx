@@ -1,4 +1,4 @@
-import { Banknote, Users, FileCheck, Clock } from 'lucide-react'
+import { Banknote, Users, FileCheck, Clock, BarChart3 } from 'lucide-react'
 import {
   Card,
   CardContent,
@@ -9,6 +9,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useDashboard } from '@/hooks/use-dashboard'
 import { GeneralError } from '@/features/errors/general-error'
+import { EmptyState, EmptySection } from '@/components/empty-state'
 import { Analytics } from './components/analytics'
 import { Overview } from './components/overview'
 import { RecentSales } from './components/recent-sales'
@@ -19,6 +20,7 @@ export function GlobalDashboard() {
   const stats = data?.stats
   const recentClaims = data?.recentClaims || []
   const chartData = data?.chartData || []
+  const hasStats = stats && (stats.totalPremiums > 0 || stats.activeMembers > 0 || stats.approvedClaims > 0 || stats.pendingClaims > 0)
 
   if (isLoading) {
     return (
@@ -32,6 +34,16 @@ export function GlobalDashboard() {
   }
 
   if (error) return <GeneralError />
+
+  if (!hasStats) {
+    return (
+      <EmptyState
+        icon={<BarChart3 className='h-5 w-5' />}
+        title='No Data Available'
+        description='There is no dashboard data to display yet. Data will appear once members, premiums, and claims are added to the system.'
+      />
+    )
+  }
 
   return (
     <Tabs
@@ -125,7 +137,7 @@ export function GlobalDashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent className='ps-2'>
-              <Overview data={chartData} />
+              {chartData.length > 0 ? <Overview data={chartData} /> : <EmptySection title='No Chart Data' description='Chart data will appear once monthly records are available.' />}
             </CardContent>
           </Card>
           <Card className='col-span-1 lg:col-span-3'>
@@ -142,7 +154,7 @@ export function GlobalDashboard() {
         </div>
       </TabsContent>
       <TabsContent value='analytics' className='space-y-4'>
-        <Analytics chartData={chartData} stats={stats ?? null} />
+        {chartData.length > 0 || hasStats ? <Analytics chartData={chartData} stats={stats ?? null} /> : <EmptySection title='No Analytics Data' description='Analytics will be available once there is sufficient data to display.' />}
       </TabsContent>
     </Tabs>
   )

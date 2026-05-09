@@ -10,8 +10,9 @@ import { GeneralError } from '@/features/errors/general-error'
 import { Overview } from './components/overview'
 import { RecentSales } from './components/recent-sales'
 import { useAuthStore } from '@/stores/auth-store'
-import { Building2, Users, DollarSign, FileText, Activity, AlertTriangle } from 'lucide-react'
+import { Building2, Users, DollarSign, FileText, Activity, AlertTriangle, BarChart3 } from 'lucide-react'
 import { isAxiosError } from 'axios'
+import { EmptySection } from '@/components/empty-state'
 
 export function BranchDashboard() {
   const { data, isLoading, error } = useBranchDashboard()
@@ -20,6 +21,8 @@ export function BranchDashboard() {
   const stats = data?.stats
   const recentClaims = data?.recentClaims || []
   const recentMembers = data?.recentMembers || []
+  const chartData = data?.chartData || []
+  const hasStats = stats && (stats.totalMembers > 0 || stats.totalPremiums > 0)
 
   if (isLoading) {
     return (
@@ -56,6 +59,27 @@ export function BranchDashboard() {
       )
     }
     return <GeneralError />
+  }
+
+  if (!hasStats && !recentMembers.length && !recentClaims.length) {
+    return (
+      <div className='space-y-4'>
+        {stats && (
+          <div className='flex items-center gap-3 rounded-lg border bg-card p-4 text-card-foreground shadow-sm'>
+            <Building2 className='h-8 w-8 text-primary' />
+            <div>
+              <h2 className='text-xl font-bold'>{stats.branchName}</h2>
+              <p className='text-sm text-muted-foreground'>{stats.branchLocation}</p>
+            </div>
+          </div>
+        )}
+        <Card>
+          <CardContent className='py-12'>
+            <EmptySection icon={<BarChart3 className='h-12 w-12' />} title='No Branch Data' description='Branch performance data will appear once members are added and claims are processed.' />
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (
@@ -135,7 +159,7 @@ export function BranchDashboard() {
             <CardTitle>Overview</CardTitle>
           </CardHeader>
           <CardContent className='ps-2'>
-            <Overview />
+            {chartData.length > 0 ? <Overview data={chartData} /> : <EmptySection title='No Chart Data' description='Chart data will appear once monthly records are available.' />}
           </CardContent>
         </Card>
         <Card className='col-span-1 lg:col-span-3'>

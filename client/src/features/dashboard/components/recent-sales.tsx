@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { FileText } from 'lucide-react'
 
 interface Claim {
   id: string
@@ -14,6 +15,16 @@ interface RecentClaimsProps {
 }
 
 export function RecentSales({ claims }: RecentClaimsProps) {
+  if (claims.length === 0) {
+    return (
+      <div className='flex flex-col items-center justify-center py-8 text-center'>
+        <FileText className='mb-3 h-10 w-10 text-muted-foreground/50' />
+        <p className='text-sm font-medium text-muted-foreground'>No Recent Claims</p>
+        <p className='text-xs text-muted-foreground/60'>Claims submitted by members will appear here.</p>
+      </div>
+    )
+  }
+
   return (
     <div className='space-y-8'>
       {claims.map((claim) => (

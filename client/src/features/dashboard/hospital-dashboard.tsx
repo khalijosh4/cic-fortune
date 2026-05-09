@@ -8,7 +8,8 @@ import {
 import { useHospitalDashboard } from '@/hooks/use-dashboard'
 import { GeneralError } from '@/features/errors/general-error'
 import { RecentSales } from './components/recent-sales'
-import { Hospital, FileText, CheckCircle, Clock, Gauge } from 'lucide-react'
+import { Hospital, FileText, CheckCircle, Clock, Gauge, BarChart3 } from 'lucide-react'
+import { EmptySection } from '@/components/empty-state'
 
 export function HospitalDashboard() {
   const { data, isLoading, error } = useHospitalDashboard()
@@ -29,9 +30,31 @@ export function HospitalDashboard() {
 
   if (error) return <GeneralError />
 
+  const hasClaims = stats && stats.totalClaims > 0
   const claimLimitPercent = stats?.claimLimit && stats.claimLimit > 0
     ? Math.round((stats.claimLimitUsed / stats.claimLimit) * 100)
     : 0
+
+  if (!hasClaims && !recentClaims.length) {
+    return (
+      <div className='space-y-4'>
+        {stats && (
+          <div className='flex items-center gap-3 rounded-lg border bg-card p-4 text-card-foreground shadow-sm'>
+            <Hospital className='h-8 w-8 text-primary' />
+            <div>
+              <h2 className='text-xl font-bold'>{stats.hospitalName}</h2>
+              <p className='text-sm text-muted-foreground'>Hospital Dashboard</p>
+            </div>
+          </div>
+        )}
+        <Card>
+          <CardContent className='py-12'>
+            <EmptySection icon={<BarChart3 className='h-12 w-12' />} title='No Claims Data' description='Claim data will appear once claims are filed by your hospital.' />
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   return (
     <div className='space-y-4'>

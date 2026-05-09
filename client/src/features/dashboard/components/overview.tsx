@@ -35,9 +35,7 @@ const chartConfig = {
 } satisfies ChartConfig
 
 export function Overview({ data }: OverviewProps) {
-  const chartData = data && data.length > 0 ? data : [
-    { month: "No Data", claims: 0, premiums: 0 },
-  ]
+  if (!data || data.length === 0) return null
 
   return (
     <Card>
@@ -48,7 +46,7 @@ export function Overview({ data }: OverviewProps) {
         <ChartContainer config={chartConfig}>
           <AreaChart
             accessibilityLayer
-            data={chartData}
+            data={data}
             margin={{ left: 12, right: 12 }}
           >
             <CartesianGrid vertical={false} />
