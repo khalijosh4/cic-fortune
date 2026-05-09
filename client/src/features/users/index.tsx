@@ -5,6 +5,8 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { useUsers } from '@/hooks/use-users'
+import { useAuthStore } from '@/stores/auth-store'
+import { getFeatureFlags } from '@/lib/permissions'
 import { QueryError } from '@/components/query-error'
 import { UsersTable } from './components/users-table'
 import { Button } from '@/components/ui/button'
@@ -15,6 +17,8 @@ const route = getRouteApi('/_authenticated/users/')
 export function Users() {
   const search = route.useSearch()
   const navigate = route.useNavigate()
+  const { auth } = useAuthStore()
+  const permissions = getFeatureFlags(auth.user?.role as any, 'users')
 
   const page = search.page || 1
   const pageSize = search.pageSize || 20
@@ -37,9 +41,11 @@ export function Users() {
               Manage employee accounts and their system roles.
             </p>
           </div>
-          <Button className='space-x-1' onClick={() => navigate({ to: '/users/new' })}>
-            <span>New User</span> <Plus size={18} />
-          </Button>
+          {permissions.canCreate && (
+            <Button className='space-x-1' onClick={() => navigate({ to: '/users/new' })}>
+              <span>New User</span> <Plus size={18} />
+            </Button>
+          )}
         </div>
         {data && (
           <p className='text-sm text-muted-foreground'>

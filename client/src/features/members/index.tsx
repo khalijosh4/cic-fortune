@@ -6,6 +6,8 @@ import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { useMembers } from '@/hooks/use-members'
 import { useMemberStats } from '@/hooks/use-stats'
+import { useAuthStore } from '@/stores/auth-store'
+import { getFeatureFlags } from '@/lib/permissions'
 import { QueryError } from '@/components/query-error'
 import { MembersTable } from './components/members-table'
 import { StatsCard } from '@/components/stats-card'
@@ -17,6 +19,8 @@ const route = getRouteApi('/_authenticated/members/')
 export function Members() {
   const search = route.useSearch()
   const navigate = route.useNavigate()
+  const { auth } = useAuthStore()
+  const permissions = getFeatureFlags(auth.user?.role as any, 'members')
 
   const page = search.page || 1
   const pageSize = search.pageSize || 20
@@ -40,9 +44,11 @@ export function Members() {
               Manage planholders and their coverage status.
             </p>
           </div>
-          <Button className='space-x-1' onClick={() => navigate({ to: '/members/new' })}>
-            <span>New Member</span> <Plus size={18} />
-          </Button>
+          {permissions.canCreate && (
+            <Button className='space-x-1' onClick={() => navigate({ to: '/members/new' })}>
+              <span>New Member</span> <Plus size={18} />
+            </Button>
+          )}
         </div>
 
         <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>

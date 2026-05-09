@@ -17,6 +17,8 @@ import {
 import { DataTableBulkActions as BulkActionsToolbar } from '@/components/data-table'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { downloadCsv } from '@/lib/export'
+import { useAuthStore } from '@/stores/auth-store'
+import { getFeatureFlags } from '@/lib/permissions'
 import { Member, useDeleteMember, useBulkUpdateMembers } from '@/hooks/use-members'
 
 type DataTableBulkActionsProps<TData> = {
@@ -26,6 +28,8 @@ type DataTableBulkActionsProps<TData> = {
 export function DataTableBulkActions<TData>({
   table,
 }: DataTableBulkActionsProps<TData>) {
+  const { auth } = useAuthStore()
+  const permissions = getFeatureFlags(auth.user?.role as any, 'members')
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const selectedRows = table.getFilteredSelectedRowModel().rows
 
@@ -124,24 +128,26 @@ export function DataTableBulkActions<TData>({
           </TooltipContent>
         </Tooltip>
 
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant='destructive'
-              size='icon'
-              onClick={() => setShowDeleteDialog(true)}
-              className='size-8'
-              aria-label='Delete selected members'
-              title='Delete selected members'
-            >
-              <Trash2 />
-              <span className='sr-only'>Delete selected members</span>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Delete selected members</p>
-          </TooltipContent>
-        </Tooltip>
+        {permissions.canDelete && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant='destructive'
+                size='icon'
+                onClick={() => setShowDeleteDialog(true)}
+                className='size-8'
+                aria-label='Delete selected members'
+                title='Delete selected members'
+              >
+                <Trash2 />
+                <span className='sr-only'>Delete selected members</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Delete selected members</p>
+            </TooltipContent>
+          </Tooltip>
+        )}
       </BulkActionsToolbar>
     </>
   )

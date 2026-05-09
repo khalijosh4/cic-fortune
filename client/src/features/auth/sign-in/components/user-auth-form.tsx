@@ -84,9 +84,9 @@ export function UserAuthForm({
           name='identifier'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Login ID or Email</FormLabel>
+              <FormLabel>User ID or Email</FormLabel>
               <FormControl>
-                <Input placeholder='HDB-2026-001' {...field} />
+                <Input placeholder='e.g. ADM-2026-001 or user@example.com' {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

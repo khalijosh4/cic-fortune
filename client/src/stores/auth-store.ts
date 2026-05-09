@@ -11,6 +11,8 @@ interface AuthUser {
   email: string
   role: string
   mustChangePassword: boolean
+  branchId?: string | null
+  hospitalId?: string | null
 }
 
 interface AuthState {

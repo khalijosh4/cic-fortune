@@ -15,6 +15,8 @@ export const LoginSchema = {
         email: Type.String(),
         role: Type.String(),
         mustChangePassword: Type.Boolean(),
+        branchId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+        hospitalId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
       }),
     }),
     401: Type.Object({

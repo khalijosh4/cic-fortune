@@ -1,6 +1,6 @@
 import { db, schema } from '@fastify-forge/db';
 const { user } = schema;
-import { eq, or } from 'drizzle-orm';
+import { or, sql } from 'drizzle-orm';
 import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import bcrypt from 'bcryptjs';
 
@@ -11,7 +11,10 @@ const authRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     const { identifier, password } = request.body;
 
     const findResult = await db.select().from(user)
-      .where(or(eq(user.email, identifier), eq(user.id, identifier)))
+      .where(or(
+        sql`LOWER(${user.email}) = LOWER(${identifier})`,
+        sql`LOWER(${user.id}) = LOWER(${identifier})`
+      ))
       .limit(1);
     const foundUser = findResult[0];
 
@@ -41,6 +44,8 @@ const authRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
         email: foundUser.email,
         role: foundUser.role,
         mustChangePassword: foundUser.mustChangePassword,
+        branchId: foundUser.branchId,
+        hospitalId: foundUser.hospitalId,
       },
     });
   });
@@ -57,8 +62,8 @@ const authRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
       phoneNumber,
       password: hashedPassword,
       role: role as any,
-      branchId,
-      hospitalId,
+      branchId: branchId || null,
+      hospitalId: hospitalId || null,
     } as any).returning({ id: user.id }) as any;
     
     const newUser = insertResult[0];

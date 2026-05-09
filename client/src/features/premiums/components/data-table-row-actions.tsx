@@ -12,6 +12,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { ConfirmDialog } from '@/components/confirm-dialog'
+import { useAuthStore } from '@/stores/auth-store'
+import { getFeatureFlags } from '@/lib/permissions'
 import { type Premium, useDeletePremium } from '@/hooks/use-premiums'
 
 type DataTableRowActionsProps = {
@@ -22,6 +24,8 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
   const navigate = useNavigate()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const deletePremium = useDeletePremium()
+  const { auth } = useAuthStore()
+  const permissions = getFeatureFlags(auth.user?.role as any, 'premiums')
   const id = row.original.id
 
   return (
@@ -56,20 +60,26 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
             <Eye className='mr-2 h-4 w-4' />
             View Details
           </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => navigate({ to: '/premiums/$id', params: { id } })}
-          >
-            <Edit className='mr-2 h-4 w-4' />
-            Edit
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            className='text-destructive focus:text-destructive'
-            onSelect={() => setShowDeleteDialog(true)}
-          >
-            <Trash2 className='mr-2 h-4 w-4' />
-            Delete
-          </DropdownMenuItem>
+          {permissions.canEdit && (
+            <DropdownMenuItem
+              onClick={() => navigate({ to: '/premiums/$id', params: { id } })}
+            >
+              <Edit className='mr-2 h-4 w-4' />
+              Edit
+            </DropdownMenuItem>
+          )}
+          {permissions.canDelete && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className='text-destructive focus:text-destructive'
+                onSelect={() => setShowDeleteDialog(true)}
+              >
+                <Trash2 className='mr-2 h-4 w-4' />
+                Delete
+              </DropdownMenuItem>
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     </>

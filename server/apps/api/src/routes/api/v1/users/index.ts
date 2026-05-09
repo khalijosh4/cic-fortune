@@ -91,7 +91,8 @@ const userRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   });
 
   fastify.post('/', { schema: CreateUserSchema }, async (request, reply) => {
-    const { password: providedPassword, branchId, ...rest } = request.body;
+    const { password: providedPassword, branchId, hospitalId, ...rest } = request.body;
+    const newRole = rest.role || 'user';
 
     // Territory-based enforcement: branch managers can only create users for their branch
     if (['branch_manager', 'claims_officer'].includes(request.user.role)) {
@@ -100,23 +101,40 @@ const userRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
       }
     }
 
+    // Branch managers must be assigned to a branch
+    if (newRole === 'branch_manager' && !branchId) {
+      return reply.badRequest('Branch ID is required when creating a branch manager');
+    }
+
     const password = providedPassword || generateTemporaryPassword();
     const hashedPassword = await bcrypt.hash(password, 10);
     
+    // Normalize empty strings to null to avoid FK violation
+    const normalizedBranchId = branchId || null;
+    const normalizedHospitalId = hospitalId || null;
+
     // Generate structured ID for primary key
-    const id = branchId 
-      ? await generateStructuredUserId(branchId) 
+    const id = normalizedBranchId 
+      ? await generateStructuredUserId(normalizedBranchId) 
       : `ADM-${new Date().getFullYear()}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
 
     const insertResult = await db.insert(user).values({
       ...rest,
       id,
-      branchId,
+      branchId: normalizedBranchId,
+      hospitalId: normalizedHospitalId,
       password: hashedPassword,
       mustChangePassword: true,
     } as any).returning() as any;
     
     const newUser = insertResult[0];
+
+    // Auto-assign as branch manager in the branch table
+    if (newRole === 'branch_manager' && normalizedBranchId) {
+      await db.update(schema.branch)
+        .set({ manager: id })
+        .where(eq(schema.branch.id, normalizedBranchId));
+    }
 
     // Trigger welcome email
     if (newUser.email) {
@@ -159,8 +177,15 @@ const userRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     }
 
     const updates: any = { ...request.body };
+    const newRole = updates.role || existing.role;
+
+    // Branch managers must have a branchId
+    if (newRole === 'branch_manager' && !updates.branchId && !existing.branchId) {
+      return reply.badRequest('Branch ID is required for a branch manager');
+    }
 
     // Re-generate structured ID if branchId is changing
+    const effectiveBranchId = updates.branchId || existing.branchId;
     if (updates.branchId && updates.branchId !== existing.branchId) {
       updates.id = await generateStructuredUserId(updates.branchId);
     }
@@ -171,6 +196,28 @@ const userRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
       .returning() as any;
     
     const updated = updateResult[0];
+
+    // Handle branch manager assignment changes
+    if (newRole === 'branch_manager' && effectiveBranchId) {
+      // Clear old branch's manager if changing branches
+      if (existing.role === 'branch_manager' && existing.branchId && existing.branchId !== effectiveBranchId) {
+        await db.update(schema.branch)
+          .set({ manager: null })
+          .where(eq(schema.branch.id, existing.branchId));
+      }
+      // Set new branch's manager
+      await db.update(schema.branch)
+        .set({ manager: request.params.id })
+        .where(eq(schema.branch.id, effectiveBranchId));
+    } else if (existing.role === 'branch_manager' && newRole !== 'branch_manager') {
+      // Clear branch manager when role is removed
+      if (existing.branchId) {
+        await db.update(schema.branch)
+          .set({ manager: null })
+          .where(eq(schema.branch.id, existing.branchId));
+      }
+    }
+
     return reply.send(updated as any);
   });
 
