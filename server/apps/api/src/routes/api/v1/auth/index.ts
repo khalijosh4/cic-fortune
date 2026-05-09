@@ -77,6 +77,47 @@ const authRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     return reply.send({ message: 'Password updated successfully' });
   });
 
+  fastify.put('/profile', async (request, reply) => {
+    const userId = (request.user as any).id;
+    const { firstName, middleName, lastName, email, phoneNumber } = request.body as any;
+
+    const [updated] = await db.update(user)
+      .set({
+        firstName,
+        middleName: middleName || null,
+        lastName,
+        email: email || null,
+        phoneNumber: phoneNumber || null,
+      } as any)
+      .where(eq(user.id, userId))
+      .returning() as any;
+
+    if (!updated) return reply.notFound('User not found');
+
+    // Fetch user permissions
+    const userPerms = await db.select({ name: permission.name })
+      .from(permission)
+      .innerJoin(userPermission, eq(userPermission.permissionId, permission.id))
+      .where(eq(userPermission.userId, userId));
+    const permissionNames = userPerms.map(p => p.name);
+
+    return reply.send({
+      id: updated.id,
+      firstName: updated.firstName,
+      middleName: updated.middleName,
+      lastName: updated.lastName,
+      email: updated.email,
+      phoneNumber: updated.phoneNumber,
+      role: updated.role,
+      mustChangePassword: updated.mustChangePassword,
+      branchId: updated.branchId,
+      hospitalId: updated.hospitalId,
+      createdAt: updated.createdAt,
+      updatedAt: updated.updatedAt,
+      permissions: permissionNames,
+    });
+  });
+
   fastify.post('/register', { schema: RegisterSchema }, async (request, reply) => {
     // Note: In a real app, this should be protected or only accessible to admins
     const { firstName, lastName, phoneNumber, password, role, branchId, hospitalId } = request.body;

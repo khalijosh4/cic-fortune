@@ -1,14 +1,30 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { spawnSync } from 'node:child_process';
+import { spawn } from 'node:child_process';
 
 import { db, schema } from '@fastify-forge/db';
 import bcrypt from 'bcryptjs';
 import fp from 'fastify-plugin';
 
 import type { FastifyInstance } from 'fastify';
+import type { SpawnOptions } from 'node:child_process';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+function spawnAsync(command: string, args: string[], options: SpawnOptions): Promise<{ stdout: string; stderr: string }> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, { stdio: 'pipe', ...options });
+    let stdout = '';
+    let stderr = '';
+    child.stdout?.on('data', (data: Buffer) => { stdout += data.toString(); });
+    child.stderr?.on('data', (data: Buffer) => { stderr += data.toString(); });
+    child.on('error', reject);
+    child.on('close', (code) => {
+      if (code === 0) resolve({ stdout, stderr });
+      else reject(new Error(`db:push failed (exit ${code}): ${stderr}`));
+    });
+  });
+}
 
 async function dbPlugin(fastify: FastifyInstance) {
   fastify.decorate('db', db);
@@ -28,19 +44,13 @@ async function dbPlugin(fastify: FastifyInstance) {
       await db.$client.query('GRANT ALL ON SCHEMA public TO public');
       fastify.log.info('Schema dropped and recreated.');
 
-      // Push the current Drizzle schema directly via pnpm binary (no shell required)
+      // Push the current Drizzle schema via async spawn (non-blocking)
       const dbPackagePath = path.resolve(__dirname, '../../../../../packages/db');
-      const result = spawnSync('pnpm', ['db:push', '--force'], {
+      const { stderr } = await spawnAsync('pnpm', ['db:push', '--force'], {
         cwd: dbPackagePath,
-        stdio: 'pipe',
         env: process.env,
       });
-
-      if (result.error) throw result.error;
-      if (result.status !== 0) {
-        const stderr = result.stderr?.toString() || 'unknown error';
-        throw new Error(`db:push failed (exit ${result.status}): ${stderr}`);
-      }
+      if (stderr) fastify.log.warn(`db:push stderr: ${stderr}`);
       fastify.log.info('Tables recreated via db:push.');
 
       // Insert the admin user — fresh schema, no conflicts possible
