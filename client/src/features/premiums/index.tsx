@@ -8,8 +8,7 @@ import { usePremiums } from '@/hooks/use-premiums'
 import { usePremiumStats } from '@/hooks/use-stats'
 import { QueryError } from '@/components/query-error'
 import { PremiumsTable } from './components/premiums-table'
-import { StatsCard } from '@/components/stats-card'
-import { Wallet, TrendingUp, AlertCircle, BarChart3 } from 'lucide-react'
+import { Stats02 } from '@/components/stats-02'
 import { formatCurrency } from '@/lib/utils'
 
 const route = getRouteApi('/_authenticated/premiums/')
@@ -42,40 +41,15 @@ export function Premiums() {
           </div>
         </div>
 
-        <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
-          <StatsCard
-            title='Total Due'
-            value={stats ? formatCurrency(stats.totalDue) : '—'}
-            description='Cumulative premiums billed'
-            icon={Wallet}
-            iconClassName='bg-blue-500/10 text-blue-500'
-            isLoading={statsLoading}
-          />
-          <StatsCard
-            title='Total Collected'
-            value={stats ? formatCurrency(stats.totalPaid) : '—'}
-            description='Total payments received'
-            icon={TrendingUp}
-            iconClassName='bg-emerald-500/10 text-emerald-500'
-            isLoading={statsLoading}
-          />
-          <StatsCard
-            title='Outstanding'
-            value={stats ? formatCurrency(stats.outstanding) : '—'}
-            description='Remaining balance to collect'
-            icon={AlertCircle}
-            iconClassName='bg-rose-500/10 text-rose-500'
-            isLoading={statsLoading}
-          />
-          <StatsCard
-            title='Collection Rate'
-            value={stats ? `${stats.collectionRate}%` : '—'}
-            description='Payments collected vs billed'
-            icon={BarChart3}
-            iconClassName='bg-amber-500/10 text-amber-500'
-            isLoading={statsLoading}
-          />
-        </div>
+        <Stats02
+          stats={[
+            { metric: 'Total Due', current: stats ? formatCurrency(stats.totalDue) : '—', previous: 'billed' },
+            { metric: 'Total Collected', current: stats ? formatCurrency(stats.totalPaid) : '—', previous: 'received' },
+            { metric: 'Outstanding', current: stats ? formatCurrency(stats.outstanding) : '—', previous: 'to collect' },
+            { metric: 'Collection Rate', current: stats ? `${stats.collectionRate}%` : '—' },
+          ]}
+          isLoading={statsLoading}
+        />
 
         {isLoading ? (
           <div className='flex h-64 w-full items-center justify-center'>

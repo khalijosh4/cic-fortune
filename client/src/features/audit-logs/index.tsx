@@ -8,8 +8,7 @@ import { useAuditLogs } from '@/hooks/use-audit-logs'
 import { useAuditLogStats } from '@/hooks/use-stats'
 import { QueryError } from '@/components/query-error'
 import { AuditLogsTable } from './components/audit-logs-table'
-import { StatsCard } from '@/components/stats-card'
-import { ClipboardList, CheckCircle2, XCircle, ShieldCheck } from 'lucide-react'
+import { Stats02 } from '@/components/stats-02'
 
 const route = getRouteApi('/_authenticated/audit-logs/')
 
@@ -41,40 +40,15 @@ export function AuditLogs() {
           </div>
         </div>
 
-        <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
-          <StatsCard
-            title='Total Events'
-            value={stats?.total ?? 0}
-            description='All recorded system actions'
-            icon={ClipboardList}
-            iconClassName='bg-blue-500/10 text-blue-500'
-            isLoading={statsLoading}
-          />
-          <StatsCard
-            title='Successful'
-            value={stats?.success ?? 0}
-            description='Operations completed successfully'
-            icon={CheckCircle2}
-            iconClassName='bg-emerald-500/10 text-emerald-500'
-            isLoading={statsLoading}
-          />
-          <StatsCard
-            title='Errors'
-            value={stats?.error ?? 0}
-            description='Failed or errored operations'
-            icon={XCircle}
-            iconClassName='bg-rose-500/10 text-rose-500'
-            isLoading={statsLoading}
-          />
-          <StatsCard
-            title='Success Rate'
-            value={stats ? `${stats.successRate}%` : '—'}
-            description='Overall system reliability'
-            icon={ShieldCheck}
-            iconClassName='bg-purple-500/10 text-purple-500'
-            isLoading={statsLoading}
-          />
-        </div>
+        <Stats02
+          stats={[
+            { metric: 'Total Events', current: stats?.total ?? 0 },
+            { metric: 'Successful', current: stats?.success ?? 0 },
+            { metric: 'Errors', current: stats?.error ?? 0 },
+            { metric: 'Success Rate', current: stats ? `${stats.successRate}%` : '—' },
+          ]}
+          isLoading={statsLoading}
+        />
 
         {isLoading ? (
           <div className='flex h-64 w-full items-center justify-center'>

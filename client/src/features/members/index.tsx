@@ -10,9 +10,9 @@ import { useAuthStore } from '@/stores/auth-store'
 import { getFeatureFlags } from '@/lib/permissions'
 import { QueryError } from '@/components/query-error'
 import { MembersTable } from './components/members-table'
-import { StatsCard } from '@/components/stats-card'
+import { Stats02 } from '@/components/stats-02'
 import { Button } from '@/components/ui/button'
-import { Plus, Users, UserCheck, Clock, UserX } from 'lucide-react'
+import { Plus } from 'lucide-react'
 
 const route = getRouteApi('/_authenticated/members/')
 
@@ -51,40 +51,15 @@ export function Members() {
           )}
         </div>
 
-        <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
-          <StatsCard
-            title='Total Members'
-            value={stats?.total ?? 0}
-            description='All enrolled planholders'
-            icon={Users}
-            iconClassName='bg-blue-500/10 text-blue-500'
-            isLoading={statsLoading}
-          />
-          <StatsCard
-            title='Active'
-            value={stats?.active ?? 0}
-            description='Currently active policies'
-            icon={UserCheck}
-            iconClassName='bg-emerald-500/10 text-emerald-500'
-            isLoading={statsLoading}
-          />
-          <StatsCard
-            title='Pending'
-            value={stats?.pending ?? 0}
-            description='Awaiting activation'
-            icon={Clock}
-            iconClassName='bg-amber-500/10 text-amber-500'
-            isLoading={statsLoading}
-          />
-          <StatsCard
-            title='Expired'
-            value={stats?.expired ?? 0}
-            description='Lapsed or expired policies'
-            icon={UserX}
-            iconClassName='bg-rose-500/10 text-rose-500'
-            isLoading={statsLoading}
-          />
-        </div>
+        <Stats02
+          stats={[
+            { metric: 'Total Members', current: stats?.total ?? 0 },
+            { metric: 'Active', current: stats?.active ?? 0 },
+            { metric: 'Pending', current: stats?.pending ?? 0 },
+            { metric: 'Expired', current: stats?.expired ?? 0 },
+          ]}
+          isLoading={statsLoading}
+        />
 
         {isLoading ? (
           <div className='flex h-64 w-full items-center justify-center'>

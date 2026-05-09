@@ -8,9 +8,9 @@ import { useHospitals } from '@/hooks/use-hospitals'
 import { useHospitalStats } from '@/hooks/use-stats'
 import { QueryError } from '@/components/query-error'
 import { HospitalsTable } from './components/hospitals-table'
-import { StatsCard } from '@/components/stats-card'
+import { Stats02 } from '@/components/stats-02'
 import { Button } from '@/components/ui/button'
-import { Plus, Building2, Stethoscope, Building, Activity } from 'lucide-react'
+import { Plus } from 'lucide-react'
 
 const route = getRouteApi('/_authenticated/hospitals/')
 
@@ -45,40 +45,15 @@ export function Hospitals() {
           </Button>
         </div>
 
-        <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
-          <StatsCard
-            title='Total Hospitals'
-            value={stats?.total ?? 0}
-            description='All registered providers'
-            icon={Building2}
-            iconClassName='bg-blue-500/10 text-blue-500'
-            isLoading={statsLoading}
-          />
-          <StatsCard
-            title='Private'
-            value={stats?.byType?.private ?? 0}
-            description='Private facilities'
-            icon={Building}
-            iconClassName='bg-emerald-500/10 text-emerald-500'
-            isLoading={statsLoading}
-          />
-          <StatsCard
-            title='Public / County'
-            value={(stats?.byType?.public ?? 0) + (stats?.byType?.county ?? 0)}
-            description='Public and county hospitals'
-            icon={Stethoscope}
-            iconClassName='bg-amber-500/10 text-amber-500'
-            isLoading={statsLoading}
-          />
-          <StatsCard
-            title='Specialist / Teaching'
-            value={(stats?.byType?.specialist ?? 0) + (stats?.byType?.teaching ?? 0)}
-            description='Advanced care facilities'
-            icon={Activity}
-            iconClassName='bg-purple-500/10 text-purple-500'
-            isLoading={statsLoading}
-          />
-        </div>
+        <Stats02
+          stats={[
+            { metric: 'Total Hospitals', current: stats?.total ?? 0 },
+            { metric: 'Private', current: stats?.byType?.private ?? 0 },
+            { metric: 'Public / County', current: (stats?.byType?.public ?? 0) + (stats?.byType?.county ?? 0) },
+            { metric: 'Specialist / Teaching', current: (stats?.byType?.specialist ?? 0) + (stats?.byType?.teaching ?? 0) },
+          ]}
+          isLoading={statsLoading}
+        />
 
         {isLoading ? (
           <div className='flex h-64 w-full items-center justify-center'>

@@ -8,9 +8,9 @@ import { useBranches } from '@/hooks/use-branches'
 import { useBranchStats } from '@/hooks/use-stats'
 import { QueryError } from '@/components/query-error'
 import { BranchesTable } from './components/branches-table'
-import { StatsCard } from '@/components/stats-card'
+import { Stats02 } from '@/components/stats-02'
 import { Button } from '@/components/ui/button'
-import { Plus, GitBranch, Users, FileText, TrendingUp } from 'lucide-react'
+import { Plus } from 'lucide-react'
 
 const route = getRouteApi('/_authenticated/branches/')
 
@@ -45,40 +45,15 @@ export function Branches() {
           </Button>
         </div>
 
-        <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
-          <StatsCard
-            title='Total Branches'
-            value={stats?.total ?? 0}
-            description='Active Sacco branches'
-            icon={GitBranch}
-            iconClassName='bg-blue-500/10 text-blue-500'
-            isLoading={statsLoading}
-          />
-          <StatsCard
-            title='Total Members'
-            value={stats?.totalMembers ?? 0}
-            description='Enrolled across all branches'
-            icon={Users}
-            iconClassName='bg-emerald-500/10 text-emerald-500'
-            isLoading={statsLoading}
-          />
-          <StatsCard
-            title='Avg. Members / Branch'
-            value={stats?.avgMembers ?? 0}
-            description='Average enrollment per branch'
-            icon={TrendingUp}
-            iconClassName='bg-amber-500/10 text-amber-500'
-            isLoading={statsLoading}
-          />
-          <StatsCard
-            title='Total Claims Filed'
-            value={stats?.totalClaims ?? 0}
-            description='Claims across all branches'
-            icon={FileText}
-            iconClassName='bg-rose-500/10 text-rose-500'
-            isLoading={statsLoading}
-          />
-        </div>
+        <Stats02
+          stats={[
+            { metric: 'Total Branches', current: stats?.total ?? 0 },
+            { metric: 'Total Members', current: stats?.totalMembers ?? 0, previous: 'enrolled' },
+            { metric: 'Avg. Members / Branch', current: stats?.avgMembers ?? 0 },
+            { metric: 'Total Claims Filed', current: stats?.totalClaims ?? 0 },
+          ]}
+          isLoading={statsLoading}
+        />
 
         {isLoading ? (
           <div className='flex h-64 w-full items-center justify-center'>
