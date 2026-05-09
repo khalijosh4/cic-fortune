@@ -1,49 +1,15 @@
 import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis } from 'recharts'
 
-const data = [
-  {
-    name: 'Mon',
-    clicks: Math.floor(Math.random() * 900) + 100,
-    uniques: Math.floor(Math.random() * 700) + 80,
-  },
-  {
-    name: 'Tue',
-    clicks: Math.floor(Math.random() * 900) + 100,
-    uniques: Math.floor(Math.random() * 700) + 80,
-  },
-  {
-    name: 'Wed',
-    clicks: Math.floor(Math.random() * 900) + 100,
-    uniques: Math.floor(Math.random() * 700) + 80,
-  },
-  {
-    name: 'Thu',
-    clicks: Math.floor(Math.random() * 900) + 100,
-    uniques: Math.floor(Math.random() * 700) + 80,
-  },
-  {
-    name: 'Fri',
-    clicks: Math.floor(Math.random() * 900) + 100,
-    uniques: Math.floor(Math.random() * 700) + 80,
-  },
-  {
-    name: 'Sat',
-    clicks: Math.floor(Math.random() * 900) + 100,
-    uniques: Math.floor(Math.random() * 700) + 80,
-  },
-  {
-    name: 'Sun',
-    clicks: Math.floor(Math.random() * 900) + 100,
-    uniques: Math.floor(Math.random() * 700) + 80,
-  },
-]
+interface AnalyticsChartProps {
+  data: { month: string; claims: number; premiums: number }[]
+}
 
-export function AnalyticsChart() {
+export function AnalyticsChart({ data }: AnalyticsChartProps) {
   return (
     <ResponsiveContainer width='100%' height={300}>
       <AreaChart data={data}>
         <XAxis
-          dataKey='name'
+          dataKey='month'
           stroke='#888888'
           fontSize={12}
           tickLine={false}
@@ -57,7 +23,7 @@ export function AnalyticsChart() {
         />
         <Area
           type='monotone'
-          dataKey='clicks'
+          dataKey='premiums'
           stroke='currentColor'
           className='text-primary'
           fill='currentColor'
@@ -65,7 +31,7 @@ export function AnalyticsChart() {
         />
         <Area
           type='monotone'
-          dataKey='uniques'
+          dataKey='claims'
           stroke='currentColor'
           className='text-muted-foreground'
           fill='currentColor'

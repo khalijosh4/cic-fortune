@@ -48,8 +48,10 @@ const authRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
       user: {
         id: foundUser.id,
         firstName: foundUser.firstName,
+        middleName: foundUser.middleName,
         lastName: foundUser.lastName,
         email: foundUser.email,
+        phoneNumber: foundUser.phoneNumber,
         role: foundUser.role,
         mustChangePassword: foundUser.mustChangePassword,
         branchId: foundUser.branchId,

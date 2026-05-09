@@ -5,7 +5,7 @@ export default function SettingsSecurity() {
   return (
     <ContentSection
       title='Security'
-      desc='Manage your account security and update your password.'
+      desc='Update your password and manage your account security settings.'
     >
       <SecurityForm />
     </ContentSection>

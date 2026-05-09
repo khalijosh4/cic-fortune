@@ -7,8 +7,10 @@ const USER_DATA = 'user_data'
 interface AuthUser {
   id: string
   firstName: string
+  middleName?: string | null
   lastName: string
   email: string
+  phoneNumber?: string | null
   role: string
   mustChangePassword: boolean
   branchId?: string | null

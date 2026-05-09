@@ -35,6 +35,9 @@ export function AuditLogDetails({ id }: AuditLogDetailsProps) {
     { label: 'IP Address', value: log.ipAddress },
     { label: 'Timestamp', value: log.timestamp ? new Date(log.timestamp).toLocaleString() : '—' },
     { label: 'Event Type', value: <span className='capitalize'>{log.type}</span> },
+    { label: 'Entity ID', value: log.entityId || '—' },
+    { label: 'Entity Type', value: log.entityType || '—' },
+    { label: 'Details', value: log.details || '—' },
   ]
 
   return (

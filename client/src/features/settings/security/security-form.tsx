@@ -18,6 +18,7 @@ import { ShieldAlert } from 'lucide-react'
 import { toast } from 'sonner'
 import { useState } from 'react'
 import api from '@/lib/api'
+import { Separator } from '@/components/ui/separator'
 
 const securityFormSchema = z.object({
   currentPassword: z.string().min(1, 'Current password is required.'),
@@ -74,34 +75,52 @@ export function SecurityForm() {
   }
 
   return (
-    <div className='space-y-6'>
-      {user?.mustChangePassword && (
-        <Alert variant='destructive' className='bg-destructive/10 text-destructive border-destructive/20'>
-          <ShieldAlert className='h-4 w-4' />
-          <AlertTitle>Password Change Required</AlertTitle>
-          <AlertDescription>
-            For your security, you must change your temporary password before you can continue using the system.
-          </AlertDescription>
-        </Alert>
-      )}
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
+        {user?.mustChangePassword && (
+          <Alert variant='destructive' className='bg-destructive/10 text-destructive border-destructive/20'>
+            <ShieldAlert className='h-4 w-4' />
+            <AlertTitle>Password Change Required</AlertTitle>
+            <AlertDescription>
+              For your security, you must change your temporary password before you can continue using the system.
+            </AlertDescription>
+          </Alert>
+        )}
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
-          <FormField
-            control={form.control}
-            name='currentPassword'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Current Password</FormLabel>
-                <FormControl>
-                  <PasswordInput placeholder='••••••••' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <div>
+          <div className='flex items-center gap-2 mb-4'>
+            <span className='flex h-2 w-2 rounded-full bg-primary' />
+            <span className='text-xs font-semibold uppercase tracking-wider text-muted-foreground'>
+              Current Credentials
+            </span>
+          </div>
+          <Separator className='mb-6' />
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+            <FormField
+              control={form.control}
+              name='currentPassword'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Current Password</FormLabel>
+                  <FormControl>
+                    <PasswordInput placeholder='••••••••' {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
 
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+        <div>
+          <div className='flex items-center gap-2 mb-4'>
+            <span className='flex h-2 w-2 rounded-full bg-primary' />
+            <span className='text-xs font-semibold uppercase tracking-wider text-muted-foreground'>
+              New Password
+            </span>
+          </div>
+          <Separator className='mb-6' />
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
             <FormField
               control={form.control}
               name='newPassword'
@@ -112,7 +131,7 @@ export function SecurityForm() {
                     <PasswordInput placeholder='••••••••' {...field} />
                   </FormControl>
                   <FormDescription>
-                    Must be at least 8 characters long.
+                    Must be at least 8 characters with uppercase, lowercase, and a number.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -132,12 +151,14 @@ export function SecurityForm() {
               )}
             />
           </div>
+        </div>
 
+        <div className='border-t pt-6'>
           <Button type='submit' disabled={isSubmitting} className='min-w-[150px]'>
             {isSubmitting ? 'Updating...' : 'Update Password'}
           </Button>
-        </form>
-      </Form>
-    </div>
+        </div>
+      </form>
+    </Form>
   )
 }

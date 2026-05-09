@@ -1,4 +1,4 @@
-import { Banknote, Users, FileCheck, Clock, TrendingUp, Activity } from 'lucide-react'
+import { Banknote, Users, FileCheck, Clock } from 'lucide-react'
 import {
   Card,
   CardContent,
@@ -142,7 +142,7 @@ export function GlobalDashboard() {
         </div>
       </TabsContent>
       <TabsContent value='analytics' className='space-y-4'>
-        <Analytics chartData={chartData} stats={stats} />
+        <Analytics chartData={chartData} stats={stats ?? null} />
       </TabsContent>
     </Tabs>
   )

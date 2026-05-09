@@ -11,8 +11,10 @@ export const LoginSchema = {
       user: Type.Object({
         id: Type.String(),
         firstName: Type.String(),
+        middleName: Type.Optional(Type.Union([Type.String(), Type.Null()])),
         lastName: Type.String(),
         email: Type.String(),
+        phoneNumber: Type.Optional(Type.Union([Type.String(), Type.Null()])),
         role: Type.String(),
         mustChangePassword: Type.Boolean(),
         branchId: Type.Optional(Type.Union([Type.String(), Type.Null()])),

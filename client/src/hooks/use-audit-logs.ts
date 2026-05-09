@@ -12,6 +12,9 @@ export interface AuditLog {
   ipAddress?: string | null
   status?: string | null
   type?: string | null
+  entityId?: string | null
+  entityType?: string | null
+  details?: string | null
 }
 
 interface AuditLogsResponse {
