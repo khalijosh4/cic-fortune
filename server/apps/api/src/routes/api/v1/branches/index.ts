@@ -15,13 +15,19 @@ import { sendTransferEmail } from '#/utils/notification.util.js';
 
 const branchRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/stats', async (request, reply) => {
+    const { lobId } = request.query as any;
+    const conditions = [];
+    if (lobId) conditions.push(eq(branch.lobId, lobId));
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
     const [stats] = await db.select({
       total: sql<number>`count(${branch.id})`,
       totalMembers: sql<number>`sum(${branchStats.totalMembers})`,
       totalClaims: sql<number>`sum(${branchStats.totalClaims})`,
     })
     .from(branchStats)
-    .innerJoin(branch, eq(branchStats.id, branch.id));
+    .innerJoin(branch, eq(branchStats.id, branch.id))
+    .where(whereClause);
 
     const total = Number(stats?.total || 0);
     const totalMembers = Number(stats?.totalMembers || 0);
@@ -37,12 +43,13 @@ const branchRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
 
   fastify.get('/', { schema: ListBranchSchema }, async (request, reply) => {
     const { 
-      limit = 10, offset = 0, location, branchName,
+      limit = 10, offset = 0, location, branchName, lobId,
       minPlans, maxPlans, 'plansRange[]': plansRange,
       minActivePlans, maxActivePlans, 'activePlansRange[]': activePlansRange,
     } = request.query;
 
     const filters = getTerritoryFilters(request.user, branch);
+    if (lobId) filters.push(eq(branch.lobId, lobId));
     if (location) filters.push(sql`${branch.location} ILIKE ${`%${location}%`}`);
     if (branchName) filters.push(sql`${branch.name} ILIKE ${`%${branchName}%`}`);
     
@@ -66,6 +73,7 @@ const branchRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
       totalActivePlans: branchStats.totalActivePlans,
       totalClaims: branchStats.totalClaims,
       location: branch.location,
+      lobId: branch.lobId,
       managerName: sql<string>`${schema.user.firstName} || ' ' || ${schema.user.lastName}`.as('manager_name'),
     })
     .from(branchStats)
@@ -96,6 +104,7 @@ const branchRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     const insertResult = await db.insert(branch).values({
       ...request.body,
       id,
+      lobId: (request.body as any).lobId || user.lobIds?.[0],
     } as any).returning() as any;
     
     const newBranch = insertResult[0];

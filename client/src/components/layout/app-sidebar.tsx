@@ -1,6 +1,7 @@
 import { Layers } from 'lucide-react'
 import { useLayout } from '@/context/layout-provider'
 import { useAuthStore } from '@/stores/auth-store'
+import { useLobStore } from '@/stores/lob-store'
 import {
   Sidebar,
   SidebarContent,
@@ -15,14 +16,20 @@ import { NavUser } from './nav-user'
 import { LobSwitcher } from './lob-switcher'
 import { hasAnyPermission, hasPermission } from '@/lib/permissions'
 
-function filterNavItems(items: NavItem[], permissions: string[] | undefined): NavItem[] {
+function filterNavItems(items: NavItem[], permissions: string[] | undefined, enabledModules: string[] | null): NavItem[] {
   return items.reduce<NavItem[]>((acc, item) => {
     if (item.requiredPermissions && item.requiredPermissions.length > 0 && !hasAnyPermission(permissions, item.requiredPermissions)) {
+      return acc
+    }
+    if (enabledModules && enabledModules.length > 0 && item.moduleId && !enabledModules.includes(item.moduleId)) {
       return acc
     }
     if ('items' in item && item.items) {
       const filteredSubItems = item.items.filter((sub) => {
         if (sub.requiredPermissions && sub.requiredPermissions.length > 0 && !hasAnyPermission(permissions, sub.requiredPermissions)) {
+          return false
+        }
+        if (enabledModules && enabledModules.length > 0 && sub.moduleId && !enabledModules.includes(sub.moduleId)) {
           return false
         }
         return true
@@ -36,9 +43,9 @@ function filterNavItems(items: NavItem[], permissions: string[] | undefined): Na
   }, [])
 }
 
-function filterNavGroups(groups: NavGroupType[], permissions: string[] | undefined): NavGroupType[] {
+function filterNavGroups(groups: NavGroupType[], permissions: string[] | undefined, enabledModules: string[] | null): NavGroupType[] {
   return groups.reduce<NavGroupType[]>((acc, group) => {
-    const filteredItems = filterNavItems(group.items, permissions)
+    const filteredItems = filterNavItems(group.items, permissions, enabledModules)
     if (filteredItems.length === 0) return acc
     acc.push({ ...group, items: filteredItems })
     return acc
@@ -49,6 +56,7 @@ export function AppSidebar() {
   const { auth } = useAuthStore()
   const { collapsible, variant } = useLayout()
   const userPermissions = auth.user?.permissions
+  const activeLob = useLobStore((s) => s.activeLob)
   const isGlobalView = hasPermission(userPermissions, 'lobs.summary') || hasPermission(userPermissions, 'lobs.switch')
 
   const user = {
@@ -57,9 +65,10 @@ export function AppSidebar() {
     avatar: sidebarData.user.avatar,
   }
 
-  const filteredNavGroups = filterNavGroups(sidebarData.navGroups, userPermissions)
+  const enabledModules = (activeLob as any)?.config?.enabledModules || null
 
-  // Add LOB Summary section for elevated users
+  const filteredNavGroups = filterNavGroups(sidebarData.navGroups, userPermissions, enabledModules)
+
   const summaryGroup: NavGroupType | null = isGlobalView
     ? {
         title: 'LOB Overview',
@@ -68,6 +77,7 @@ export function AppSidebar() {
             title: 'LOB Summary',
             url: '/lob-summary',
             icon: Layers,
+            moduleId: 'lob-summary',
             requiredPermissions: ['lobs.summary'],
           },
         ],

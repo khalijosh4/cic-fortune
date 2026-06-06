@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '@/lib/api'
 import { toast } from 'sonner'
+import { useLobStore } from '@/stores/lob-store'
 
 export interface Branch {
   id: string
@@ -19,15 +20,17 @@ interface BranchesResponse {
 }
 
 export function useBranches(
-  limit = 10, 
-  offset = 0, 
+  limit = 10,
+  offset = 0,
   filters?: any
 ) {
+  const activeLobId = useLobStore((s) => s.activeLob?.id)
+  const effectiveFilters = { ...filters, ...(activeLobId ? { lobId: activeLobId } : {}) }
   return useQuery<BranchesResponse>({
-    queryKey: ['branches', limit, offset, filters],
+    queryKey: ['branches', limit, offset, effectiveFilters],
     queryFn: async () => {
       const response = await api.get('/branches', {
-        params: { limit, offset, ...filters },
+        params: { limit, offset, ...effectiveFilters },
       })
       return response.data
     },
@@ -65,9 +68,10 @@ export function useUpdateBranch(id: string) {
 }
 export function useCreateBranch() {
   const queryClient = useQueryClient()
+  const activeLobId = useLobStore((s) => s.activeLob?.id)
   return useMutation({
     mutationFn: async (data: any) => {
-      const response = await api.post('/branches', data)
+      const response = await api.post('/branches', { ...data, lobId: activeLobId })
       return response.data
     },
     onSuccess: () => {

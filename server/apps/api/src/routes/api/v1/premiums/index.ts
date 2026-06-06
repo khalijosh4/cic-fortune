@@ -16,8 +16,10 @@ import { hasAccess } from '#/utils/tebac.util.js';
 
 const premiumRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/stats', async (request, reply) => {
-    // TeBAC filtering
     const filters = [];
+    const { lobId } = request.query as any;
+    if (lobId) filters.push(eq(premium.lobId, lobId));
+
     if (['branch_manager', 'claims_officer', 'user'].includes((request as any).user.role)) {
       filters.push(eq(member.branchId, (request as any).user.branchId!));
     }
@@ -42,13 +44,14 @@ const premiumRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
 
   fastify.get('/', { schema: ListPremiumSchema }, async (request, reply) => {
     const { 
-      limit = 10, offset = 0, memberId, status, 'status[]': statuses,
+      limit = 10, offset = 0, memberId, lobId, status, 'status[]': statuses,
       minAmountDue, maxAmountDue, 'amountDueRange[]': amountDueRange,
       minAmountPaid, maxAmountPaid, 'amountPaidRange[]': amountPaidRange,
       startDate, endDate, 'dueDateRange[]': dueDateRange, name
     } = request.query;
 
     const filters = [];
+    if (lobId) filters.push(eq(premium.lobId, lobId));
     if (memberId) filters.push(eq(premium.memberId, memberId));
     
     const applyStatusFilter = (s: string) => {
@@ -127,8 +130,6 @@ const premiumRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
 
     const { ids, status: newStatus } = request.body;
     
-    // For premiums, status is derived; we update paymentMethod as a marker
-    // A more complete implementation would update a dedicated status field
     await db.update(premium)
       .set({ paymentMethod: newStatus } as any)
       .where(sql`${premium.id} IN ${ids}`);
@@ -141,8 +142,13 @@ const premiumRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
       return reply.forbidden('Only admins can generate premiums');
     }
 
-    const { memberId, dueDate } = request.body;
+    const { memberId, dueDate, lobId } = request.body as any;
     const newPremium = await PremiumService.generatePremium(memberId, new Date(dueDate));
+    // Set lobId on the new premium
+    const premiumLobId = lobId || (request.user as any).lobIds?.[0];
+    if (premiumLobId && newPremium) {
+      await db.update(premium).set({ lobId: premiumLobId } as any).where(eq(premium.id, (newPremium as any).id));
+    }
     return reply.code(201).send(newPremium as any);
   });
 

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '@/lib/api'
 import { toast } from 'sonner'
+import { useLobStore } from '@/stores/lob-store'
 
 export interface Claim {
   id: string
@@ -20,15 +21,17 @@ interface ClaimsResponse {
 }
 
 export function useClaims(
-  limit = 10, 
-  offset = 0, 
+  limit = 10,
+  offset = 0,
   filters?: any
 ) {
+  const activeLobId = useLobStore((s) => s.activeLob?.id)
+  const effectiveFilters = { ...filters, ...(activeLobId ? { lobId: activeLobId } : {}) }
   return useQuery<ClaimsResponse>({
-    queryKey: ['claims', limit, offset, filters],
+    queryKey: ['claims', limit, offset, effectiveFilters],
     queryFn: async () => {
       const response = await api.get('/claims', {
-        params: { limit, offset, ...filters },
+        params: { limit, offset, ...effectiveFilters },
       })
       return response.data
     },
@@ -87,9 +90,10 @@ export function useUpdateClaim(id: string) {
 }
 export function useCreateClaim() {
   const queryClient = useQueryClient()
+  const activeLobId = useLobStore((s) => s.activeLob?.id)
   return useMutation({
     mutationFn: async (data: any) => {
-      const response = await api.post('/claims', data)
+      const response = await api.post('/claims', { ...data, lobId: activeLobId })
       return response.data
     },
     onSuccess: () => {

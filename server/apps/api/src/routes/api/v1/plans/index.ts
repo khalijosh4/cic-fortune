@@ -11,12 +11,17 @@ import {
 
 const planRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/stats', async (request, reply) => {
+    const { lobId } = request.query as any;
+    const conditions = [];
+    if (lobId) conditions.push(eq(premiumRate.lobId, lobId));
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
     const [stats] = await db.select({
       total: sql<number>`count(*)`,
       avgInpatient: sql<number>`avg(${premiumRate.inpatientLimit})`,
       avgOutpatient: sql<number>`avg(${premiumRate.outpatientLimit})`,
       avgMaternity: sql<number>`avg(${premiumRate.maternityLimit})`,
-    }).from(premiumRate);
+    }).from(premiumRate).where(whereClause);
 
     return reply.send({
       total: Number(stats?.total || 0),
@@ -28,10 +33,11 @@ const planRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
 
   fastify.get('/', { schema: ListPlanSchema }, async (request, reply) => {
     const { 
-      limit = 10, offset = 0, planName
+      limit = 10, offset = 0, planName, lobId
     } = request.query;
 
     const filters = [];
+    if (lobId) filters.push(eq(premiumRate.lobId, lobId));
     if (planName) filters.push(sql`${premiumRate.planName} ILIKE ${`%${planName}%`}`);
 
     const whereClause = filters.length > 0 ? and(...filters) : undefined;
@@ -54,6 +60,7 @@ const planRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     const insertResult = await db.insert(premiumRate).values({
       ...(request.body as any),
       id,
+      lobId: (request.body as any).lobId || (request.user as any).lobIds?.[0],
     } as any).returning() as any;
     const newPlan = insertResult[0];
     return reply.code(201).send(newPlan as any);

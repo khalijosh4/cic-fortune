@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '@/lib/api'
 import { toast } from 'sonner'
+import { useLobStore } from '@/stores/lob-store'
 
 export interface Hospital {
   id: string
@@ -16,15 +17,17 @@ interface HospitalsResponse {
 }
 
 export function useHospitals(
-  limit = 10, 
-  offset = 0, 
+  limit = 10,
+  offset = 0,
   filters?: any
 ) {
+  const activeLobId = useLobStore((s) => s.activeLob?.id)
+  const effectiveFilters = { ...filters, ...(activeLobId ? { lobId: activeLobId } : {}) }
   return useQuery<HospitalsResponse>({
-    queryKey: ['hospitals', limit, offset, filters],
+    queryKey: ['hospitals', limit, offset, effectiveFilters],
     queryFn: async () => {
       const response = await api.get('/hospitals', {
-        params: { limit, offset, ...filters },
+        params: { limit, offset, ...effectiveFilters },
       })
       return response.data
     },
@@ -62,9 +65,10 @@ export function useUpdateHospital(id: string) {
 }
 export function useCreateHospital() {
   const queryClient = useQueryClient()
+  const activeLobId = useLobStore((s) => s.activeLob?.id)
   return useMutation({
     mutationFn: async (data: any) => {
-      const response = await api.post('/hospitals', data)
+      const response = await api.post('/hospitals', { ...data, lobId: activeLobId })
       return response.data
     },
     onSuccess: () => {

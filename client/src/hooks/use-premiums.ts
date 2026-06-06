@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '@/lib/api'
 import { toast } from 'sonner'
+import { useLobStore } from '@/stores/lob-store'
 
 export interface Premium {
   id: string
@@ -21,11 +22,13 @@ export function usePremiums(
   offset = 0,
   filters?: any
 ) {
+  const activeLobId = useLobStore((s) => s.activeLob?.id)
+  const effectiveFilters = { ...filters, ...(activeLobId ? { lobId: activeLobId } : {}) }
   return useQuery<PremiumsResponse>({
-    queryKey: ['premiums', limit, offset, filters],
+    queryKey: ['premiums', limit, offset, effectiveFilters],
     queryFn: async () => {
       const response = await api.get('/premiums', {
-        params: { limit, offset, ...filters },
+        params: { limit, offset, ...effectiveFilters },
       })
       return response.data
     },
@@ -84,9 +87,10 @@ export function useUpdatePremium(id: string) {
 }
 export function useCreatePremium() {
   const queryClient = useQueryClient()
+  const activeLobId = useLobStore((s) => s.activeLob?.id)
   return useMutation({
     mutationFn: async (data: any) => {
-      const response = await api.post('/premiums', data)
+      const response = await api.post('/premiums', { ...data, lobId: activeLobId })
       return response.data
     },
     onSuccess: () => {

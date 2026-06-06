@@ -1,5 +1,5 @@
 import { 
-  pgEnum, pgTable, uuid, varchar, numeric, pgView, timestamp, text, integer, boolean, primaryKey, type AnyPgColumn
+  pgEnum, pgTable, uuid, varchar, numeric, pgView, timestamp, text, integer, boolean, primaryKey, jsonb, type AnyPgColumn
 } from 'drizzle-orm/pg-core';
 import { sql, eq } from 'drizzle-orm';
 import type { InferSelectModel } from 'drizzle-orm';
@@ -54,6 +54,7 @@ export const lineOfBusiness = pgTable('line_of_business', {
   description: text('description'),
   icon: varchar('icon', { length: 50 }),
   isActive: boolean('is_active').notNull().default(true),
+  config: jsonb('config').$default(() => ({ enabledModules: [] })),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });
@@ -70,6 +71,7 @@ export const branch: any = pgTable('branch', {
   name: varchar('name', { length: 50 }).notNull(),
   location: varchar('location', { length: 255 }).notNull(),
   manager: varchar('manager_id', { length: 50 }).references((): AnyPgColumn => user.id, { onDelete: 'set null', onUpdate: 'cascade' }),
+  lobId: varchar('lob_id', { length: 50 }).references((): AnyPgColumn => lineOfBusiness.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date())
 });
@@ -112,6 +114,7 @@ export const member = pgTable('member', {
   phoneNumber: varchar('phone_number', { length: 20 }),
   branchId: varchar('branch_id', { length: 50 }).references(() => branch.id, { onDelete: 'set null', onUpdate: 'cascade' }),
   planId: varchar('plan_id', { length: 50 }).references(() => premiumRate.id, { onDelete: 'set null', onUpdate: 'cascade' }),
+  lobId: varchar('lob_id', { length: 50 }).references(() => lineOfBusiness.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
   coverType: PolicyCoverTypeEnum('cover_type').default('individual'),
   dependentsCount: integer('dependents_count').default(0),
   premiumRate: numeric('premium_rate', { precision: 12, scale: 2 }).notNull(),
@@ -127,6 +130,7 @@ export const claim = pgTable('claim', {
   memberId: varchar('member_id', { length: 50 }).references(() => member.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
   hospitalId: varchar('hospital_id', { length: 50 }).references(() => hospital.id, { onDelete: 'set null', onUpdate: 'cascade' }),
   planId: varchar('plan_id', { length: 50 }).references(() => premiumRate.id, { onDelete: 'set null', onUpdate: 'cascade' }),
+  lobId: varchar('lob_id', { length: 50 }).references(() => lineOfBusiness.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
   amountClaimed: numeric('amount_claimed', { precision: 15, scale: 2 }).notNull(),
   amountApproved: numeric('amount_approved', { precision: 15, scale: 2 }),
   status: ClaimStatusEnum('status').default('pending'),
@@ -139,12 +143,14 @@ export const hospital = pgTable('hospital', {
   name: varchar('name', { length: 100 }).notNull(),
   location: text('location'),
   type: HospitalTypeEnum('type').default('public'),
+  lobId: varchar('lob_id', { length: 50 }).references(() => lineOfBusiness.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
   claimLimit: numeric('claim_limit', { precision: 15, scale: 2 }),
 });
 
 export const premium = pgTable('premium', {
   id: varchar('id', { length: 50 }).primaryKey(),
   memberId: varchar('member_id', { length: 50 }).references(() => member.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+  lobId: varchar('lob_id', { length: 50 }).references(() => lineOfBusiness.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
   amountDue: numeric('amount_due', { precision: 12, scale: 2 }).notNull(),
   amountPaid: numeric('amount_paid', { precision: 12, scale: 2 }).default('0'),
   dueDate: timestamp('due_date').notNull(),
@@ -155,6 +161,7 @@ export const premium = pgTable('premium', {
 export const premiumRate = pgTable('premium_rate', {
   id: varchar('id', { length: 50 }).primaryKey(),
   planName: varchar('plan_name', { length: 100 }).notNull(),
+  lobId: varchar('lob_id', { length: 50 }).references(() => lineOfBusiness.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
   // Benefit Limits (from charts)
   inpatientLimit: numeric('inpatient_limit', { precision: 15, scale: 2 }).notNull(),
   outpatientLimit: numeric('outpatient_limit', { precision: 15, scale: 2 }).notNull(),

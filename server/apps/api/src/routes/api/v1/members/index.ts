@@ -15,6 +15,8 @@ import { sendEnrollmentEmail, sendEnrollmentSms } from '#/utils/notification.uti
 const memberRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/stats', async (request, reply) => {
     const filters = getTerritoryFilters(request.user, member);
+    const { lobId } = request.query as any;
+    if (lobId) filters.push(eq(member.lobId, lobId));
     const whereClause = filters.length > 0 ? and(...filters) : undefined;
 
     const [stats] = await db.select({
@@ -34,7 +36,7 @@ const memberRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
 
   fastify.get('/', { schema: ListMemberSchema }, async (request, reply) => {
     const { 
-      limit = 10, offset = 0, branchId, planId, 
+      limit = 10, offset = 0, branchId, planId, lobId,
       coverType, 'coverType[]': coverTypes,
       minPremiumRate, maxPremiumRate, 'premiumRange[]': premiumRange,
       status, 'status[]': statuses,
@@ -42,6 +44,7 @@ const memberRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     } = request.query;
 
     const filters = getTerritoryFilters(request.user, member);
+    if (lobId) filters.push(eq(member.lobId, lobId));
     if (branchId) {
       filters.push(eq(member.branchId, branchId));
     }
@@ -147,6 +150,7 @@ const memberRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     const insertResult = await db.insert(member).values({
       ...payload,
       id,
+      lobId: payload.lobId || (request.user as any).lobIds?.[0],
       usedAnnualLimit: '0',
       usedOutpatientLimit: '0',
       usedInpatientLimit: '0',

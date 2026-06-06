@@ -15,6 +15,7 @@ export const CreatePremiumSchema = {
     memberId: Type.String(),
     amountDue: Type.String(),
     dueDate: Type.String(),
+    lobId: Type.Optional(Type.String()),
   }),
   response: {
     201: PremiumSchema,
@@ -37,6 +38,7 @@ export const ListPremiumSchema = {
     limit: Type.Optional(Type.Number()),
     offset: Type.Optional(Type.Number()),
     memberId: Type.Optional(Type.String()),
+    lobId: Type.Optional(Type.String()),
     status: Type.Optional(Type.String()),
     'status[]': Type.Optional(Type.Array(Type.String())),
     minAmountDue: Type.Optional(Type.Number()),

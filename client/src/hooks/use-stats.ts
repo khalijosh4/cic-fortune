@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import api from '@/lib/api'
+import { useLobStore } from '@/stores/lob-store'
 
 // Plans
 export interface PlanStats {
@@ -9,9 +10,11 @@ export interface PlanStats {
   avgMaternity: number
 }
 export function usePlanStats() {
+  const activeLobId = useLobStore((s) => s.activeLob?.id)
+  const params = activeLobId ? { lobId: activeLobId } : {}
   return useQuery<PlanStats>({
-    queryKey: ['plans', 'stats'],
-    queryFn: async () => (await api.get('/plans/stats')).data,
+    queryKey: ['plans', 'stats', activeLobId],
+    queryFn: async () => (await api.get('/plans/stats', { params })).data,
   })
 }
 
@@ -24,9 +27,11 @@ export interface PremiumStats {
   collectionRate: number
 }
 export function usePremiumStats() {
+  const activeLobId = useLobStore((s) => s.activeLob?.id)
+  const params = activeLobId ? { lobId: activeLobId } : {}
   return useQuery<PremiumStats>({
-    queryKey: ['premiums', 'stats'],
-    queryFn: async () => (await api.get('/premiums/stats')).data,
+    queryKey: ['premiums', 'stats', activeLobId],
+    queryFn: async () => (await api.get('/premiums/stats', { params })).data,
   })
 }
 
@@ -38,9 +43,11 @@ export interface MemberStats {
   expired: number
 }
 export function useMemberStats() {
+  const activeLobId = useLobStore((s) => s.activeLob?.id)
+  const params = activeLobId ? { lobId: activeLobId } : {}
   return useQuery<MemberStats>({
-    queryKey: ['members', 'stats'],
-    queryFn: async () => (await api.get('/members/stats')).data,
+    queryKey: ['members', 'stats', activeLobId],
+    queryFn: async () => (await api.get('/members/stats', { params })).data,
   })
 }
 
@@ -52,9 +59,11 @@ export interface BranchStats {
   avgMembers: number
 }
 export function useBranchStats() {
+  const activeLobId = useLobStore((s) => s.activeLob?.id)
+  const params = activeLobId ? { lobId: activeLobId } : {}
   return useQuery<BranchStats>({
-    queryKey: ['branches', 'stats'],
-    queryFn: async () => (await api.get('/branches/stats')).data,
+    queryKey: ['branches', 'stats', activeLobId],
+    queryFn: async () => (await api.get('/branches/stats', { params })).data,
   })
 }
 
@@ -64,9 +73,11 @@ export interface HospitalStats {
   byType: Record<string, number>
 }
 export function useHospitalStats() {
+  const activeLobId = useLobStore((s) => s.activeLob?.id)
+  const params = activeLobId ? { lobId: activeLobId } : {}
   return useQuery<HospitalStats>({
-    queryKey: ['hospitals', 'stats'],
-    queryFn: async () => (await api.get('/hospitals/stats')).data,
+    queryKey: ['hospitals', 'stats', activeLobId],
+    queryFn: async () => (await api.get('/hospitals/stats', { params })).data,
   })
 }
 
@@ -80,9 +91,11 @@ export interface ClaimStats {
   totalAmountApproved: number
 }
 export function useClaimStats() {
+  const activeLobId = useLobStore((s) => s.activeLob?.id)
+  const params = activeLobId ? { lobId: activeLobId } : {}
   return useQuery<ClaimStats>({
-    queryKey: ['claims', 'stats'],
-    queryFn: async () => (await api.get('/claims/stats')).data,
+    queryKey: ['claims', 'stats', activeLobId],
+    queryFn: async () => (await api.get('/claims/stats', { params })).data,
   })
 }
 
@@ -94,8 +107,10 @@ export interface AuditLogStats {
   successRate: number
 }
 export function useAuditLogStats() {
+  const activeLobId = useLobStore((s) => s.activeLob?.id)
+  const params = activeLobId ? { lobId: activeLobId } : {}
   return useQuery<AuditLogStats>({
-    queryKey: ['audit-logs', 'stats'],
-    queryFn: async () => (await api.get('/audit-logs/stats')).data,
+    queryKey: ['audit-logs', 'stats', activeLobId],
+    queryFn: async () => (await api.get('/audit-logs/stats', { params })).data,
   })
 }

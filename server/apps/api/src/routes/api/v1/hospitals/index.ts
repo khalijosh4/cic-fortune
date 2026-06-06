@@ -12,10 +12,15 @@ import { getTerritoryFilters, hasAccess } from '#/utils/tebac.util.js';
 
 const hospitalRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/stats', async (request, reply) => {
+    const { lobId } = request.query as any;
+    const conditions = [];
+    if (lobId) conditions.push(eq(hospital.lobId, lobId));
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
     const rows = await db.select({
       type: hospital.type,
       count: sql<number>`count(*)`,
-    }).from(hospital).groupBy(hospital.type);
+    }).from(hospital).where(whereClause).groupBy(hospital.type);
 
     const total = rows.reduce((sum, r) => sum + Number(r.count), 0);
     const byType = Object.fromEntries(rows.map(r => [r.type, Number(r.count)]));
@@ -24,9 +29,10 @@ const hospitalRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   });
 
   fastify.get('/', { schema: ListHospitalSchema }, async (request, reply) => {
-    const { limit = 10, offset = 0, location, name, 'type[]': types, minClaimLimit, maxClaimLimit, 'claimLimitRange[]': claimLimitRange } = request.query;
+    const { limit = 10, offset = 0, location, name, lobId, 'type[]': types, minClaimLimit, maxClaimLimit, 'claimLimitRange[]': claimLimitRange } = request.query;
 
     const filters = getTerritoryFilters(request.user, hospital);
+    if (lobId) filters.push(eq(hospital.lobId, lobId));
     if (location) filters.push(sql`${hospital.location} ILIKE ${`%${location}%`}`);
     if (name) filters.push(sql`${hospital.name} ILIKE ${`%${name}%`}`);
     if (types && types.length > 0) {
@@ -58,6 +64,7 @@ const hospitalRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     const insertResult = await db.insert(hospital).values({
       ...(request.body as any),
       id,
+      lobId: (request.body as any).lobId || (request.user as any).lobIds?.[0],
     } as any).returning() as any;
     const newHospital = insertResult[0];
     return reply.code(201).send(newHospital as any);

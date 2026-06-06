@@ -22,6 +22,7 @@ export const PlanSchema = Type.Object({
 export const CreatePlanSchema = {
   body: Type.Object({
     planName: Type.String(),
+    lobId: Type.Optional(Type.String()),
     inpatientLimit: Type.String(),
     outpatientLimit: Type.String(),
     maternityLimit: Type.Optional(Type.String()),
@@ -71,6 +72,7 @@ export const ListPlanSchema = {
     limit: Type.Optional(Type.Number()),
     offset: Type.Optional(Type.Number()),
     planName: Type.Optional(Type.String()),
+    lobId: Type.Optional(Type.String()),
   }),
   response: {
     200: Type.Object({

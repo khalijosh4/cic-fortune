@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '@/lib/api'
 import { toast } from 'sonner'
+import { useLobStore } from '@/stores/lob-store'
 
 export interface Member {
   id: string
@@ -27,15 +28,17 @@ interface MembersResponse {
 }
 
 export function useMembers(
-  limit = 10, 
-  offset = 0, 
+  limit = 10,
+  offset = 0,
   filters?: any
 ) {
+  const activeLobId = useLobStore((s) => s.activeLob?.id)
+  const effectiveFilters = { ...filters, ...(activeLobId ? { lobId: activeLobId } : {}) }
   return useQuery<MembersResponse>({
-    queryKey: ['members', limit, offset, filters],
+    queryKey: ['members', limit, offset, effectiveFilters],
     queryFn: async () => {
       const response = await api.get('/members', {
-        params: { limit, offset, ...filters },
+        params: { limit, offset, ...effectiveFilters },
       })
       return response.data
     },
@@ -95,9 +98,10 @@ export function useUpdateMember(id: string) {
 
 export function useCreateMember() {
   const queryClient = useQueryClient()
+  const activeLobId = useLobStore((s) => s.activeLob?.id)
   return useMutation({
     mutationFn: async (data: any) => {
-      const response = await api.post('/members', data)
+      const response = await api.post('/members', { ...data, lobId: activeLobId })
       return response.data
     },
     onSuccess: () => {

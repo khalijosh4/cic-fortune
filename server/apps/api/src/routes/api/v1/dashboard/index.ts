@@ -13,6 +13,10 @@ const dashboardRoute: FastifyPluginAsyncTypebox = async (app) => {
   }, async (request) => {
     try {
       const filters = getTerritoryFilters(request.user, schema);
+      const { lobId } = request.query as any;
+      if (lobId) {
+        filters.push(sql`${schema.member.lobId} = ${lobId}`);
+      }
 
       const premiumConditions = filters.length > 0
         ? and(...filters.map(f => sql`${schema.premium.memberId} IN (SELECT id FROM ${schema.member} WHERE ${f})`))

@@ -9,6 +9,7 @@ export interface LineOfBusiness {
   description: string | null
   icon: string | null
   isActive: boolean
+  config: { enabledModules: string[] } | null
   createdAt: string | null
   updatedAt: string | null
 }

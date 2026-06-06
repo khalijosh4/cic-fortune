@@ -41,6 +41,24 @@ async function seed() {
     
     console.log('Created/Verified admin with ID:', adminId);
 
+    // 1.5 Seed Lines of Business
+    console.log('Seeding lines of business...');
+    const lobs = [
+      { id: 'LOB-HEALTH', name: 'Health Insurance', code: 'HEALTH', description: 'Medical cover including inpatient, outpatient, maternity, dental, and optical', icon: 'HeartPulse', isActive: true },
+      { id: 'LOB-MOTOR', name: 'Motor Insurance', code: 'MOTOR', description: 'Comprehensive motor vehicle insurance covering private and commercial vehicles', icon: 'Car', isActive: true },
+      { id: 'LOB-LIFE', name: 'Life Insurance', code: 'LIFE', description: 'Life cover with terminal illness, critical illness, and accidental death benefits', icon: 'Heart', isActive: true },
+    ];
+    for (const lob of lobs) {
+      await db.insert(schema.lineOfBusiness).values(lob as any).onConflictDoNothing();
+    }
+
+    // 1.6 Seed User-LOB Associations (Admin)
+    console.log('Seeding admin user-lob associations...');
+    const allLobIds = (await db.select({ id: schema.lineOfBusiness.id }).from(schema.lineOfBusiness)).map(l => l.id);
+    for (const lobId of allLobIds) {
+      await db.insert(schema.userLob).values({ userId: adminId, lobId } as any).onConflictDoNothing();
+    }
+
     // 2. Seed Hospitals
     console.log('Seeding hospitals...');
     let hospitalIds: string[] = [];
@@ -52,6 +70,7 @@ async function seed() {
         location: faker.location.city(),
         type: faker.helpers.arrayElement(['private', 'county', 'teaching', 'clinic', 'specialist', 'referral', 'public']),
         claimLimit: faker.number.int({ min: 100000, max: 2000000 }).toString(),
+        lobId: faker.helpers.arrayElement(allLobIds),
       } as any).onConflictDoNothing().returning();
       const res = insertRes?.[0];
       if (res) hospitalIds.push(res.id);
@@ -74,7 +93,8 @@ async function seed() {
         id: bId,
         name: bName + ' Branch',
         location: faker.location.streetAddress().slice(0, 255),
-        manager: adminId, 
+        manager: adminId,
+        lobId: faker.helpers.arrayElement(allLobIds),
       } as any).onConflictDoNothing().returning();
       const res = insertRes?.[0];
       if (res) branchIds.push(res.id);
@@ -82,26 +102,6 @@ async function seed() {
     if (branchIds.length === 0) {
       const allBranches = await db.select({ id: schema.branch.id }).from(schema.branch);
       branchIds = allBranches.map(b => b.id);
-    }
-
-    // 3.3 Seed Lines of Business
-    console.log('Seeding lines of business...');
-    const lobs = [
-      { id: 'LOB-HEALTH', name: 'Health Insurance', code: 'HEALTH', description: 'Medical cover including inpatient, outpatient, maternity, dental, and optical', icon: 'HeartPulse', isActive: true },
-      { id: 'LOB-MOTOR', name: 'Motor Insurance', code: 'MOTOR', description: 'Comprehensive motor vehicle insurance covering private and commercial vehicles', icon: 'Car', isActive: true },
-      { id: 'LOB-LIFE', name: 'Life Insurance', code: 'LIFE', description: 'Life cover with terminal illness, critical illness, and accidental death benefits', icon: 'Heart', isActive: true },
-    ];
-    for (const lob of lobs) {
-      await db.insert(schema.lineOfBusiness).values(lob as any).onConflictDoNothing();
-    }
-
-    // 3.4 Seed User-LOB Associations
-    console.log('Seeding user-lob associations...');
-    const allLobIds = (await db.select({ id: schema.lineOfBusiness.id }).from(schema.lineOfBusiness)).map(l => l.id);
-
-    // Associate admin with all LOBs
-    for (const lobId of allLobIds) {
-      await db.insert(schema.userLob).values({ userId: adminId, lobId } as any).onConflictDoNothing();
     }
 
     // 3.5 Seed Specific Role Users for Testing
@@ -161,10 +161,9 @@ async function seed() {
     }
 
     // Associate faker users with LOBs
-    const seedLobIds = (await db.select({ id: schema.lineOfBusiness.id }).from(schema.lineOfBusiness)).map(l => l.id);
     for (const uid of userIds) {
       if (uid === adminId) continue; // Admin already has all LOBs
-      const lobId = seedLobIds[Math.floor(Math.random() * seedLobIds.length)];
+      const lobId = allLobIds[Math.floor(Math.random() * allLobIds.length)];
       await db.insert(schema.userLob).values({ userId: uid, lobId } as any).onConflictDoNothing();
     }
 
@@ -188,6 +187,7 @@ async function seed() {
       m5: '33899',
       m6: '36489',
       extra: '5089',
+      lobId: faker.helpers.arrayElement(allLobIds),
     } as any).onConflictDoNothing();
     const planIds = [planId];
 
@@ -213,12 +213,14 @@ async function seed() {
       else if (dependentsCount === 5) calculatedPremium = 33899;
       else if (dependentsCount >= 6) calculatedPremium = 36489 + ((dependentsCount - 6) * 5089);
 
+      const lobId = faker.helpers.arrayElement(allLobIds);
       const insertRes: any = await db.insert(schema.member).values({
         id: mId,
         firstName: faker.person.firstName(),
         lastName: faker.person.lastName(),
         branchId,
         planId: faker.helpers.arrayElement(planIds),
+        lobId,
         coverType: faker.helpers.arrayElement(['family', 'individual', 'corporate group']),
         dependentsCount,
         premiumRate: calculatedPremium.toString(),
@@ -247,6 +249,7 @@ async function seed() {
         memberId: mId,
         hospitalId: hId,
         planId: faker.helpers.arrayElement(planIds),
+        lobId: faker.helpers.arrayElement(allLobIds),
         amountClaimed: amount.toString(),
         amountApproved: status === 'approved' ? (amount * 0.9).toString() : null,
         status: status,
@@ -266,6 +269,7 @@ async function seed() {
       await db.insert(schema.premium).values({
         id: pId,
         memberId: mId,
+        lobId: faker.helpers.arrayElement(allLobIds),
         amountDue: amount.toString(),
         amountPaid: paid.toString(),
         dueDate: faker.date.future(),

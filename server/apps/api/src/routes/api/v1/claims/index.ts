@@ -16,13 +16,16 @@ import { hasAccess } from '#/utils/tebac.util.js';
 
 const claimRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get('/stats', async (request, reply) => {
-    const roleFilters = [];
+    const filters = [];
+    const { lobId } = request.query as any;
+    if (lobId) filters.push(eq(claim.lobId, lobId));
+
     if (['branch_manager', 'claims_officer', 'user'].includes(request.user.role)) {
-      roleFilters.push(eq(member.branchId, (request as any).user.branchId!));
+      filters.push(eq(member.branchId, (request as any).user.branchId!));
     } else if (request.user.role === 'hospital') {
-      roleFilters.push(eq(claim.hospitalId, request.user.hospitalId!));
+      filters.push(eq(claim.hospitalId, request.user.hospitalId!));
     }
-    const whereClause = roleFilters.length > 0 ? and(...roleFilters) : undefined;
+    const whereClause = filters.length > 0 ? and(...filters) : undefined;
 
     const [stats] = await db.select({
       total: sql<number>`count(${claim.id})`,
@@ -48,13 +51,14 @@ const claimRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
 
   fastify.get('/', { schema: ListClaimSchema }, async (request, reply) => {
     const { 
-      limit = 10, offset = 0, memberId, hospitalId, status, 'status[]': statuses,
+      limit = 10, offset = 0, memberId, hospitalId, lobId, status, 'status[]': statuses,
       minAmountClaimed, maxAmountClaimed, 'claimedRange[]': claimedRange,
       minAmountApproved, maxAmountApproved, 'approvedRange[]': approvedRange,
       startDate, endDate, 'timestampRange[]': timestampRange, name
     } = request.query;
 
     const filters = [];
+    if (lobId) filters.push(eq(claim.lobId, lobId));
     if (memberId) filters.push(eq(claim.memberId, memberId));
     if (hospitalId) filters.push(eq(claim.hospitalId, hospitalId));
     
@@ -83,8 +87,6 @@ const claimRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     }
 
     // Role based filtering (TeBAC)
-    // Note: For branch staff, we need to join with member to filter by branchId
-    // Our utility handles direct columns, but for claims we need member branch
     if (['branch_manager', 'claims_officer', 'user'].includes(request.user.role)) {
        filters.push(eq(member.branchId, (request as any).user.branchId!));
     } else if (request.user.role === 'hospital') {
@@ -134,12 +136,11 @@ const claimRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   });
 
   fastify.post('/', { schema: CreateClaimSchema }, async (request, reply) => {
-    // Hospitals or admins can submit claims
     if (!['admin', 'system_admin'].includes(request.user.role) && request.user.role !== 'hospital') {
       return reply.forbidden('Only admins or hospitals can submit claims');
     }
 
-    const payload = {
+    const payload: any = {
       ...request.body,
       status: 'pending' as any,
     };
@@ -147,6 +148,8 @@ const claimRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     if (request.user.role === 'hospital') {
       payload.hospitalId = request.user.hospitalId!;
     }
+
+    payload.lobId = payload.lobId || (request.user as any).lobIds?.[0];
 
     const { generateStructuredClaimId } = await import('#/utils/id-generator.util.js');
     const id = await generateStructuredClaimId();
@@ -157,7 +160,6 @@ const claimRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     } as any).returning() as any;
     const newClaim = insertResult[0];
 
-    // Evaluate limits automatically
     const evaluation = await ClaimsService.evaluateClaimLimits(newClaim.id);
 
     return reply.code(201).send({ ...newClaim, evaluation } as any);

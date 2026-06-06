@@ -7,6 +7,7 @@ export type UserPayload = {
   permissions?: string[];
   branchId?: string;
   hospitalId?: string;
+  lobIds?: string[];
 };
 
 /**
@@ -14,11 +15,16 @@ export type UserPayload = {
  */
 export function getTerritoryFilters(user: UserPayload, table: any): SQL[] {
   const filters: SQL[] = [];
-  const { role, branchId, hospitalId } = user;
+  const { role, branchId, hospitalId, lobIds } = user;
 
   // Global roles: no filtering
   if (['admin', 'system_admin', 'ceo', 'hr'].includes(role)) {
     return filters;
+  }
+
+  // LOB filtering for non-global roles: restrict to user's LOBs
+  if (lobIds && lobIds.length > 0 && 'lobId' in table) {
+    filters.push(eq(table.lobId, lobIds[0]));
   }
 
   // Hospital staff: restricted to their hospital

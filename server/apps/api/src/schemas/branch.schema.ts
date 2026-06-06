@@ -14,6 +14,7 @@ export const CreateBranchSchema = {
     name: Type.String(),
     location: Type.String(),
     manager: Type.Optional(Type.String()),
+    lobId: Type.Optional(Type.String()),
   }),
   response: {
     201: BranchSchema,
@@ -45,6 +46,7 @@ export const ListBranchSchema = {
     offset: Type.Optional(Type.Number()),
     branchName: Type.Optional(Type.String()),
     location: Type.Optional(Type.String()),
+    lobId: Type.Optional(Type.String()),
     minPlans: Type.Optional(Type.Number()),
     maxPlans: Type.Optional(Type.Number()),
     'plansRange[]': Type.Optional(Type.Array(Type.Number())),
@@ -62,6 +64,7 @@ export const ListBranchSchema = {
         totalActivePlans: Type.Number(),
         totalClaims: Type.Number(),
         location: Type.String(),
+        lobId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
         managerName: Type.Optional(Type.Union([Type.String(), Type.Null()])),
       })),
       total: Type.Number(),

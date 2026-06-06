@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import api from '@/lib/api'
+import { useLobStore } from '@/stores/lob-store'
 
 export interface DashboardData {
   stats: {
@@ -83,10 +84,12 @@ export interface HospitalDashboardData {
 }
 
 export function useDashboard() {
+  const activeLobId = useLobStore((s) => s.activeLob?.id)
+  const params = activeLobId ? { lobId: activeLobId } : {}
   return useQuery<DashboardData>({
-    queryKey: ['dashboard'],
+    queryKey: ['dashboard', activeLobId],
     queryFn: async () => {
-      const response = await api.get('/dashboard')
+      const response = await api.get('/dashboard', { params })
       return response.data
     },
   })

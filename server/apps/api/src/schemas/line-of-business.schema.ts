@@ -7,6 +7,7 @@ export const LineOfBusinessSchema = Type.Object({
   description: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   icon: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   isActive: Type.Boolean(),
+  config: Type.Optional(Type.Any()),
   createdAt: Type.Optional(Type.Any()),
   updatedAt: Type.Optional(Type.Any()),
 });
@@ -14,7 +15,6 @@ export const LineOfBusinessSchema = Type.Object({
 export const CreateLineOfBusinessSchema = {
   body: Type.Object({
     name: Type.String({ minLength: 1 }),
-    code: Type.String({ minLength: 1 }),
     description: Type.Optional(Type.String()),
     icon: Type.Optional(Type.String()),
   }),
@@ -31,6 +31,7 @@ export const UpdateLineOfBusinessSchema = {
     description: Type.Optional(Type.String()),
     icon: Type.Optional(Type.String()),
     isActive: Type.Optional(Type.Boolean()),
+    config: Type.Optional(Type.Any()),
   }),
   response: {
     200: LineOfBusinessSchema,

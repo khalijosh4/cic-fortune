@@ -17,6 +17,10 @@ function isGlobalRole(role: string): boolean {
   return ['admin', 'system_admin', 'ceo', 'hr'].includes(role);
 }
 
+function generateCode(name: string): string {
+  return name.toUpperCase().replace(/[^A-Z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
 const lineOfBusinessRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
   // Get user's associated LOBs
   fastify.get('/my', { schema: UserLobListSchema }, async (request, reply) => {
@@ -55,11 +59,11 @@ const lineOfBusinessRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
     const summaries = await Promise.all(lobs.map(async (lob) => {
       const memberCount = await db.select({ count: sql<number>`count(*)` })
         .from(member)
-        .where(eq(member.branchId, lob.id));
+        .where(eq(member.lobId, lob.id));
 
       const claimCount = await db.select({ count: sql<number>`count(*)` })
         .from(claim)
-        .where(eq(claim.hospitalId, lob.id));
+        .where(eq(claim.lobId, lob.id));
 
       return {
         id: lob.id,
@@ -96,8 +100,9 @@ const lineOfBusinessRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
       return reply.forbidden('You do not have permission to create lines of business');
     }
 
-    const { name, code, description, icon } = request.body;
-    const id = `LOB-${code.toUpperCase().replace(/\s+/g, '-')}`;
+    const { name, description, icon } = request.body;
+    const code = generateCode(name);
+    const id = `LOB-${code}`;
 
     const [inserted] = await db.insert(lineOfBusiness).values({
       id,
@@ -105,6 +110,7 @@ const lineOfBusinessRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
       code,
       description: description || null,
       icon: icon || null,
+      config: { enabledModules: [] },
     } as any).returning() as any;
 
     return reply.code(201).send(inserted as any);

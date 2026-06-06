@@ -19,6 +19,7 @@ export const CreateClaimSchema = {
     planId: Type.String(),
     amountClaimed: Type.String(),
     diagnosis: Type.Optional(Type.String()),
+    lobId: Type.Optional(Type.String()),
   }),
   response: {
     201: ClaimSchema,
@@ -48,6 +49,7 @@ export const ListClaimSchema = {
     offset: Type.Optional(Type.Number()),
     memberId: Type.Optional(Type.String()),
     hospitalId: Type.Optional(Type.String()),
+    lobId: Type.Optional(Type.String()),
     status: Type.Optional(Type.String()),
     'status[]': Type.Optional(Type.Array(Type.String())),
     minAmountClaimed: Type.Optional(Type.Number()),
