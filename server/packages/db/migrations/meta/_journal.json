@@ -78,6 +78,13 @@
       "when": 1780754379876,
       "tag": "0010_lyrical_lucky_pierre",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1782000000000,
+      "tag": "0011_lucky_user_lob",
+      "breakpoints": true
     }
   ]
 }

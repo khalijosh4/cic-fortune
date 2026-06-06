@@ -95,6 +95,15 @@ async function seed() {
       await db.insert(schema.lineOfBusiness).values(lob as any).onConflictDoNothing();
     }
 
+    // 3.4 Seed User-LOB Associations
+    console.log('Seeding user-lob associations...');
+    const allLobIds = (await db.select({ id: schema.lineOfBusiness.id }).from(schema.lineOfBusiness)).map(l => l.id);
+
+    // Associate admin with all LOBs
+    for (const lobId of allLobIds) {
+      await db.insert(schema.userLob).values({ userId: adminId, lobId } as any).onConflictDoNothing();
+    }
+
     // 3.5 Seed Specific Role Users for Testing
     console.log('Seeding specific role users...');
     const roles = ['admin', 'user', 'hospital', 'hr', 'ceo', 'branch_manager', 'claims_officer', 'system_admin'];
@@ -113,6 +122,14 @@ async function seed() {
         branchId: faker.helpers.arrayElement(branchIds), 
       } as any).onConflictDoNothing();
       console.log(`Created or updated ${role} user: ${email}`);
+    }
+
+    // Associate role-specific users with LOBs
+    const allTestUsers = await db.select({ id: schema.user.id }).from(schema.user);
+    const nonAdminUsers = allTestUsers.filter(u => u.id !== adminId);
+    for (let i = 0; i < nonAdminUsers.length; i++) {
+      const lobId = allLobIds[i % allLobIds.length];
+      await db.insert(schema.userLob).values({ userId: nonAdminUsers[i].id, lobId } as any).onConflictDoNothing();
     }
 
     // 4. Seed Users (Employees)
@@ -141,6 +158,14 @@ async function seed() {
     if (userIds.length <= 1) { 
       const allUsers = await db.select({ id: schema.user.id }).from(schema.user);
       userIds = allUsers.map(u => u.id);
+    }
+
+    // Associate faker users with LOBs
+    const seedLobIds = (await db.select({ id: schema.lineOfBusiness.id }).from(schema.lineOfBusiness)).map(l => l.id);
+    for (const uid of userIds) {
+      if (uid === adminId) continue; // Admin already has all LOBs
+      const lobId = seedLobIds[Math.floor(Math.random() * seedLobIds.length)];
+      await db.insert(schema.userLob).values({ userId: uid, lobId } as any).onConflictDoNothing();
     }
 
     // 4.5 Seed Premium Rates (Plans)
@@ -302,6 +327,8 @@ async function seed() {
       { id: 'lobs-read', name: 'lobs.read', description: 'View lines of business', resource: 'lobs', action: 'read' },
       { id: 'lobs-update', name: 'lobs.update', description: 'Edit lines of business', resource: 'lobs', action: 'update' },
       { id: 'lobs-delete', name: 'lobs.delete', description: 'Delete lines of business', resource: 'lobs', action: 'delete' },
+      { id: 'lobs-switch', name: 'lobs.switch', description: 'Switch between lines of business', resource: 'lobs', action: 'switch' },
+      { id: 'lobs-summary', name: 'lobs.summary', description: 'View LOB summaries', resource: 'lobs', action: 'summary' },
     ];
     for (const p of permissions) {
       await db.insert(schema.permission).values(p).onConflictDoNothing();

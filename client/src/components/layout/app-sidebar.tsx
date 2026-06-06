@@ -1,3 +1,4 @@
+import { Layers } from 'lucide-react'
 import { useLayout } from '@/context/layout-provider'
 import { useAuthStore } from '@/stores/auth-store'
 import {
@@ -7,13 +8,12 @@ import {
   SidebarHeader,
   SidebarRail,
 } from '@/components/ui/sidebar'
-// import { AppTitle } from './app-title'
 import { sidebarData } from './data/sidebar-data'
 import type { NavItem, NavGroup as NavGroupType } from './types'
 import { NavGroup } from './nav-group'
 import { NavUser } from './nav-user'
 import { LobSwitcher } from './lob-switcher'
-import { hasAnyPermission } from '@/lib/permissions'
+import { hasAnyPermission, hasPermission } from '@/lib/permissions'
 
 function filterNavItems(items: NavItem[], permissions: string[] | undefined): NavItem[] {
   return items.reduce<NavItem[]>((acc, item) => {
@@ -49,6 +49,7 @@ export function AppSidebar() {
   const { auth } = useAuthStore()
   const { collapsible, variant } = useLayout()
   const userPermissions = auth.user?.permissions
+  const isGlobalView = hasPermission(userPermissions, 'lobs.summary') || hasPermission(userPermissions, 'lobs.switch')
 
   const user = {
     name: auth.user ? `${auth.user.firstName} ${auth.user.lastName}` : sidebarData.user.name,
@@ -58,13 +59,32 @@ export function AppSidebar() {
 
   const filteredNavGroups = filterNavGroups(sidebarData.navGroups, userPermissions)
 
+  // Add LOB Summary section for elevated users
+  const summaryGroup: NavGroupType | null = isGlobalView
+    ? {
+        title: 'LOB Overview',
+        items: [
+          {
+            title: 'LOB Summary',
+            url: '/lob-summary',
+            icon: Layers,
+            requiredPermissions: ['lobs.summary'],
+          },
+        ],
+      }
+    : null
+
+  const allGroups = summaryGroup
+    ? [summaryGroup, ...filteredNavGroups]
+    : filteredNavGroups
+
   return (
     <Sidebar collapsible={collapsible} variant={variant}>
       <SidebarHeader>
-        <LobSwitcher teams={sidebarData.teams} />
+        <LobSwitcher />
       </SidebarHeader>
       <SidebarContent>
-        {filteredNavGroups.map((props) => (
+        {allGroups.map((props) => (
           <NavGroup key={props.title} {...props} />
         ))}
       </SidebarContent>

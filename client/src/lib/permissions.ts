@@ -30,9 +30,11 @@ const ROUTE_TO_PERMISSION: Record<string, string> = {
   '/users': 'users.read',
   '/branches': 'branches.read',
   '/line-of-business': 'lobs.read',
+  '/line-of-business/new': 'lobs.create',
   '/hospitals': 'hospitals.read',
   '/plans': 'plans.read',
   '/audit-logs': 'audit-logs.read',
+  '/lob-summary': 'lobs.summary',
 }
 
 const GLOBAL_ROLES: Role[] = ['admin', 'system_admin', 'ceo', 'hr']

@@ -1,5 +1,5 @@
 import { db, schema } from '@fastify-forge/db';
-const { user, userPermission, permission } = schema;
+const { user, userPermission, permission, userLob } = schema;
 import { or, sql, eq } from 'drizzle-orm';
 import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import bcrypt from 'bcryptjs';
@@ -35,10 +35,17 @@ const authRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
       .where(eq(userPermission.userId, foundUser.id));
     const permissionNames = userPerms.map(p => p.name);
 
+    // Fetch user's LOB associations
+    const userLobs = await db.select({ lobId: userLob.lobId })
+      .from(userLob)
+      .where(eq(userLob.userId, foundUser.id));
+    const lobIds = userLobs.map(l => l.lobId);
+
     const token = fastify.jwt.sign({ 
       id: foundUser.id, 
       role: foundUser.role,
       permissions: permissionNames,
+      lobIds,
       hospitalId: foundUser.hospitalId ?? undefined, 
       branchId: foundUser.branchId ?? undefined 
     } as any);
@@ -57,6 +64,7 @@ const authRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
         branchId: foundUser.branchId,
         hospitalId: foundUser.hospitalId,
         permissions: permissionNames,
+        lobIds,
       },
     });
   });
@@ -103,6 +111,12 @@ const authRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
       .where(eq(userPermission.userId, userId));
     const permissionNames = userPerms.map(p => p.name);
 
+    // Fetch user's LOB associations
+    const userLobs = await db.select({ lobId: userLob.lobId })
+      .from(userLob)
+      .where(eq(userLob.userId, userId));
+    const lobIds = userLobs.map(l => l.lobId);
+
     return reply.send({
       id: updated.id,
       firstName: updated.firstName,
@@ -117,6 +131,7 @@ const authRoutes: FastifyPluginAsyncTypebox = async (fastify) => {
       createdAt: updated.createdAt,
       updatedAt: updated.updatedAt,
       permissions: permissionNames,
+      lobIds,
     });
   });
 

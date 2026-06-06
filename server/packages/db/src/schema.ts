@@ -58,6 +58,13 @@ export const lineOfBusiness = pgTable('line_of_business', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });
 
+export const userLob = pgTable('user_lob', {
+  userId: varchar('user_id', { length: 50 }).notNull().references((): AnyPgColumn => user.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+  lobId: varchar('lob_id', { length: 50 }).notNull().references((): AnyPgColumn => lineOfBusiness.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.userId, t.lobId] }),
+}));
+
 export const branch: any = pgTable('branch', {
   id: varchar('id', { length: 50 }).primaryKey(),
   name: varchar('name', { length: 50 }).notNull(),

@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedLobSummaryRouteImport } from './routes/_authenticated/lob-summary'
 import { Route as errors503RouteImport } from './routes/(errors)/503'
 import { Route as errors500RouteImport } from './routes/(errors)/500'
 import { Route as errors404RouteImport } from './routes/(errors)/404'
@@ -62,6 +63,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedLobSummaryRoute = AuthenticatedLobSummaryRouteImport.update({
+  id: '/lob-summary',
+  path: '/lob-summary',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const errors503Route = errors503RouteImport.update({
@@ -312,6 +318,7 @@ export interface FileRoutesByFullPath {
   '/404': typeof errors404Route
   '/500': typeof errors500Route
   '/503': typeof errors503Route
+  '/lob-summary': typeof AuthenticatedLobSummaryRoute
   '/audit-logs/$id': typeof AuthenticatedAuditLogsIdRoute
   '/branches/$id': typeof AuthenticatedBranchesIdRoute
   '/branches/new': typeof AuthenticatedBranchesNewRoute
@@ -356,6 +363,7 @@ export interface FileRoutesByTo {
   '/404': typeof errors404Route
   '/500': typeof errors500Route
   '/503': typeof errors503Route
+  '/lob-summary': typeof AuthenticatedLobSummaryRoute
   '/': typeof AuthenticatedIndexRoute
   '/audit-logs/$id': typeof AuthenticatedAuditLogsIdRoute
   '/branches/$id': typeof AuthenticatedBranchesIdRoute
@@ -404,6 +412,7 @@ export interface FileRoutesById {
   '/(errors)/404': typeof errors404Route
   '/(errors)/500': typeof errors500Route
   '/(errors)/503': typeof errors503Route
+  '/_authenticated/lob-summary': typeof AuthenticatedLobSummaryRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/audit-logs/$id': typeof AuthenticatedAuditLogsIdRoute
   '/_authenticated/branches/$id': typeof AuthenticatedBranchesIdRoute
@@ -453,6 +462,7 @@ export interface FileRouteTypes {
     | '/404'
     | '/500'
     | '/503'
+    | '/lob-summary'
     | '/audit-logs/$id'
     | '/branches/$id'
     | '/branches/new'
@@ -497,6 +507,7 @@ export interface FileRouteTypes {
     | '/404'
     | '/500'
     | '/503'
+    | '/lob-summary'
     | '/'
     | '/audit-logs/$id'
     | '/branches/$id'
@@ -544,6 +555,7 @@ export interface FileRouteTypes {
     | '/(errors)/404'
     | '/(errors)/500'
     | '/(errors)/503'
+    | '/_authenticated/lob-summary'
     | '/_authenticated/'
     | '/_authenticated/audit-logs/$id'
     | '/_authenticated/branches/$id'
@@ -607,6 +619,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/lob-summary': {
+      id: '/_authenticated/lob-summary'
+      path: '/lob-summary'
+      fullPath: '/lob-summary'
+      preLoaderRoute: typeof AuthenticatedLobSummaryRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/(errors)/503': {
@@ -933,6 +952,7 @@ const AuthenticatedSettingsRouteRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteRoute: typeof AuthenticatedSettingsRouteRouteWithChildren
+  AuthenticatedLobSummaryRoute: typeof AuthenticatedLobSummaryRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedAuditLogsIdRoute: typeof AuthenticatedAuditLogsIdRoute
   AuthenticatedBranchesIdRoute: typeof AuthenticatedBranchesIdRoute
@@ -967,6 +987,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRouteRoute: AuthenticatedSettingsRouteRouteWithChildren,
+  AuthenticatedLobSummaryRoute: AuthenticatedLobSummaryRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedAuditLogsIdRoute: AuthenticatedAuditLogsIdRoute,
   AuthenticatedBranchesIdRoute: AuthenticatedBranchesIdRoute,

@@ -20,6 +20,7 @@ export const LoginSchema = {
         branchId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
         hospitalId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
         permissions: Type.Optional(Type.Array(Type.String())),
+        lobIds: Type.Optional(Type.Array(Type.String())),
       }),
     }),
     401: Type.Object({

@@ -7,8 +7,8 @@ export const LineOfBusinessSchema = Type.Object({
   description: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   icon: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   isActive: Type.Boolean(),
-  createdAt: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-  updatedAt: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  createdAt: Type.Optional(Type.Any()),
+  updatedAt: Type.Optional(Type.Any()),
 });
 
 export const CreateLineOfBusinessSchema = {
@@ -50,5 +50,26 @@ export const GetLineOfBusinessSchema = {
   params: Type.Object({ id: Type.String() }),
   response: {
     200: LineOfBusinessSchema,
+  },
+};
+
+export const CreateUserLobSchema = {
+  params: Type.Object({ userId: Type.String() }),
+  body: Type.Object({
+    lobIds: Type.Array(Type.String()),
+  }),
+  response: {
+    200: Type.Object({
+      message: Type.String(),
+      lobIds: Type.Array(Type.String()),
+    }),
+  },
+};
+
+export const UserLobListSchema = {
+  response: {
+    200: Type.Object({
+      data: Type.Array(LineOfBusinessSchema),
+    }),
   },
 };

@@ -16,6 +16,7 @@ interface AuthUser {
   branchId?: string | null
   hospitalId?: string | null
   permissions?: string[]
+  lobIds?: string[]
 }
 
 interface AuthState {
