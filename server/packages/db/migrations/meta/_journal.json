@@ -64,6 +64,20 @@
       "when": 1778244973924,
       "tag": "0008_fuzzy_energizer",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1780752638038,
+      "tag": "0009_windy_pyro",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1780754379876,
+      "tag": "0010_lyrical_lucky_pierre",
+      "breakpoints": true
     }
   ]
 }

@@ -65,6 +65,16 @@ async function dbPlugin(fastify: FastifyInstance) {
         mustChangePassword: false,
       } as any);
 
+      // Seed default lines of business
+      const lobs = [
+        { id: 'LOB-HEALTH', name: 'Health Insurance', code: 'HEALTH', description: 'Medical cover including inpatient, outpatient, maternity, dental, and optical', icon: 'HeartPulse', isActive: true },
+        { id: 'LOB-MOTOR', name: 'Motor Insurance', code: 'MOTOR', description: 'Comprehensive motor vehicle insurance covering private and commercial vehicles', icon: 'Car', isActive: true },
+        { id: 'LOB-LIFE', name: 'Life Insurance', code: 'LIFE', description: 'Life cover with terminal illness, critical illness, and accidental death benefits', icon: 'Heart', isActive: true },
+      ];
+      for (const lob of lobs) {
+        await db.insert(schema.lineOfBusiness).values(lob as any).onConflictDoNothing();
+      }
+
       // Seed default permissions
       const permissions = [
         { id: 'members-create', name: 'members.create', description: 'Create new members', resource: 'members', action: 'create' },
@@ -97,6 +107,10 @@ async function dbPlugin(fastify: FastifyInstance) {
         { id: 'plans-delete', name: 'plans.delete', description: 'Delete plans', resource: 'plans', action: 'delete' },
         { id: 'audit-logs-read', name: 'audit-logs.read', description: 'View audit logs', resource: 'audit-logs', action: 'read' },
         { id: 'dashboard-read', name: 'dashboard.read', description: 'View dashboard', resource: 'dashboard', action: 'read' },
+        { id: 'lobs-create', name: 'lobs.create', description: 'Create new lines of business', resource: 'lobs', action: 'create' },
+        { id: 'lobs-read', name: 'lobs.read', description: 'View lines of business', resource: 'lobs', action: 'read' },
+        { id: 'lobs-update', name: 'lobs.update', description: 'Edit lines of business', resource: 'lobs', action: 'update' },
+        { id: 'lobs-delete', name: 'lobs.delete', description: 'Delete lines of business', resource: 'lobs', action: 'delete' },
       ];
       for (const p of permissions) {
         await db.insert(schema.permission).values(p).onConflictDoNothing();

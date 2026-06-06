@@ -29,6 +29,7 @@ const ROUTE_TO_PERMISSION: Record<string, string> = {
   '/premiums': 'premiums.read',
   '/users': 'users.read',
   '/branches': 'branches.read',
+  '/line-of-business': 'lobs.read',
   '/hospitals': 'hospitals.read',
   '/plans': 'plans.read',
   '/audit-logs': 'audit-logs.read',

@@ -28,6 +28,7 @@ import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authen
 import { Route as AuthenticatedPremiumsIndexRouteImport } from './routes/_authenticated/premiums/index'
 import { Route as AuthenticatedPlansIndexRouteImport } from './routes/_authenticated/plans/index'
 import { Route as AuthenticatedMembersIndexRouteImport } from './routes/_authenticated/members/index'
+import { Route as AuthenticatedLineOfBusinessIndexRouteImport } from './routes/_authenticated/line-of-business/index'
 import { Route as AuthenticatedHospitalsIndexRouteImport } from './routes/_authenticated/hospitals/index'
 import { Route as AuthenticatedHelpCenterIndexRouteImport } from './routes/_authenticated/help-center/index'
 import { Route as AuthenticatedClaimsIndexRouteImport } from './routes/_authenticated/claims/index'
@@ -44,6 +45,8 @@ import { Route as AuthenticatedPlansNewRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedPlansIdRouteImport } from './routes/_authenticated/plans/$id'
 import { Route as AuthenticatedMembersNewRouteImport } from './routes/_authenticated/members/new'
 import { Route as AuthenticatedMembersIdRouteImport } from './routes/_authenticated/members/$id'
+import { Route as AuthenticatedLineOfBusinessNewRouteImport } from './routes/_authenticated/line-of-business/new'
+import { Route as AuthenticatedLineOfBusinessIdRouteImport } from './routes/_authenticated/line-of-business/$id'
 import { Route as AuthenticatedHospitalsNewRouteImport } from './routes/_authenticated/hospitals/new'
 import { Route as AuthenticatedHospitalsIdRouteImport } from './routes/_authenticated/hospitals/$id'
 import { Route as AuthenticatedErrorsErrorRouteImport } from './routes/_authenticated/errors/$error'
@@ -150,6 +153,12 @@ const AuthenticatedMembersIndexRoute =
     path: '/members/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedLineOfBusinessIndexRoute =
+  AuthenticatedLineOfBusinessIndexRouteImport.update({
+    id: '/line-of-business/',
+    path: '/line-of-business/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedHospitalsIndexRoute =
   AuthenticatedHospitalsIndexRouteImport.update({
     id: '/hospitals/',
@@ -237,6 +246,18 @@ const AuthenticatedMembersIdRoute = AuthenticatedMembersIdRouteImport.update({
   path: '/members/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedLineOfBusinessNewRoute =
+  AuthenticatedLineOfBusinessNewRouteImport.update({
+    id: '/line-of-business/new',
+    path: '/line-of-business/new',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedLineOfBusinessIdRoute =
+  AuthenticatedLineOfBusinessIdRouteImport.update({
+    id: '/line-of-business/$id',
+    path: '/line-of-business/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedHospitalsNewRoute =
   AuthenticatedHospitalsNewRouteImport.update({
     id: '/hospitals/new',
@@ -298,6 +319,8 @@ export interface FileRoutesByFullPath {
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/hospitals/$id': typeof AuthenticatedHospitalsIdRoute
   '/hospitals/new': typeof AuthenticatedHospitalsNewRoute
+  '/line-of-business/$id': typeof AuthenticatedLineOfBusinessIdRoute
+  '/line-of-business/new': typeof AuthenticatedLineOfBusinessNewRoute
   '/members/$id': typeof AuthenticatedMembersIdRoute
   '/members/new': typeof AuthenticatedMembersNewRoute
   '/plans/$id': typeof AuthenticatedPlansIdRoute
@@ -314,6 +337,7 @@ export interface FileRoutesByFullPath {
   '/claims/': typeof AuthenticatedClaimsIndexRoute
   '/help-center/': typeof AuthenticatedHelpCenterIndexRoute
   '/hospitals/': typeof AuthenticatedHospitalsIndexRoute
+  '/line-of-business/': typeof AuthenticatedLineOfBusinessIndexRoute
   '/members/': typeof AuthenticatedMembersIndexRoute
   '/plans/': typeof AuthenticatedPlansIndexRoute
   '/premiums/': typeof AuthenticatedPremiumsIndexRoute
@@ -340,6 +364,8 @@ export interface FileRoutesByTo {
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/hospitals/$id': typeof AuthenticatedHospitalsIdRoute
   '/hospitals/new': typeof AuthenticatedHospitalsNewRoute
+  '/line-of-business/$id': typeof AuthenticatedLineOfBusinessIdRoute
+  '/line-of-business/new': typeof AuthenticatedLineOfBusinessNewRoute
   '/members/$id': typeof AuthenticatedMembersIdRoute
   '/members/new': typeof AuthenticatedMembersNewRoute
   '/plans/$id': typeof AuthenticatedPlansIdRoute
@@ -356,6 +382,7 @@ export interface FileRoutesByTo {
   '/claims': typeof AuthenticatedClaimsIndexRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexRoute
   '/hospitals': typeof AuthenticatedHospitalsIndexRoute
+  '/line-of-business': typeof AuthenticatedLineOfBusinessIndexRoute
   '/members': typeof AuthenticatedMembersIndexRoute
   '/plans': typeof AuthenticatedPlansIndexRoute
   '/premiums': typeof AuthenticatedPremiumsIndexRoute
@@ -385,6 +412,8 @@ export interface FileRoutesById {
   '/_authenticated/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/_authenticated/hospitals/$id': typeof AuthenticatedHospitalsIdRoute
   '/_authenticated/hospitals/new': typeof AuthenticatedHospitalsNewRoute
+  '/_authenticated/line-of-business/$id': typeof AuthenticatedLineOfBusinessIdRoute
+  '/_authenticated/line-of-business/new': typeof AuthenticatedLineOfBusinessNewRoute
   '/_authenticated/members/$id': typeof AuthenticatedMembersIdRoute
   '/_authenticated/members/new': typeof AuthenticatedMembersNewRoute
   '/_authenticated/plans/$id': typeof AuthenticatedPlansIdRoute
@@ -401,6 +430,7 @@ export interface FileRoutesById {
   '/_authenticated/claims/': typeof AuthenticatedClaimsIndexRoute
   '/_authenticated/help-center/': typeof AuthenticatedHelpCenterIndexRoute
   '/_authenticated/hospitals/': typeof AuthenticatedHospitalsIndexRoute
+  '/_authenticated/line-of-business/': typeof AuthenticatedLineOfBusinessIndexRoute
   '/_authenticated/members/': typeof AuthenticatedMembersIndexRoute
   '/_authenticated/plans/': typeof AuthenticatedPlansIndexRoute
   '/_authenticated/premiums/': typeof AuthenticatedPremiumsIndexRoute
@@ -430,6 +460,8 @@ export interface FileRouteTypes {
     | '/errors/$error'
     | '/hospitals/$id'
     | '/hospitals/new'
+    | '/line-of-business/$id'
+    | '/line-of-business/new'
     | '/members/$id'
     | '/members/new'
     | '/plans/$id'
@@ -446,6 +478,7 @@ export interface FileRouteTypes {
     | '/claims/'
     | '/help-center/'
     | '/hospitals/'
+    | '/line-of-business/'
     | '/members/'
     | '/plans/'
     | '/premiums/'
@@ -472,6 +505,8 @@ export interface FileRouteTypes {
     | '/errors/$error'
     | '/hospitals/$id'
     | '/hospitals/new'
+    | '/line-of-business/$id'
+    | '/line-of-business/new'
     | '/members/$id'
     | '/members/new'
     | '/plans/$id'
@@ -488,6 +523,7 @@ export interface FileRouteTypes {
     | '/claims'
     | '/help-center'
     | '/hospitals'
+    | '/line-of-business'
     | '/members'
     | '/plans'
     | '/premiums'
@@ -516,6 +552,8 @@ export interface FileRouteTypes {
     | '/_authenticated/errors/$error'
     | '/_authenticated/hospitals/$id'
     | '/_authenticated/hospitals/new'
+    | '/_authenticated/line-of-business/$id'
+    | '/_authenticated/line-of-business/new'
     | '/_authenticated/members/$id'
     | '/_authenticated/members/new'
     | '/_authenticated/plans/$id'
@@ -532,6 +570,7 @@ export interface FileRouteTypes {
     | '/_authenticated/claims/'
     | '/_authenticated/help-center/'
     | '/_authenticated/hospitals/'
+    | '/_authenticated/line-of-business/'
     | '/_authenticated/members/'
     | '/_authenticated/plans/'
     | '/_authenticated/premiums/'
@@ -689,6 +728,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMembersIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/line-of-business/': {
+      id: '/_authenticated/line-of-business/'
+      path: '/line-of-business'
+      fullPath: '/line-of-business/'
+      preLoaderRoute: typeof AuthenticatedLineOfBusinessIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/hospitals/': {
       id: '/_authenticated/hospitals/'
       path: '/hospitals'
@@ -801,6 +847,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMembersIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/line-of-business/new': {
+      id: '/_authenticated/line-of-business/new'
+      path: '/line-of-business/new'
+      fullPath: '/line-of-business/new'
+      preLoaderRoute: typeof AuthenticatedLineOfBusinessNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/line-of-business/$id': {
+      id: '/_authenticated/line-of-business/$id'
+      path: '/line-of-business/$id'
+      fullPath: '/line-of-business/$id'
+      preLoaderRoute: typeof AuthenticatedLineOfBusinessIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/hospitals/new': {
       id: '/_authenticated/hospitals/new'
       path: '/hospitals/new'
@@ -881,6 +941,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedErrorsErrorRoute: typeof AuthenticatedErrorsErrorRoute
   AuthenticatedHospitalsIdRoute: typeof AuthenticatedHospitalsIdRoute
   AuthenticatedHospitalsNewRoute: typeof AuthenticatedHospitalsNewRoute
+  AuthenticatedLineOfBusinessIdRoute: typeof AuthenticatedLineOfBusinessIdRoute
+  AuthenticatedLineOfBusinessNewRoute: typeof AuthenticatedLineOfBusinessNewRoute
   AuthenticatedMembersIdRoute: typeof AuthenticatedMembersIdRoute
   AuthenticatedMembersNewRoute: typeof AuthenticatedMembersNewRoute
   AuthenticatedPlansIdRoute: typeof AuthenticatedPlansIdRoute
@@ -895,6 +957,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedClaimsIndexRoute: typeof AuthenticatedClaimsIndexRoute
   AuthenticatedHelpCenterIndexRoute: typeof AuthenticatedHelpCenterIndexRoute
   AuthenticatedHospitalsIndexRoute: typeof AuthenticatedHospitalsIndexRoute
+  AuthenticatedLineOfBusinessIndexRoute: typeof AuthenticatedLineOfBusinessIndexRoute
   AuthenticatedMembersIndexRoute: typeof AuthenticatedMembersIndexRoute
   AuthenticatedPlansIndexRoute: typeof AuthenticatedPlansIndexRoute
   AuthenticatedPremiumsIndexRoute: typeof AuthenticatedPremiumsIndexRoute
@@ -912,6 +975,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedErrorsErrorRoute: AuthenticatedErrorsErrorRoute,
   AuthenticatedHospitalsIdRoute: AuthenticatedHospitalsIdRoute,
   AuthenticatedHospitalsNewRoute: AuthenticatedHospitalsNewRoute,
+  AuthenticatedLineOfBusinessIdRoute: AuthenticatedLineOfBusinessIdRoute,
+  AuthenticatedLineOfBusinessNewRoute: AuthenticatedLineOfBusinessNewRoute,
   AuthenticatedMembersIdRoute: AuthenticatedMembersIdRoute,
   AuthenticatedMembersNewRoute: AuthenticatedMembersNewRoute,
   AuthenticatedPlansIdRoute: AuthenticatedPlansIdRoute,
@@ -926,6 +991,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedClaimsIndexRoute: AuthenticatedClaimsIndexRoute,
   AuthenticatedHelpCenterIndexRoute: AuthenticatedHelpCenterIndexRoute,
   AuthenticatedHospitalsIndexRoute: AuthenticatedHospitalsIndexRoute,
+  AuthenticatedLineOfBusinessIndexRoute: AuthenticatedLineOfBusinessIndexRoute,
   AuthenticatedMembersIndexRoute: AuthenticatedMembersIndexRoute,
   AuthenticatedPlansIndexRoute: AuthenticatedPlansIndexRoute,
   AuthenticatedPremiumsIndexRoute: AuthenticatedPremiumsIndexRoute,

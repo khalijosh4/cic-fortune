@@ -47,6 +47,17 @@ export const user: any = pgTable('user', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date())
 });
 
+export const lineOfBusiness = pgTable('line_of_business', {
+  id: varchar('id', { length: 50 }).primaryKey(),
+  name: varchar('name', { length: 100 }).notNull().unique(),
+  code: varchar('code', { length: 50 }).notNull().unique(),
+  description: text('description'),
+  icon: varchar('icon', { length: 50 }),
+  isActive: boolean('is_active').notNull().default(true),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
+});
+
 export const branch: any = pgTable('branch', {
   id: varchar('id', { length: 50 }).primaryKey(),
   name: varchar('name', { length: 50 }).notNull(),

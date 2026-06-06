@@ -12,7 +12,7 @@ import { sidebarData } from './data/sidebar-data'
 import type { NavItem, NavGroup as NavGroupType } from './types'
 import { NavGroup } from './nav-group'
 import { NavUser } from './nav-user'
-import { TeamSwitcher } from './team-switcher'
+import { LobSwitcher } from './lob-switcher'
 import { hasAnyPermission } from '@/lib/permissions'
 
 function filterNavItems(items: NavItem[], permissions: string[] | undefined): NavItem[] {
@@ -61,7 +61,7 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible={collapsible} variant={variant}>
       <SidebarHeader>
-        <TeamSwitcher teams={sidebarData.teams} />
+        <LobSwitcher teams={sidebarData.teams} />
       </SidebarHeader>
       <SidebarContent>
         {filteredNavGroups.map((props) => (

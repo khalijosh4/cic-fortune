@@ -12,6 +12,7 @@ import {
   Users,
   FileText,
   DollarSign,
+  Layers,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -79,6 +80,12 @@ export const sidebarData: SidebarData = {
           url: '/premiums',
           icon: DollarSign,
           requiredPermissions: ['premiums.read'],
+        },
+        {
+          title: 'Line of Business',
+          url: '/line-of-business',
+          icon: Layers,
+          requiredPermissions: ['lobs.read'],
         },
         {
           title: 'Audit Logs',
