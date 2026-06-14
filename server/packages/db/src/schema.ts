@@ -90,22 +90,6 @@ export const policy: any = pgTable('policy', {
 
 // Policy table removed in favor of consolidated premiumRate (Plan) table
 
-/*
-export const member: any = pgTable('member', {
-  id: uuid('id').primaryKey().notNull().defaultRandom(),
-  firstName: varchar('first_name', { length: 50 }).notNull(),
-  middleName: varchar('middle_name', { length: 50 }),
-  lastName: varchar('last_name', { length: 50 }).notNull(),
-  email: varchar('email', { length: 100 }),
-  phoneNumber: varchar('phone_number', { length: 15 }).notNull(),
-  branchId: uuid('branch_id').notNull().references(() => branch.id, { onDelete: 'restrict', onUpdate: 'cascade' }),
-  policyId: uuid('policy_id').notNull().references(() => policy.id, { onDelete: 'restrict', onUpdate: 'cascade' }),
-  premiumAmount: numeric('premium_amount', { precision: 12, scale: 4 }).notNull(),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date())
-});
-*/
-
 export const member = pgTable('member', {
   id: varchar('id', { length: 50 }).primaryKey(),
   firstName: varchar('first_name', { length: 50 }).notNull(),

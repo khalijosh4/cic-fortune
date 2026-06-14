@@ -19,7 +19,6 @@ logger.info('Preparing database (generate, push, seed)...');
     logger.info('Database prepared successfully.');
   } catch (error) {
     logger.error({ err: error }, 'Failed to prepare database');
-    // We don't exit here, just log, in case db is already fine or it's a transient issue
   }
 
 */

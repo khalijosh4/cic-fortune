@@ -1,6 +1,5 @@
 import { db, schema } from '@fastify-forge/db';
 import { eq, inArray, sql } from 'drizzle-orm';
-import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 
 import {
   CreateLineOfBusinessSchema,
@@ -10,6 +9,8 @@ import {
   CreateUserLobSchema,
   UserLobListSchema,
 } from '#/schemas/line-of-business.schema.js';
+
+import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 
 const { lineOfBusiness, userLob, member, claim } = schema;
 

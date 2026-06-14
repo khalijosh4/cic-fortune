@@ -1,5 +1,5 @@
-import { eq, type SQL } from 'drizzle-orm';
 import { schema } from '@fastify-forge/db';
+import { eq, type SQL } from 'drizzle-orm';
 
 export type UserPayload = {
   id: string;

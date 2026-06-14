@@ -7,8 +7,8 @@ export default fp(async function (fastify) {
     hideUntagged: true,
     openapi: {
       info: {
-        title: 'Fastify Forge API',
-        description: 'API Documentation for Fastify Forge',
+        title: 'Fortune Server API',
+        description: 'API Documentation for Fortune Server',
         version: '0.0.0',
       },
     },

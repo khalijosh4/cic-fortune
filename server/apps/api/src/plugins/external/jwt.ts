@@ -1,4 +1,5 @@
 import fastifyJwt, { type FastifyJWTOptions } from '@fastify/jwt';
+
 import type { FastifyInstance } from 'fastify';
 
 export const autoConfig = (fastify: FastifyInstance): FastifyJWTOptions => ({
